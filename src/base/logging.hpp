@@ -1,13 +1,14 @@
 #pragma once
+#include "fmt/format.h"
+#include "fmt/ostream.h"
+#include "fmt/time.h"
 #include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <vector>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <chrono>
 #include <ctime>
-#include <cstdarg>
+#include <cmath>
 
 #ifndef NDEBUG
 /**
@@ -46,7 +47,7 @@
 
 /**
  * @brief logging wrapper macro that outputs to stderr
- * @param ... C-style format string (like printf())
+ * @param ... format string
  */
 #  define stderr_log(...) \
     _bgl_console_log(std::cerr, __FILE__, __LINE__, __func__, __VA_ARGS__)
@@ -54,7 +55,7 @@
 /**
  * @brief logging wrapper macro specifying output stream
  * @param os output stream for logging
- * @param ... C-style format string (like printf())
+ * @param ... format string
  */
 #  define console_log(os, ...) \
     _bgl_console_log(os, __FILE__, __LINE__, __func__, __VA_ARGS__)
@@ -67,13 +68,17 @@
 
 
 namespace bgl {
+/**
+ * @brief generate string representing current date and time
+ * @return generated string
+ */
 std::string get_date_string() {
   auto now = std::chrono::high_resolution_clock::now();
   std::time_t time = std::chrono::system_clock::to_time_t(now);
+  auto now_second = std::chrono::system_clock::from_time_t(time);
+  auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - now_second);
   std::tm tm = *std::localtime(&time);
-  std::stringstream sst;
-  sst << std::put_time(&tm, "%m/%d %H:%M:%S");
-  return sst.str();
+  return fmt::format("[{:%y-%m-%d %H:%M:%S}.{:02g}]", tm, std::floor(now_ms.count() / 10.0));
 }
 
 // implementation
@@ -84,8 +89,9 @@ void _bgl_timer(std::ostream &os, std::string_view title, const char *file,
   body();
   auto end = std::chrono::high_resolution_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  std::string footer = std::string("(in ") + func + "(), " + file + ":" + std::to_string(line) + ")";
-  os << "[timer] " << title << ": " << elapsed.count() << "[ms] " << footer << "\n";
+  std::string footer = fmt::format("(in {}(), {}:{})", func, file, line);
+  fmt::print(os, "{} [timer] {}: {}[ms]\n  {}\n", get_date_string(), title,
+             elapsed.count(), footer);
 }
 
 class _bgl_fn_timer {
@@ -98,7 +104,8 @@ public:
   ~_bgl_fn_timer() {
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
-    os_ << "[fn-timer] " << func_ << "(): " << elapsed.count() << "[ms] " << footer_ << '\n';
+    fmt::print(os_, "{} [fn-timer] {}(): {}[ms]\n  {}\n", get_date_string(), func_,
+               elapsed.count(), footer_);
   }
 private:
   std::ostream &os_;
@@ -107,19 +114,13 @@ private:
   const std::chrono::time_point<std::chrono::high_resolution_clock> start_;
 };
 
+template <typename... Args>
 void _bgl_console_log(std::ostream &os, const char *file, int line, const char *func,
-                      const char *fmt, ...) {
-  std::string header = std::string("[log] [") + get_date_string() + "] ";
-  std::string footer = std::string(" (in ") + func + "(), " + file + ":" + std::to_string(line) + ")";
-
-  va_list ap, ap2;
-  va_start(ap, fmt);
-  va_copy(ap2, ap);
-  std::vector<char> buf(std::vsnprintf(nullptr, 0, fmt, ap) + 1);
-  std::vsnprintf(buf.data(), buf.size(), fmt, ap2);
-  va_end(ap);
-  va_end(ap2);
-
-  os << header << buf.data() << footer << '\n';
+                      const Args &...args) {
+  std::string header = fmt::format("{} [log]", get_date_string());
+  std::string footer = fmt::format("(in {}(), {}:{})", func, file, line);
+  std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
+                                std::make_tuple(args...));
+  fmt::print(os, "{} {}\n  {}\n", header, body, footer);
 }
 } // namespace bgl
