@@ -1,0 +1,21 @@
+dist: trusty
+sudo: false
+language: cpp
+
+os: linux
+addons:
+  apt:
+    update: true
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-8
+      - ninja-build
+      - doxygen
+
+before_install:
+  - eval "CC=gcc-8 && CXX=g++-8"
+
+script:
+  - make test
+  - make doc

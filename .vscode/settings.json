@@ -1,0 +1,10 @@
+{
+  "clang.cxxflags": [
+    "-I${workspaceRoot}",
+    "-I${workspaceRoot}/src",
+    "--std=c++17",
+    "-Wall",
+    "-Wextra",
+    "-Wno-pragma-once-outside-header"
+  ]
+}
