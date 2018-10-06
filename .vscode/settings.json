@@ -1,6 +1,7 @@
 {
   "clang.cxxflags": [
     "-I${workspaceRoot}",
+    "-I${workspaceRoot}/extlib/fmt/include",
     "-I${workspaceRoot}/src",
     "--std=c++17",
     "-Wall",

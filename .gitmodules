@@ -1,0 +1,3 @@
+[submodule "extlib/fmt"]
+	path = extlib/fmt
+	url = https://github.com/fmtlib/fmt.git
