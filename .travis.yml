@@ -36,4 +36,6 @@ before_install:
 
 script:
   - make test
+  - make target TARGET=playground
+  - make target TARGET=sample_project
   - make doc

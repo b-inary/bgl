@@ -1,5 +1,5 @@
 
-.PHONY: all test doc clean
+.PHONY: all test target doc clean
 
 all:
 	@mkdir -p build
@@ -8,8 +8,12 @@ all:
 test: all
 	@bin/run_tests
 
+target:
+	@mkdir -p build
+	@cd build; cmake .. -GNinja && ninja ${TARGET}
+
 doc: src/
 	@doxygen Doxyfile
 
 clean:
-	rm -rf bin build docs playground/bin
+	rm -rf bin build docs

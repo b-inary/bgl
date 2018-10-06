@@ -2,7 +2,7 @@
 .PHONY: all clean
 
 all:
-	@cd ..; $(MAKE)
+	@cd ..; $(MAKE) target TARGET=playground
 
 clean:
 	rm -rf bin

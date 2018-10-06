@@ -2,7 +2,7 @@
 .PHONY: all test clean
 
 all:
-	@cd ../..; $(MAKE)
+	@cd ../..; $(MAKE) target TARGET=sample_project
 
 test: all
 	@bin/run_tests

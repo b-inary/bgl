@@ -6,25 +6,26 @@ namespace {
 template <typename T>
 class irange_iterator {
 public:
-  irange_iterator(T x) : x_{x} {}
-  const T& operator*() const { return x_; }
+  constexpr irange_iterator(T value) : value_{value} {}
+  constexpr T operator*() const { return value_; }
   // remark: this inequality operator does not satisfy commutativity
-  bool operator!=(const irange_iterator &rhs) const { return x_ < rhs.x_; }
-  void operator++() { ++x_; }
+  constexpr bool operator!=(const irange_iterator &rhs) const {
+    return value_ < rhs.value_;
+  }
+  void operator++() { ++value_; }
 private:
-  T x_;
+  T value_;
 };
 } // unnamed namespace
 
 template <typename T>
 class irange_type {
 public:
-  irange_type(T m, T n) : m_{m}, n_{n} {}
-  irange_iterator<T> begin() { return m_; }
-  irange_iterator<T> end() { return n_; }
+  constexpr irange_type(T start, T stop) : start_{start}, stop_{stop} {}
+  constexpr irange_iterator<T> begin() { return start_; }
+  constexpr irange_iterator<T> end() { return stop_; }
 private:
-  T m_;
-  const T n_;
+  const T start_, stop_;
 };
 
 /**
@@ -33,8 +34,8 @@ private:
  * @return range adapter of [0, n)
  */
 template <typename T>
-irange_type<T> irange(T n) {
-  static_assert(std::is_integral<T>::value);
+constexpr irange_type<T> irange(T n) {
+  static_assert(std::is_integral_v<T>);
   return {0, n};
 }
 
@@ -44,9 +45,10 @@ irange_type<T> irange(T n) {
  * @param n end value
  * @return range adapter of [m, n)
  */
-template <typename T1, typename T2>
-irange_type<typename std::common_type<T1, T2>::type> irange(T1 m, T2 n) {
-  static_assert(std::is_integral<typename std::common_type<T1, T2>::type>::value);
+template <typename T1, typename T2,
+          typename CommonType = typename std::common_type<T1, T2>::type>
+constexpr irange_type<CommonType> irange(T1 m, T2 n) {
+  static_assert(std::is_integral_v<CommonType>);
   return {m, n};
 }
 } // namespace bgl
