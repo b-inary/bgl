@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 namespace bgl {
 //! candidates of console color
@@ -11,8 +12,8 @@ enum console_color {
 
 /**
  * @brief set foreground color of console.
+ * @param os output stream. if |os| is neither of std::cout or std::cerr, do nothing
  * @param color color to set
- * @param set_stderr if true, change stderr. otherwise, change stdout
  */
-void set_console_color(console_color color, bool set_stderr);
+void set_console_color(std::ostream &os, console_color color);
 } // namespace bgl

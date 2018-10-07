@@ -51,9 +51,9 @@ void _bgl_check(bool abort, Expr expr, const char* expr_str, const char *file, i
     }
 
     put_date_string(std::cerr);
-    set_console_color(abort ? console_color::error : console_color::warning, true);
+    set_console_color(std::cerr, abort ? console_color::error : console_color::warning);
     fmt::print(std::cerr, abort ? "error: " : "warning: ");
-    set_console_color(console_color::original, true);
+    set_console_color(std::cerr, console_color::original);
     fmt::print(stderr, "check failed{}\n  expression: {}\n", msg, expr_str);
     fmt::print(stderr, "  (in {}(), {}:{})\n", func, file, line);
 

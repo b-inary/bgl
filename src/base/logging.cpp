@@ -12,10 +12,8 @@ namespace bgl {
 std::string get_date_string() {
   auto now = std::chrono::high_resolution_clock::now();
   std::time_t time = std::chrono::system_clock::to_time_t(now);
-  auto now_second = std::chrono::system_clock::from_time_t(time);
-  auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - now_second);
   std::tm tm = *std::localtime(&time);
-  return fmt::format("[{:%y-%m-%d %H:%M:%S}.{:02g}]", tm, std::floor(now_ms.count() / 10.0));
+  return fmt::format("[{:%m/%d %H:%M:%S}]", tm);
 }
 
 /**

@@ -47,7 +47,14 @@
  * @param ... format string (of fmt library)
  */
 #  define console_log(...) \
-    _bgl_console_log(std::cerr, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    _bgl_console_log(std::cerr, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+/**
+ * @brief logging wrapper macro that outputs to stderr. do not print position of macro
+ * @param ... format string (of fmt library)
+ */
+#  define console_log_oneline(...) \
+    _bgl_console_log(std::cerr, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 /**
  * @brief logging wrapper macro specifying output stream
@@ -55,8 +62,15 @@
  * @param ... format string (of fmt library)
  */
 #  define write_log(os, ...) \
-    _bgl_console_log(os, __FILE__, __LINE__, __func__, __VA_ARGS__)
+    _bgl_console_log(os, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
+/**
+ * @brief logging wrapper macro specifying output stream. do not print position of macro
+ * @param os output stream for logging
+ * @param ... format string (of fmt library)
+ */
+#  define write_log_oneline(os, ...) \
+    _bgl_console_log(os, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
 #  define timer(title, ...)         __VA_ARGS__()
 #  define timer_os(os, title, ...)  __VA_ARGS__()
@@ -87,13 +101,9 @@ void _bgl_timer(std::ostream &os, std::string_view title, const char *file,
   std::string footer = fmt::format("(in {}(), {}:{})", func, file, line);
 
   put_date_string(os);
-  if (&os == &std::cout || &os == &std::cerr) {
-    set_console_color(console_color::info, &os == &std::cerr);
-  }
+  set_console_color(os, console_color::info);
   fmt::print(os, "timer: ");
-  if (&os == &std::cout || &os == &std::cerr) {
-    set_console_color(console_color::original, &os == &std::cerr);
-  }
+  set_console_color(os, console_color::original);
   fmt::print(os, "{}: {}[ms]\n  {}\n", title, elapsed.count(), footer);
 }
 
@@ -109,13 +119,9 @@ public:
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
 
     put_date_string(os_);
-    if (&os_ == &std::cout || &os_ == &std::cerr) {
-        set_console_color(console_color::info, &os_ == &std::cerr);
-    }
+    set_console_color(os_, console_color::info);
     fmt::print(os_, "fn-timer: ");
-    if (&os_ == &std::cout || &os_ == &std::cerr) {
-        set_console_color(console_color::original, &os_ == &std::cerr);
-    }
+    set_console_color(os_, console_color::original);
     fmt::print(os_, "{}(): {}[ms]\n  {}\n", func_, elapsed.count(), footer_);
   }
 private:
@@ -126,18 +132,17 @@ private:
 };
 
 template <typename... Args>
-void _bgl_console_log(std::ostream &os, const char *file, int line, const char *func,
-                      const Args &...args) {
+void _bgl_console_log(std::ostream &os, bool show_position, const char *file, int line,
+                      const char *func, const Args &...args) {
   std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
                                 std::make_tuple(args...));
   put_date_string(os);
-  if (&os == &std::cout || &os == &std::cerr) {
-    set_console_color(console_color::info, &os == &std::cerr);
-  }
+  set_console_color(os, console_color::info);
   fmt::print(os, "log: ");
-  if (&os == &std::cout || &os == &std::cerr) {
-    set_console_color(console_color::original, &os == &std::cerr);
+  set_console_color(os, console_color::original);
+  fmt::print(os, "{}\n", body);
+  if (show_position) {
+    fmt::print(os, "  (in {}(), {}:{})\n", func, file, line);
   }
-  fmt::print(os, "{}\n  (in {}(), {}:{})\n", body, func, file, line);
 }
 } // namespace bgl
