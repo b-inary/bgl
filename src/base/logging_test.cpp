@@ -8,5 +8,5 @@ void logging_test() {
 
 TEST_CASE("logging", "[base]") {
   timer_stderr("timer test", logging_test);
-  stderr_log("logging test: {}, {}", "hoge", 42);
+  console_log("logging test: {}, {}", "hoge", 42);
 }

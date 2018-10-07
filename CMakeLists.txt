@@ -14,7 +14,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extlib/fmt/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(EXT_LIBRARIES fmt-header-only)
+set(EXT_LIBRARIES fmt)
 set(TEST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/extlib/catch_main.cpp)
 
 add_subdirectory(extlib/fmt)
