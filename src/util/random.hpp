@@ -118,6 +118,6 @@ private:
 //! alias of xoshiro256
 using rng_t = xoshiro256;
 
-// global random number generator for lazy guys
-extern rng_t bgl_random;
+//! pre-defined global instance of rng_t for lazy guys
+inline rng_t bgl_random;
 } // namespace bgl
