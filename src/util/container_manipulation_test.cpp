@@ -1,5 +1,6 @@
 #include "extlib/catch.hpp"
 #include "container_manipulation.hpp"
+#include "lambda.hpp"
 #include <vector>
 using namespace std;
 using namespace bgl;
@@ -21,7 +22,7 @@ TEST_CASE("container", "[util]") {
 
   SECTION("remove_elements_if") {
     vector<int> v{3, 1, 4, 1, 5, 9, 2, 6, 5, 3};
-    remove_elements_if(v, [](int x) { return x <= 3; });
+    remove_elements_if(v, lambda(x) { return x <= 3; });
     REQUIRE(v.size() == 5);
     REQUIRE(v[0] == 4);
   }
