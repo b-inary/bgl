@@ -5,7 +5,7 @@
 using namespace std;
 using namespace bgl;
 
-TEST_CASE("random", "[base]") {
+TEST_CASE("random", "[util]") {
   const int kNumPoints = 1000000;
 
   int c = 0;

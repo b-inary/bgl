@@ -29,6 +29,18 @@ Container &remove_elements(Container &c, const T &value) {
 }
 
 /**
+ * @brief remove elements equal to |value| from container |c|
+ * @param c container
+ * @param value removed value
+ * @return reference of processed container. instance is the same as |c|
+ */
+template <typename Container, typename Pred>
+Container &remove_elements_if(Container &c, Pred p) {
+  c.erase(std::remove_if(c.begin(), c.end(), p), c.end());
+  return c;
+}
+
+/**
  * @brief remove deplicated elements from container |c|
  * @param c input container
  * @return reference of processed container. instance is the same as |c|

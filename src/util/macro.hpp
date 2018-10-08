@@ -6,9 +6,6 @@
 #include <tuple>
 #include <cstdlib>
 
-//! macro for suppressing unused variable warning
-#define unused(x) (static_cast<void>(x))
-
 /**
  * @brief custom assertion macro. abort when |expr| is false
  * @param expr condition expression
