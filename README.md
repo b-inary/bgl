@@ -1,6 +1,4 @@
-# bgl
-
-[![Build Status](https://travis-ci.com/b-inary/bgl.svg?branch=master)](https://travis-ci.com/b-inary/bgl)
+# bgl [![Build Status](https://travis-ci.com/b-inary/bgl.svg?branch=master)](https://travis-ci.com/b-inary/bgl)
 
 research prototyping oriented graph library just for me
 
@@ -13,6 +11,7 @@ research prototyping oriented graph library just for me
 **build**
 
     git clone --recursive git@github.com:b-inary/bgl.git
+    cd bgl
     make
     make test  # run tests
     make doc   # generate documents (require Doxygen, Graphviz)

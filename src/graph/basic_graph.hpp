@@ -49,24 +49,6 @@ constexpr WeightType weight(const weighted_edge_t<WeightType> &e) noexcept {
 }
 
 /* utility function of edge */
-inline void update_to(unweighted_edge_t &e, node_t v) {
-  e = v;
-}
-
-template <typename WeightType>
-inline void update_to(weighted_edge_t<WeightType> &e, node_t v) {
-  e.first = v;
-}
-
-inline void update_weight(unweighted_edge_t &e [[maybe_unused]], int w [[maybe_unused]]) {
-  require_msg(false, "cannot change weight of unweighted edge");
-}
-
-template <typename WeightType>
-inline void update_weight(weighted_edge_t<WeightType> &e, WeightType w) {
-  e.second = w;
-}
-
 inline constexpr unweighted_edge_t
 reverse_edge(node_t v, unweighted_edge_t e [[maybe_unused]]) noexcept {
   return v;
@@ -240,8 +222,10 @@ public:
     adj_ = adj;
     for (node_t v : nodes()) {
       auto &es = adj_[v];
-      std::sort(es.begin(), es.end());
-      require_msg(to(es.back()) < num_nodes_, "invalid index");
+      if (es.size() > 0) {
+        std::sort(es.begin(), es.end());
+        require_msg(to(es.back()) < num_nodes_, "invalid index");
+      }
     }
   }
 

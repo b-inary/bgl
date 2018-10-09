@@ -70,7 +70,7 @@ TEST_CASE("unweighted graph", "[basic-graph]") {
   }
 }
 
-TEST_CASE("directed", "[basic-graph]") {
+TEST_CASE("directed graph", "[basic-graph]") {
   weighted_edge_list<int> es = {{0, {1, 1}}, {1, {2, 2}}, {2, {3, 3}}, {3, {1, 4}}};
   wgraph<int> g = es;
 
