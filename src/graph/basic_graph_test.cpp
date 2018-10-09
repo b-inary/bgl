@@ -149,4 +149,14 @@ TEST_CASE("directed graph", "[basic-graph]") {
     g2.make_undirected();
     REQUIRE(g2.num_edges() == 10);
   }
+
+  SECTION("dynamic update") {
+    wgraph<int> g2 = g;
+    g2.add_edge(2, {3, 1});
+    REQUIRE(g2.num_edges() == 5);
+    REQUIRE(g2.get_weight(2, 3).value_or(0) == 1);
+    g2.remove_edge(2, 3);
+    REQUIRE(g2.num_edges() == 3);
+    REQUIRE(g2.is_adjacent(2, 3) == false);
+  }
 }

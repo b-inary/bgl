@@ -19,14 +19,22 @@ int main() {
   // |weighted_edge_t| は実際には |pair<node_t, WeightType>| として定義されています．
   weighted_edge_t<double> e2 = {1, 0.5};
 
+  // 辺の行き先，重みを取得するにはフリー関数 |to|, |weight| を利用します．
+  node_t u1 = to(e1);
+  int w1 = weight(e1);  // 重み無し辺の重みは常に 1 (int) です．
+  node_t u2 = to(e2);
+  double w2 = weight(e2);
+
 
   /* 3. 辺リストと隣接リスト */
 
   // 辺リストは |unweighted_edge_list|, |weighted_edge_list<WeightType>| で表します．
+  // 実際には vector<pair<node_t, EdgeType>> として定義されています．
   unweighted_edge_list es = {{0, 1}, {1, 2}};
   weighted_edge_list<double> wes = {{0, {1, 0.5}}, {1, {2, 1.5}}};
 
   // 隣接リストは |unweighted_adjacency_list|, |weighted_adjacency_list<WeightType>| で表します．
+  // 実際には vector<vector<EdgeType>> として定義されています．
   unweighted_adjacency_list adj = {{1}, {2}, {}};
   weighted_adjacency_list<double> wadj = {{{1, 0.5}}, {{2, 1.5}}, {}};
 

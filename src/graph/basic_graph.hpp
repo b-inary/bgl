@@ -65,6 +65,11 @@ bool compare_to(EdgeType e, node_t v) {
   return to(e) < v;
 }
 
+template <typename EdgeType>
+bool compare_to_rev(node_t v, EdgeType e) {
+  return v < to(e);
+}
+
 //! type for representing edge list
 template <typename EdgeType>
 using edge_list = std::vector<std::pair<node_t, EdgeType>>;
@@ -373,6 +378,24 @@ public:
       num_edges_ += adj_[v].size();
     }
     return *this;
+  }
+
+  /* dynamic update: since adjacency list is sorted, these operations are slow! */
+
+  //! add edge |e| from |v|
+  void add_edge(node_t v, const edge_type &e) {
+    auto &es = adj_[v];
+    es.insert(std::upper_bound(es.begin(), es.end(), e), e);
+    ++num_edges_;
+  }
+
+  //! remove all edges from |u| to |v|
+  void remove_edge(node_t u, node_t v) {
+    auto &es = adj_[u];
+    auto lb = std::lower_bound(es.begin(), es.end(), v, compare_to<edge_type>);
+    auto ub = std::upper_bound(es.begin(), es.end(), v, compare_to_rev<edge_type>);
+    num_edges_ -= ub - lb;
+    es.erase(lb, ub);
   }
 
   /* pretty print */
