@@ -78,16 +78,6 @@ reverse_edge(node_t v, weighted_edge_t<WeightType> e) noexcept {
   return {v, weight(e)};
 }
 
-template <typename WeightType>
-std::istream &operator<<(std::istream &is, weighted_edge_t<WeightType> &e) {
-  return is >> e.first >> e.second;
-}
-
-template <typename WeightType>
-std::ostream &operator<<(std::ostream &os, const weighted_edge_t<WeightType> &e) {
-  return os << to(e) << ' ' << weight(e);
-}
-
 template <typename EdgeType>
 bool compare_to(EdgeType e, node_t v) {
   return to(e) < v;
@@ -440,3 +430,17 @@ template <typename WeightType>
 using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
 } // namespace bgl
+
+
+// istream/ostream support of weighted_edge_t
+namespace std {
+template <typename WeightType>
+istream &operator<<(istream &is, bgl::weighted_edge_t<WeightType> &e) {
+  return is >> e.first >> e.second;
+}
+
+template <typename WeightType>
+ostream &operator<<(ostream &os, const bgl::weighted_edge_t<WeightType> &e) {
+  return os << bgl::to(e) << ' ' << bgl::weight(e);
+}
+} // namespace std

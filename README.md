@@ -12,6 +12,7 @@ research prototyping oriented graph library just for me
 
 **build**
 
+    git clone --recursive git@github.com:b-inary/bgl.git
     make
     make test  # run tests
     make doc   # generate documents (require Doxygen, Graphviz)
