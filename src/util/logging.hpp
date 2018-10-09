@@ -73,9 +73,14 @@
 #  define write_log_oneline(os, ...) \
     _bgl_console_log(os, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
-#  define timer(title, ...)         __VA_ARGS__()
-#  define timer_os(os, title, ...)  __VA_ARGS__()
-#  define auto_timer                static_cast<void>(0)
+#  define timer_stderr(title, ...)    __VA_ARGS__()
+#  define timer(os, title, ...)       __VA_ARGS__()
+#  define fn_timer_stderr             static_cast<void>(0)
+#  define fn_timer(os)                static_cast<void>(0)
+#  define console_log(...)            static_cast<void>(0)
+#  define console_log_oneline(...)    static_cast<void>(0)
+#  define write_log(os, ...)          static_cast<void>(0)
+#  define write_log_oneline(os, ...)  static_cast<void>(0)
 #endif
 
 
@@ -85,7 +90,7 @@ namespace bgl {
  * @return generated string
  */
 inline std::string get_date_string() {
-  auto now = std::chrono::high_resolution_clock::now();
+  auto now = std::chrono::system_clock::now();
   std::time_t time = std::chrono::system_clock::to_time_t(now);
   std::tm tm = *std::localtime(&time);
   return fmt::format("[{:%m/%d %H:%M:%S}]", tm);

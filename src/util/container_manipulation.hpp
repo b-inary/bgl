@@ -29,9 +29,9 @@ Container &remove_elements(Container &c, const T &value) {
 }
 
 /**
- * @brief remove elements equal to |value| from container |c|
+ * @brief remove elements equal to |value| from by predicate |p|
  * @param c container
- * @param value removed value
+ * @param p predicate
  * @return reference of processed container. instance is the same as |c|
  */
 template <typename Container, typename Pred>

@@ -7,7 +7,7 @@ research prototyping oriented graph library just for me
 **requirements**
 
 - C++17 compiler (tested on g++8 and clang++7.0)
-- [CMake](https://cmake.org/) (>= version 3.7)
+- [CMake](https://cmake.org/) (>= version 3.8)
 - [Ninja](https://ninja-build.org/)
 
 **build**

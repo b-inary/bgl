@@ -2,7 +2,10 @@
 #include "fmt.hpp"
 #include <iostream>
 
-#if defined(WIN32) || defined(__WIN32__) || defined(_WIN32) || defined(_MSC_VER) || defined(__MINGW32__)
+#ifdef _MSC_VER
+#  define NOMINMAX 1
+#endif
+#if defined(WIN32) || defined(__WIN32__) || defined(_WIN32) || defined(_MSC_VER)
 //! defined when platform is Windows
 #  define BGL_PLATFORM_WINDOWS
 #  include <windows.h>

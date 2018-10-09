@@ -1,11 +1,18 @@
 #pragma once
+#include <iterator>
 #include <type_traits>
+#include <cstddef>
 
 namespace bgl {
 namespace {
 template <typename T>
 class irange_iterator {
 public:
+  using difference_type = std::ptrdiff_t;
+  using value_type = T;
+  using pointer = T*;
+  using reference = T&;
+  using iterator_category = std::forward_iterator_tag;
   constexpr irange_iterator(T value) : value_{value} {}
   constexpr T operator*() const { return value_; }
   // remark: this inequality operator does not satisfy commutativity

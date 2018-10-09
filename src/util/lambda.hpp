@@ -3,7 +3,7 @@
 
 /**
  * @brief easy lambda wrapper. ex) lambda(a, b) -> [&](const auto &a, const auto &b)<br>
- *        supports up to 8 arguments
+ *        supports up to 8 arguments. does not work on MSVC...
  * @param ... arguments
  */
 #define lambda(...) BGL_LAMBDA_III(BGL_IS_EMPTY(__VA_ARGS__))(__VA_ARGS__)
