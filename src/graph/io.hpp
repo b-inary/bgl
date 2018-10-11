@@ -5,8 +5,6 @@
 #include <sstream>
 #include <fstream>
 #include <unordered_map>
-#include <functional>
-#include <optional>
 #include <filesystem>
 
 // istream support of weighted_edge_t
