@@ -68,6 +68,19 @@ TEST_CASE("unweighted graph", "[basic-graph]") {
     g2.make_undirected();
     REQUIRE(g2.num_edges() == 8);
   }
+
+  SECTION("remove isolated nodes") {
+    graph g2 = g;
+    g2.remove_isolated_nodes();
+    REQUIRE(g2.num_nodes() == 4);
+    g2.remove_edge(0, 1);
+    REQUIRE(g2.num_edges() == 3);
+    g2.remove_isolated_nodes();
+    REQUIRE(g2.is_adjacent(0, 1) == true);
+    REQUIRE(g2.is_adjacent(1, 2) == true);
+    REQUIRE(g2.is_adjacent(2, 0) == true);
+    REQUIRE(g2.is_adjacent(0, 2) == false);
+  }
 }
 
 TEST_CASE("directed graph", "[basic-graph]") {

@@ -15,6 +15,13 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+# filesystem support
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  set(FILESYSTEM stdc++fs)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(FILESYSTEM c++fs)
+endif()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extlib/fmt/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)

@@ -50,13 +50,13 @@ constexpr WeightType weight(const weighted_edge_t<WeightType> &e) noexcept {
 
 /* utility function of edge */
 inline constexpr unweighted_edge_t
-reverse_edge(node_t v, unweighted_edge_t e [[maybe_unused]]) noexcept {
+update_to(unweighted_edge_t e [[maybe_unused]], node_t v) noexcept {
   return v;
 }
 
 template <typename WeightType>
 constexpr weighted_edge_t<WeightType>
-reverse_edge(node_t v, weighted_edge_t<WeightType> e) noexcept {
+update_to(weighted_edge_t<WeightType> e, node_t v) noexcept {
   return {v, weight(e)};
 }
 
@@ -351,7 +351,7 @@ public:
     adjacency_list<edge_type> adj(num_nodes());
     for (node_t v : nodes()) {
       for (const edge_type &e : edges_from(v)) {
-        adj[to(e)].push_back(reverse_edge(v, e));
+        adj[to(e)].push_back(update_to(e, v));
       }
     }
     adj_ = std::move(adj);
@@ -367,7 +367,7 @@ public:
     for (node_t v : nodes()) {
       for (size_t i : irange(outdegrees[v])) {
         const edge_type &e = adj_[v][i];
-        adj_[to(e)].push_back(reverse_edge(v, e));
+        adj_[to(e)].push_back(update_to(e, v));
       }
     }
     num_edges_ = 0;
@@ -377,6 +377,41 @@ public:
       remove_duplicates(adj_[v]);
       num_edges_ += adj_[v].size();
     }
+    return *this;
+  }
+
+  //! [destructive] remove isolated nodes (i.e., nodes with degree zero). can rename ID of nodes
+  graph_type &remove_isolated_nodes() {
+    std::vector<char> is_isolated(num_nodes(), true);
+    for (node_t u : nodes()) {
+      for (node_t v : neighbors(u)) {
+        is_isolated[u] = false;
+        is_isolated[v] = false;
+      }
+    }
+
+    node_t new_num_nodes = 0;
+    std::vector<node_t> new_id(num_nodes());
+    std::vector<node_t> new_id_rev(num_nodes());
+    for (node_t v : nodes()) {
+      if (!is_isolated[v]) {
+        new_id[v] = new_num_nodes++;
+        new_id_rev[new_id[v]] = v;
+      }
+    }
+
+    for (node_t v : irange(new_num_nodes)) {
+      if (v != new_id_rev[v]) {
+        adj_[v] = std::move(adj_[new_id_rev[v]]);
+      }
+      for (auto &e : adj_[v]) {
+        e = update_to(e, new_id[to(e)]);
+      }
+    }
+
+    num_nodes_ = new_num_nodes;
+    adj_.resize(new_num_nodes);
+    adj_.shrink_to_fit();
     return *this;
   }
 
@@ -402,13 +437,13 @@ public:
 
   //! do pretty print to |os|
   void pretty_print(std::ostream &os = std::cerr) const {
-    static const node_t kLimitNumNodes = 5;
-    static const std::size_t kLimitNumEdges = 10;
+    const node_t kLimitNumNodes = 5;
+    const std::size_t kLimitNumEdges = 10;
 
     fmt::print(os, "====================\n");
-    fmt::print(os, "  type: {}\n", typename_of(graph_type{}));
     fmt::print(os, "  # of nodes: {}\n", num_nodes());
     fmt::print(os, "  # of edges: {}\n", num_edges());
+    fmt::print(os, "  type: {}\n", typename_of(graph_type{}));
     fmt::print(os, "--------------------\n");
     for (node_t v : irange(std::min(num_nodes(), kLimitNumNodes))) {
       fmt::print(os, "  {} -> ", v);
@@ -437,17 +472,3 @@ template <typename WeightType>
 using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
 } // namespace bgl
-
-
-// istream/ostream support of weighted_edge_t
-namespace std {
-template <typename WeightType>
-istream &operator<<(istream &is, bgl::weighted_edge_t<WeightType> &e) {
-  return is >> e.first >> e.second;
-}
-
-template <typename WeightType>
-ostream &operator<<(ostream &os, const bgl::weighted_edge_t<WeightType> &e) {
-  return os << bgl::to(e) << ' ' << bgl::weight(e);
-}
-} // namespace std

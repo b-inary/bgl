@@ -6,12 +6,13 @@
 #include <tuple>
 #include <cstdlib>
 
+#ifndef NDEBUG
 /**
  * @brief custom assertion macro. abort when |expr| is false
  * @param expr condition expression
  */
 #define require(expr) \
-  _bgl_check(true, expr, #expr, __FILE__, __LINE__, __func__, "")
+  _bgl_check(true, expr, "assertion failed")
 
 /**
  * @brief custom assertion macro with message. abort when |expr| is false
@@ -19,14 +20,14 @@
  * @param ... message of format string
  */
 #define require_msg(expr, ...) \
-  _bgl_check(true, expr, #expr, __FILE__, __LINE__, __func__, __VA_ARGS__)
+  _bgl_check(true, expr, __VA_ARGS__)
 
 /**
  * @brief custom assertion macro. continue running even when |expr| is false
  * @param expr condition expression
  */
 #define check(expr) \
-  _bgl_check(false, expr, #expr, __FILE__, __LINE__, __func__, "")
+  _bgl_check(false, expr, "assertion failed")
 
 /**
  * @brief custom assertion macro with message. continue running even when |expr| is false
@@ -34,29 +35,27 @@
  * @param ... message of format string
  */
 #define check_msg(expr, ...) \
-  _bgl_check(false, expr, #expr, __FILE__, __LINE__, __func__, __VA_ARGS__)
+  _bgl_check(false, expr, __VA_ARGS__)
 
-namespace bgl {
-template <typename Expr, typename... Args>
-void _bgl_check(bool abort, Expr expr, const char* expr_str, const char *file, int line,
-                const char *func, const Args &...args) {
-  if (!(expr)) {
-    std::string msg = std::apply([](const auto &...args) { return fmt::format(args...); },
-                                 std::make_tuple(args...));
-    if (!msg.empty()) {
-      msg = ": " + msg;
-    }
-
-    put_date_string(std::cerr);
-    set_console_color(std::cerr, abort ? console_color::error : console_color::warning);
-    fmt::print(std::cerr, abort ? "error: " : "warning: ");
-    set_console_color(std::cerr, console_color::original);
-    fmt::print(stderr, "check failed{}\n  expression: {}\n", msg, expr_str);
-    fmt::print(stderr, "  (in {}(), {}:{})\n", func, file, line);
-
-    if (abort) {
-      std::exit(EXIT_FAILURE);
-    }
-  }
-}
-} // namespace bgl
+#define _bgl_check(abort, expr, ...) \
+  do {  \
+    if (!(expr)) { \
+      std::string msg = std::apply([](const auto &...args) { return fmt::format(args...); }, \
+                                   std::make_tuple(__VA_ARGS__)); \
+      put_date_string(std::cerr); \
+      set_console_color(std::cerr, abort ? console_color::error : console_color::warning); \
+      fmt::print(std::cerr, abort ? "error: " : "warning: "); \
+      set_console_color(std::cerr, console_color::original); \
+      fmt::print(stderr, "{}\n  assertion: {}\n", msg, #expr); \
+      fmt::print(stderr, "  (in {}(), {}:{})\n", __func__, __FILE__, __LINE__); \
+      if (abort) { \
+        std::exit(EXIT_FAILURE); \
+      } \
+    } \
+  } while (false)
+#else
+#define require(expr)           (expr)
+#define require_msg(expr, ...)  (expr)
+#define check(expr)             (expr)
+#define check_msg(expr, ...)    (expr)
+#endif

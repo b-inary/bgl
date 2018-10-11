@@ -6,4 +6,4 @@ file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 list(REMOVE_ITEM SOURCES ${TEST_SOURCES})
 
 add_executable(run_tests ${TEST_SOURCES} ${TEST_LIBRARY})
-target_link_libraries(run_tests PRIVATE ${EXT_LIBRARIES})
+target_link_libraries(run_tests PRIVATE ${EXT_LIBRARIES} ${FILESYSTEM})
