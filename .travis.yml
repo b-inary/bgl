@@ -16,20 +16,20 @@ matrix:
             - doxygen
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-#     - os: linux
-#       addons:
-#         apt:
-#           update: true
-#           sources:
-#             - ubuntu-toolchain-r-test
-#             - llvm-toolchain-trusty-7
-#           packages:
-#             - clang-7
-#             - libstdc++-7-dev
-#             - ninja-build
-#             - doxygen
-#       env:
-#         - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+    - os: linux
+      addons:
+        apt:
+          update: true
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+          packages:
+            - clang-7
+            - libstdc++-7-dev
+            - ninja-build
+            - doxygen
+      env:
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
 
 before_install:
   - eval "${MATRIX_EVAL}"

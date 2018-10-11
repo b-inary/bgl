@@ -5,7 +5,6 @@
 #include <sstream>
 #include <fstream>
 #include <unordered_map>
-#include <filesystem>
 
 // istream support of weighted_edge_t
 namespace std {
@@ -50,9 +49,9 @@ void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = tru
 
 //! write graph as tsv file to |filename|
 template <typename GraphType>
-void write_graph_tsv(std::filesystem::path file, const GraphType &g, bool write_info = true) {
-  std::ofstream ofs(file);
-  require_msg(ofs, "write_graph_tsv: file cannot open: {}", file.string());
+void write_graph_tsv(path file, const GraphType &g, bool write_info = true) {
+  std::ofstream ofs(file.string());
+  require_msg(ofs, "write_graph_tsv: file cannot open: {}", file);
   write_graph_tsv(ofs, g, write_info);
 }
 
@@ -88,9 +87,9 @@ GraphType read_graph_tsv(std::istream &is, bool canonicalize = true) {
 
 //! read graph from |filename| as tsv file
 template <typename GraphType>
-GraphType read_graph_tsv(std::filesystem::path file, bool canonicalize = true) {
-  std::ifstream ifs(file);
-  require_msg(ifs, "read_graph_tsv: file not exist: {}", file.string());
+GraphType read_graph_tsv(path file, bool canonicalize = true) {
+  std::ifstream ifs(file.string());
+  require_msg(ifs, "read_graph_tsv: file not exist: {}", file);
   return read_graph_tsv<GraphType>(ifs, canonicalize);
 }
 } // namespace bgl
