@@ -15,6 +15,14 @@ TEST_CASE("file", "[util]") {
   REQUIRE(path("../../").string() == "../..");
   REQUIRE(path("foo/..").string() == ".");
 
+  REQUIRE((path("foo") / "bar").string() == "foo/bar");
+  REQUIRE(("foo/" / path("bar")).string() == "foo/bar");
+  REQUIRE(("foo/" / path("/bar")).string() == "/bar");
+  REQUIRE((path("/foo") / path("/bar/")).string() == "/bar/");
+  REQUIRE((path("/") / path("bar")).string() == "/bar");
+  REQUIRE((path("foo/") / path("..")).string() == ".");
+  REQUIRE((path("/") / path("..")).string() == "/");
+
   REQUIRE(path("foo/bar").remove_filename().string() == "foo/");
   REQUIRE(path("foo/").remove_filename().string() == "foo/");
   REQUIRE(path("/foo").remove_filename().string() == "/");

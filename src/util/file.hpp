@@ -1,4 +1,4 @@
-#include "extlib/path.hpp"
+#include "extlib/apathy.hpp"
 #include "macro.hpp"
 #include "lambda.hpp"
 #include <iostream>
@@ -11,12 +11,17 @@ namespace bgl {
 //! a super-tiny C++17 filesystem::path like class
 class path {
 public:
-  path(const char *str = "") : path_{str} {
-    path_.sanitize();
+  path(const char *str = "") : path_{str} {}
+  path(const std::string &str) : path_{str} {}
+
+  path& operator/=(const path &rhs) {
+    path_ /= rhs.path_;
+    return *this;
   }
 
-  path(const std::string &str) : path_{str} {
-    path_.sanitize();
+  friend path operator/(const path &lhs, const path &rhs) {
+    path result(lhs);
+    return result /= rhs;
   }
 
   path& remove_filename() {
@@ -28,16 +33,16 @@ public:
 
   path& replace_filename(const path &replacement) {
     remove_filename();
-    path_.append(replacement.path_);
+    path_ /= replacement.path_;
     return *this;
   }
 
   path& replace_extension(const path &replacement = path()) {
     std::string st = path_.stem();
-    std::string ext = replacement.path_.string();
+    std::string ext = replacement.string();
     if (!ext.empty() && ext[0] != '.') ext = "." + ext;
     remove_filename();
-    path_.append(st + ext);
+    path_ /= st + ext;
     return *this;
   }
 
@@ -120,12 +125,12 @@ public:
 
   /* equality operators */
 
-  bool operator==(const path &rhs) const noexcept {
-    return path_.string() == rhs.path_.string();
+  friend bool operator==(const path &lhs, const path &rhs) noexcept {
+    return lhs.path_ == rhs.path_;
   }
 
-  bool operator!=(const path &rhs) const noexcept {
-    return !(*this == rhs);
+  friend bool operator!=(const path &lhs, const path &rhs) noexcept {
+    return !(lhs == rhs);
   }
 
 private:
@@ -141,20 +146,12 @@ private:
       }
     };
 
-    replace('\\', "\\\\");
-    replace('^', "\\^");
-    replace('$', "\\$");
     replace('.', "\\.");
     replace('*', ".*");
     replace('+', "\\+");
     replace('?', ".");
-    replace('(', "\\(");
-    replace(')', "\\)");
     replace('{', "\\{");
     replace('}', "\\}");
-    replace('[', "\\[");
-    replace(']', "\\]");
-    replace('|', "\\|");
 
     return result;
   }

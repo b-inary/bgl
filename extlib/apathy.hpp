@@ -1,5 +1,5 @@
 // https://github.com/dlecocq/apathy
-// partially modified by b-inary (Wataru Inariba)
+// modified by b-inary (Wataru Inariba)
 
 /******************************************************************************
  * Copyright (c) 2013 Dan Lecocq
@@ -32,7 +32,6 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include <istream>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -40,11 +39,9 @@
 
 /* C includes */
 #include <errno.h>
-#include <fcntl.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 /* A class for path manipulation */
 namespace apathy {
@@ -61,7 +58,7 @@ namespace apathy {
             /* The actual string segment */
             std::string segment;
 
-            Segment(std::string s=""): segment(s) {}
+            Segment(const std::string &s = "") : segment(s) {}
 
             friend std::istream& operator>>(std::istream& stream, Segment& s) {
                 return std::getline(stream, s.segment, separator);
@@ -75,47 +72,32 @@ namespace apathy {
         /* Default constructor
          *
          * Points to current directory */
-        Path(const std::string& path=""): path(path) {}
+        Path(const char *path = "") : path(path) {
+            sanitize();
+        }
 
-        /* Our generalized constructor.
-         *
-         * This enables all sorts of type promotion (like int -> Path) for
-         * arguments into all the functions below. Anything that
-         * std::stringstream can support is implicitly supported as well
-         *
-         * @param p - path to construct */
-        template <class T>
-        Path(const T& p);
+        Path(const std::string& path) : path(path) {
+            sanitize();
+        }
 
         /**********************************************************************
          * Operators
          *********************************************************************/
         /* Checks if the paths are exactly the same */
-        bool operator==(const Path& other) { return path == other.path; }
+        friend bool operator==(const Path& lhs, const Path& rhs) {
+            return lhs.path == rhs.path;
+        }
 
         /* Check if the paths are not exactly the same */
-        bool operator!=(const Path& other) { return ! (*this == other); }
+        friend bool operator!=(const Path& lhs, const Path& rhs) {
+            return !(lhs == rhs);
+        }
 
         /* Append the provided segment to the path as a directory. This is the
          * same as append(segment)
          *
          * @param segment - path segment to add to this path */
-        Path& operator<<(const Path& segment);
-
-        /* Append the provided segment to the path as a directory. This is the
-         * same as append(segment). Returns a /new/ path object rather than a
-         * reference.
-         *
-         * @param segment - path segment to add to this path */
-        Path operator+(const Path& segment) const;
-
-        /* Check if the two paths are equivalent
-         *
-         * Two paths are equivalent if they point to the same resource, even if
-         * they are not exact string matches
-         *
-         * @param other - path to compare to */
-        bool equivalent(const Path& other);
+        Path& operator/=(const Path& segment);
 
         /* Return a string version of this path */
         std::string string() const { return path; }
@@ -134,16 +116,10 @@ namespace apathy {
          *********************************************************************/
 
         /* Append the provided segment to the path as a directory. Alias for
-         * `operator<<`
+         * `operator/=`
          *
          * @param segment - path segment to add to this path */
         Path& append(const Path& segment);
-
-        /* Evaluate the provided path relative to this path. If the second path
-         * is absolute, then return the second path.
-         *
-         * @param rel - path relative to this path to evaluate */
-        Path& relative(const Path& rel);
 
         /* Move up one level in the directory structure */
         Path& up();
@@ -181,16 +157,6 @@ namespace apathy {
          *   assert(Path("/foo//").trim() == "/foo");
          */
         Path& trim();
-
-        /**********************************************************************
-         * Copiers
-         *********************************************************************/
-
-        /* Return parent path
-         *
-         * Returns a new Path object referring to the parent directory. To
-         * move _this_ path to the parent directory, use the `up` function */
-        Path parent() const { return Path(Path(*this).up()); }
 
         /**********************************************************************
          * Member Utility Methods
@@ -235,19 +201,11 @@ namespace apathy {
          * Static Utility Methods
          *********************************************************************/
 
-        /* Return a brand new path as the concatenation of the two provided
-         * paths
-         *
-         * @param a - first part of the path to join
-         * @param b - second part of the path to join
-         */
-        static Path join(const Path& a, const Path& b);
-
         /* Return a branch new path as the concatenation of each segments
          *
          * @param segments - the path segments to concatenate
          */
-        static Path join(const std::vector<Segment>& segments);
+        static std::string join(const std::vector<Segment>& segments);
 
         /* Current working directory */
         static Path cwd();
@@ -266,31 +224,16 @@ namespace apathy {
         std::string path;
     };
 
-    /* Constructor */
-    template <class T>
-    inline Path::Path(const T& p): path("") {
-        std::stringstream ss;
-        ss << p;
-        path = ss.str();
-    }
-
     /**************************************************************************
      * Operators
      *************************************************************************/
-    inline Path& Path::operator<<(const Path& segment) {
+    inline Path& Path::operator/=(const Path& segment) {
         return append(segment);
     }
 
-    inline Path Path::operator+(const Path& segment) const {
-        Path result(path);
-        result.append(segment);
-        return result;
-    }
-
-    inline bool Path::equivalent(const Path& other) {
-        /* Make copies of both paths, sanitize, and ensure they're equal */
-        return Path(path).absolute().sanitize() ==
-               Path(other).absolute().sanitize();
+    inline Path operator/(const Path& lhs, const Path& rhs) {
+        Path result(lhs);
+        return result /= rhs;
     }
 
     inline std::string Path::filename() const {
@@ -327,35 +270,16 @@ namespace apathy {
         /* First, check if the last character is the separator character.
          * If not, then append one and then the segment. Otherwise, just
          * the segment */
-        if (!trailing_slash()) {
-            path.push_back(separator);
+        if (segment.is_absolute()) {
+            return *this = segment;
         }
+        directory();
         path.append(segment.path);
-        return *this;
-    }
-
-    inline Path& Path::relative(const Path& rel) {
-        if (!rel.is_absolute()) {
-            return append(rel).sanitize();
-        } else {
-            operator=(rel);
-            return *this;
-        }
+        return sanitize();
     }
 
     inline Path& Path::up() {
-        /* Make sure we turn this into an absolute url if it's not already
-         * one */
-        if (path.size() == 0) {
-            path = "..";
-            return directory();
-        }
-
-        append("..").sanitize();
-        if (path.size() == 0) {
-            return *this;
-        }
-        return directory();
+        return append("..");
     }
 
     inline Path& Path::absolute() {
@@ -364,9 +288,8 @@ namespace apathy {
          * directory */
         if (!is_absolute()) {
             /* Join our current working directory with the path */
-            operator=(join(cwd(), path));
+            *this = cwd() / path;
         }
-        sanitize();
         return *this;
     }
 
@@ -422,7 +345,7 @@ namespace apathy {
         }
 
         if (!relative) {
-            path = std::string(1, separator) + Path::join(pruned).path;
+            path = std::string(1, separator) + Path::join(pruned);
             if (was_directory) {
                 return directory();
             }
@@ -430,7 +353,7 @@ namespace apathy {
         }
 
         /* It was a relative path */
-        path = Path::join(pruned).path;
+        path = Path::join(pruned);
         if (path.length() && was_directory) {
             return directory();
         }
@@ -441,7 +364,6 @@ namespace apathy {
     }
 
     inline Path& Path::directory() {
-        trim();
         if (!trailing_slash()) {
             path.push_back(separator);
         }
@@ -449,13 +371,8 @@ namespace apathy {
     }
 
     inline Path& Path::trim() {
-        if (path.length() == 0) { return *this; }
-
-        size_t p = path.find_last_not_of(separator);
-        if (p != std::string::npos) {
-            path.erase(p + 1, path.size());
-        } else {
-            path = separator;
+        if (path.length() != 1 && trailing_slash()) {
+            path.erase(path.length() - 1);
         }
         return *this;
     }
@@ -525,13 +442,7 @@ namespace apathy {
     /**************************************************************************
      * Static Utility Methods
      *************************************************************************/
-    inline Path Path::join(const Path& a, const Path& b) {
-        Path p(a);
-        p.append(b);
-        return p;
-    }
-
-    inline Path Path::join(const std::vector<Segment>& segments) {
+    inline std::string Path::join(const std::vector<Segment>& segments) {
         std::string path;
         /* Now, we'll go through the segments, and join them with
          * separator */
@@ -542,7 +453,7 @@ namespace apathy {
                 path += std::string(1, separator);
             }
         }
-        return Path(path);
+        return path;
     }
 
     inline Path Path::cwd() {
@@ -591,7 +502,7 @@ namespace apathy {
                 continue;
             }
 
-            cpy.relative(ent->d_name);
+            cpy /= ent->d_name;
             results.push_back(cpy);
         }
 
