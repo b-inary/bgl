@@ -1,5 +1,5 @@
 #pragma once
-#include "console_color.hpp"
+#include "extlib/rang.hpp"
 #include "fmt.hpp"
 #include <iostream>
 #include <string>
@@ -103,9 +103,9 @@ void _bgl_timer(std::ostream &os, std::string_view title, const char *file,
   std::string footer = fmt::format("(in {}(), {}:{})", func, file, line);
 
   put_date_string(os);
-  set_console_color(os, console_color::info);
+  os << rang::style::bold << rang::fgB::cyan;
   fmt::print(os, "timer: ");
-  set_console_color(os, console_color::original);
+  os << rang::style::reset << rang::fg::reset;
   fmt::print(os, "{}: {}[ms]\n  {}\n", title, elapsed.count(), footer);
 }
 
@@ -121,9 +121,9 @@ public:
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
 
     put_date_string(os_);
-    set_console_color(os_, console_color::info);
+    os_ << rang::style::bold << rang::fgB::cyan;
     fmt::print(os_, "fn-timer: ");
-    set_console_color(os_, console_color::original);
+    os_ << rang::style::reset << rang::fg::reset;
     fmt::print(os_, "{}(): {}[ms]\n  {}\n", func_, elapsed.count(), footer_);
   }
 private:
@@ -139,9 +139,9 @@ void _bgl_console_log(std::ostream &os, bool show_position, const char *file, in
   std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
                                 std::make_tuple(args...));
   put_date_string(os);
-  set_console_color(os, console_color::info);
+  os << rang::style::bold << rang::fgB::cyan;
   fmt::print(os, "log: ");
-  set_console_color(os, console_color::original);
+  os << rang::style::reset << rang::fg::reset;
   fmt::print(os, "{}\n", body);
   if (show_position) {
     fmt::print(os, "  (in {}(), {}:{})\n", func, file, line);

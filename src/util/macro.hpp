@@ -1,6 +1,6 @@
 #pragma once
+#include "extlib/rang.hpp"
 #include "fmt.hpp"
-#include "console_color.hpp"
 #include "logging.hpp"
 #include <iostream>
 #include <tuple>
@@ -43,9 +43,9 @@
       std::string msg = std::apply([](const auto &...args) { return fmt::format(args...); }, \
                                    std::make_tuple(__VA_ARGS__)); \
       put_date_string(std::cerr); \
-      set_console_color(std::cerr, abort ? console_color::error : console_color::warning); \
+      std::cerr << rang::style::bold << (abort ? rang::fg::red : rang::fg::yellow); \
       fmt::print(std::cerr, abort ? "error: " : "warning: "); \
-      set_console_color(std::cerr, console_color::original); \
+      std::cerr << rang::style::reset << rang::fg::reset; \
       fmt::print(stderr, "{}\n  assertion: {}\n", msg, #expr); \
       fmt::print(stderr, "  (in {}(), {}:{})\n", __func__, __FILE__, __LINE__); \
       if (abort) { \

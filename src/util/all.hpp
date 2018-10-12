@@ -1,6 +1,7 @@
 #pragma once
 
-#include "console_color.hpp"
+#include "extlib/rang.hpp"
+
 #include "container_manipulation.hpp"
 #include "demangle_typeid.hpp"
 #include "file.hpp"
