@@ -67,6 +67,12 @@ TEST_CASE("file", "[util]") {
   REQUIRE(path(".hidden").extension().string() == "");
   REQUIRE(path("..foo").extension().string() == ".foo");
 
+  REQUIRE(path::relative("foo/bar", "foo").string() == "bar");
+  REQUIRE(path::relative("foo/bar", "foo/").string() == "bar");
+  REQUIRE(path::relative("foo/bar/", "foo/").string() == "bar/");
+  REQUIRE(path::relative("foo/bar", "baz").string() == "../foo/bar");
+  // REQUIRE(path::relative("foo/bar", "../").string() == "bgl/foo/bar");
+
   auto ls = path(".").find();
   REQUIRE(std::count(ls.begin(), ls.end(), path("src")));
   REQUIRE(std::count(ls.begin(), ls.end(), path("README.md")));

@@ -1,5 +1,5 @@
+#pragma once
 #include "extlib/apathy.hpp"
-#include "assertion.hpp"
 #include "lambda.hpp"
 #include <iostream>
 #include <vector>
@@ -50,10 +50,6 @@ public:
     return path_.string();
   }
 
-  explicit operator std::string() const {
-    return string();
-  }
-
   path parent_path() const {
     path p = *this;
     p.remove_filename().path_.trim();
@@ -93,7 +89,7 @@ public:
   }
 
   std::vector<path> find(const std::regex &re) const {
-    require_msg(is_directory(), "path: find: {} is not a directory", *this);
+    if (!is_directory()) return {*this};
     std::vector<path> results;
     auto ls = apathy::Path::listdir(path_);
     for (const auto &p : ls) {
@@ -109,7 +105,7 @@ public:
   }
 
   std::vector<path> find_recursive(const std::regex &re) const {
-    require_msg(is_directory(), "path: find: {} is not a directory", *this);
+    if (!is_directory()) return {*this};
     std::vector<path> results;
     auto ls = apathy::Path::listdir(path_);
     for (const auto &p : ls) {
@@ -121,6 +117,16 @@ public:
       }
     }
     return results;
+  }
+
+  /* path operations */
+
+  static path current_path() {
+    return apathy::Path::cwd().string();
+  }
+
+  static path relative(const path &p, const path &base = current_path()) {
+    return apathy::Path::relative(p.path_, base.path_).string();
   }
 
   /* equality operators */

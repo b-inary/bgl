@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -D_BGL_DIRECTORY=${bgl_SOURCE_DIR}")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -15,12 +15,12 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extlib/fmt/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${bgl_SOURCE_DIR})
+include_directories(${bgl_SOURCE_DIR}/extlib/fmt/include)
+include_directories(${bgl_SOURCE_DIR}/src)
 
 set(EXT_LIBRARIES fmt)
-set(TEST_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/extlib/catch_main.cpp)
+set(TEST_LIBRARY ${bgl_SOURCE_DIR}/extlib/catch_main.cpp)
 
 add_subdirectory(extlib/fmt)
 add_subdirectory(src)

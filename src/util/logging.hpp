@@ -1,6 +1,7 @@
 #pragma once
 #include "extlib/rang.hpp"
 #include "fmt.hpp"
+#include "file.hpp"
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -9,12 +10,19 @@
 #include <cmath>
 #include <ctime>
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
-#  define BGL_OS_WIN
+#  define _BGL_OS_WIN
 #  include <windows.h>
 #else
 #  include <sys/ioctl.h>
 #endif
 
+#ifndef _BGL_DIRECTORY
+#  define _BGL_DIRECTORY
+#endif
+
+#define _BGL_EVAL(f, v) f(v)
+#define _BGL_TO_STRING(s) _BGL_EVAL(_BGL_TO_STRING_HELPER, s)
+#define _BGL_TO_STRING_HELPER(s) #s
 /**
  * @brief easy timer logging macro. output to stderr
  * @param title title for logging
@@ -22,7 +30,7 @@
  * @note uses __VA_ARGS__ because comma can appear inside lambda function
  */
 #define timer_stderr(title, ...) \
-  _bgl_timer(std::cerr, title, __FILE__, __LINE__, __func__, __VA_ARGS__)
+  _bgl_timer(std::cerr, title, __FILE__, __LINE__, __VA_ARGS__)
 
 /**
  * @brief easy timer logging macro. specify output stream
@@ -32,7 +40,7 @@
  * @note uses __VA_ARGS__ because comma can appear inside lambda function
  */
 #define timer(os, title, ...) \
-  _bgl_timer(os, title, __FILE__, __LINE__, __func__, __VA_ARGS__)
+  _bgl_timer(os, title, __FILE__, __LINE__, __VA_ARGS__)
 
 /**
  * @brief easy timer logging macro that measures entire function.
@@ -54,14 +62,7 @@
  * @param ... format string (of fmt library)
  */
 #define console_log(...) \
-  _bgl_console_log(std::cerr, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-/**
- * @brief logging wrapper macro that outputs to stderr. do not print position of macro
- * @param ... format string (of fmt library)
- */
-#define console_log_oneline(...) \
-  _bgl_console_log(std::cerr, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
+  _bgl_console_log(std::cerr, __FILE__, __LINE__, __VA_ARGS__)
 
 /**
  * @brief logging wrapper macro specifying output stream
@@ -69,15 +70,7 @@
  * @param ... format string (of fmt library)
  */
 #define write_log(os, ...) \
-  _bgl_console_log(os, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-/**
- * @brief logging wrapper macro specifying output stream. do not print position of macro
- * @param os output stream for logging
- * @param ... format string (of fmt library)
- */
-#define write_log_oneline(os, ...) \
-  _bgl_console_log(os, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
+  _bgl_console_log(os, __FILE__, __LINE__, __VA_ARGS__)
 
 
 namespace bgl {
@@ -90,7 +83,7 @@ inline void print_right_console(std::ostream &os, const std::string &str) {
 
   os << std::string(str.length(), ' ') << std::flush;
 
-#ifdef BGL_OS_WIN
+#ifdef _BGL_OS_WIN
   HANDLE handle = rang::rang_implementation::getConsoleHandle(os.rdbuf());
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   GetConsoleScreenBufferInfo(handle, &csbi);
@@ -126,62 +119,63 @@ inline void put_date_string(std::ostream &os) {
   print_right_console(os, get_date_string());
 }
 
-template <typename Body>
-void _bgl_timer(std::ostream &os, std::string_view title, const char *file,
-                int line, const char *func, Body body) {
-  auto start = std::chrono::high_resolution_clock::now();
-  body();
-  auto end = std::chrono::high_resolution_clock::now();
-  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  std::string footer = fmt::format("(in {}(), {}:{})", func, file, line);
+inline std::string _bgl_source_path(const char *file) {
+  path bgl_dir = _BGL_TO_STRING(_BGL_DIRECTORY);
+  path src = bgl_dir / "build" / file;
+  return path::relative(src).string();
+}
 
-  os << rang::style::bold << rang::fgB::cyan;
+template <typename Body>
+void _bgl_timer(std::ostream &os, std::string_view title, const char *file, int line, Body body) {
+  auto start = std::chrono::system_clock::now();
+  body();
+  auto end = std::chrono::system_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+  fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
+  os << rang::style::bold << rang::fg::cyan;
   fmt::print(os, "timer: ");
   os << rang::style::reset << rang::fg::reset;
   fmt::print(os, "{}: {}[ms]", title, elapsed.count());
   put_date_string(os);
-  fmt::print(os, "  {}\n", footer);
 }
 
 class _bgl_fn_timer {
 public:
   _bgl_fn_timer(std::ostream &os, const char *file, int line, const char *func)
     : os_{os}
+    , file_{file}
     , func_{func}
-    , footer_{fmt::format("({}:{})", file, line)}
+    , line_{line}
     , start_{std::chrono::high_resolution_clock::now()} {}
   ~_bgl_fn_timer() {
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
 
-    os_ << rang::style::bold << rang::fgB::cyan;
+    fmt::print(os_, "{}:{}: ", _bgl_source_path(file_), line_);
+    os_ << rang::style::bold << rang::fg::cyan;
     fmt::print(os_, "fn-timer: ");
     os_ << rang::style::reset << rang::fg::reset;
     fmt::print(os_, "{}(): {}[ms]", func_, elapsed.count());
     put_date_string(os_);
-    fmt::print(os_, "  {}\n", footer_);
   }
 private:
   std::ostream &os_;
+  const char *file_;
   const char *func_;
-  const std::string footer_;
+  const int line_;
   const std::chrono::time_point<std::chrono::high_resolution_clock> start_;
 };
 
 template <typename... Args>
-void _bgl_console_log(std::ostream &os, bool show_position, const char *file, int line,
-                      const char *func, const Args &...args) {
+void _bgl_console_log(std::ostream &os, const char *file, int line, const Args &...args) {
   std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
                                 std::make_tuple(args...));
-  os << rang::style::bold << rang::fgB::cyan;
+  fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
+  os << rang::style::bold << rang::fg::cyan;
   fmt::print(os, "log: ");
   os << rang::style::reset << rang::fg::reset;
   fmt::print(os, "{}", body);
   put_date_string(os);
-  if (show_position) {
-    fmt::print(os, "  (in {}(), {}:{})\n", func, file, line);
-  }
 }
 } // namespace bgl
-
-#undef BGL_OS_WIN

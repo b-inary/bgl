@@ -210,6 +210,8 @@ namespace apathy {
         /* Current working directory */
         static Path cwd();
 
+        static Path relative(const Path& p, const Path& base);
+
         /* List all the paths in a directory
          *
          * @param p - path to list items for */
@@ -302,6 +304,7 @@ namespace apathy {
         std::vector<Segment> segments(split());
         /* We may have to test this repeatedly, so let's check once */
         bool relative = !is_absolute();
+        bool windows_rooted = !relative && path[0] == 'C';
 
         /* Now, we'll create a new set of segments */
         std::vector<Segment> pruned;
@@ -346,6 +349,9 @@ namespace apathy {
 
         if (!relative) {
             path = std::string(1, separator) + Path::join(pruned);
+            if (pruned.empty() && windows_rooted) {
+                path = "C:/";
+            }
             if (was_directory) {
                 return directory();
             }
@@ -397,7 +403,8 @@ namespace apathy {
      * Tests
      *************************************************************************/
     inline bool Path::is_absolute() const {
-        return path.size() && path[0] == separator;
+        return (path.size() && path[0] == separator) ||
+               (path.length() >= 3 && path.substr(0, 3) == "C:/");
     }
 
     inline bool Path::trailing_slash() const {
@@ -476,6 +483,32 @@ namespace apathy {
         return p;
     }
 
+    inline Path Path::relative(const Path& p, const Path& base) {
+        Path p_abs(p);
+        Path base_abs(base);
+        p_abs.absolute();
+        base_abs.absolute().directory();
+
+        std::vector<Segment> p_segments(p_abs.split());
+        std::vector<Segment> base_segments(base_abs.split());
+        base_segments.pop_back();
+
+        while (p_segments.size() && base_segments.size() &&
+               p_segments[0].segment == base_segments[0].segment) {
+            p_segments.erase(p_segments.begin());
+            base_segments.erase(base_segments.begin());
+        }
+
+        for (size_t pos = 0; pos < base_segments.size(); ++pos) {
+            base_segments[pos].segment = "..";
+        }
+
+        base_segments.insert(base_segments.end(),
+                             p_segments.begin(), p_segments.end());
+
+        return join(base_segments);
+    }
+
     /* List all the paths in a directory
      *
      * @param p - path to list items for */
@@ -490,8 +523,6 @@ namespace apathy {
 
         /* Otherwise, go through everything */
         for (dirent* ent = readdir(dir); ent != NULL; ent = readdir(dir)) {
-            Path cpy(base);
-
             /* Skip the parent directory listing */
             if (!strcmp(ent->d_name, "..")) {
                 continue;
@@ -502,8 +533,7 @@ namespace apathy {
                 continue;
             }
 
-            cpy /= ent->d_name;
-            results.push_back(cpy);
+            results.push_back(base / ent->d_name);
         }
 
         errno = 0;
