@@ -177,7 +177,7 @@ template <typename EdgeType>
 class basic_graph {
 public:
   using edge_type = EdgeType;
-  using weight_type = decltype(weight(edge_type()));
+  using weight_type = decltype(weight(edge_type{}));
   using graph_type = basic_graph<EdgeType>;
 
   /* initialization */

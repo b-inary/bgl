@@ -122,7 +122,8 @@ std::size_t sizeof_edge_weight(const wgraph<WeightType> &g [[maybe_unused]]) {
 template <typename GraphType>
 GraphType read_graph_binary(std::istream &is) {
   using edge_t = typename GraphType::edge_type;
-  static_assert(std::is_trivially_copyable_v<edge_t>, "edge type must be trivially copyable");
+  using weight_t = decltype(weight(edge_t{}));
+  static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
   require_msg(is, "read_graph_binary: empty stream");
 
   // check header
@@ -135,14 +136,11 @@ GraphType read_graph_binary(std::istream &is) {
 
   std::uint32_t edge_size = read_binary<std::uint32_t>(is);
   bool is_integral = read_binary<std::uint32_t>(is);
-  bool is_float = read_binary<std::uint32_t>(is);
   require_msg(
-    edge_size == sizeof_edge_weight(GraphType{}) &&
-    is_integral == std::is_integral_v<edge_t> &&
-    is_float == std::is_floating_point_v<edge_t>,
+    edge_size == sizeof_edge_weight(GraphType{}) && is_integral == std::is_integral_v<weight_t>,
     "read_graph_binary: edge type does not match\n  read type: {}\n"
-    "  edge type information: {} bytes, is_integral = {}, is_floating_point = {}\n",
-    typename_of(GraphType{}), edge_size, is_integral, is_float
+    "  edge weight information: size = {} bytes, is_integral = {}",
+    typename_of(GraphType{}), edge_size, is_integral
   );
 
   // graph body
@@ -170,14 +168,14 @@ GraphType read_graph_binary(path filename) {
 template <typename GraphType>
 void write_graph_binary(std::ostream &os, const GraphType &g) {
   using edge_t = typename GraphType::edge_type;
-  static_assert(std::is_trivially_copyable_v<edge_t>, "edge type must be trivially copyable");
+  using weight_t = decltype(weight(edge_t{}));
+  static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
   require_msg(os, "write_graph_binary: empty stream");
 
   // header
   os.write("bgl", 4);
   write_binary(os, static_cast<std::uint32_t>(sizeof_edge_weight(g)));
-  write_binary(os, static_cast<std::uint32_t>(std::is_integral_v<edge_t>));
-  write_binary(os, static_cast<std::uint32_t>(std::is_floating_point_v<edge_t>));
+  write_binary(os, static_cast<std::uint32_t>(std::is_integral_v<weight_t>));
 
   // graph body
   write_binary(os, g.num_nodes());
