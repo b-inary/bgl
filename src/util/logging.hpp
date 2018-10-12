@@ -91,13 +91,14 @@ inline void print_right_console(std::ostream &os, const std::string &str) {
   os << std::string(str.length(), ' ') << std::flush;
 
 #ifdef BGL_OS_WIN
+  HANDLE handle = rang::rang_implementation::getConsoleHandle(os.rdbuf());
   CONSOLE_SCREEN_BUFFER_INFO csbi;
-  GetConsoleScreenBufferInfo(rang::rang_implementation::getConsoleHandle(os.rdbuf()), &csbi);
+  GetConsoleScreenBufferInfo(handle, &csbi);
   int width = csbi.dwSize.X;
   if (!rang::rang_implementation::supportsAnsi(os.rdbuf())) {
     COORD pos = csbi.dwCursorPosition;
     pos.X = width - str.length();
-    SetConsoleCursorPosition(rang::rang_implementation::getConsoleHandle(os.rdbuf()), pos);
+    SetConsoleCursorPosition(handle, pos);
     os << str;
     return;
   }

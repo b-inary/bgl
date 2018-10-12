@@ -5,7 +5,6 @@ using namespace bgl;
 
 TEST_CASE("graph I/O", "[graph-io]") {
   graph g = read_graph_tsv<graph>("datasets/karate.tsv");
-  g.pretty_print();
   REQUIRE(g.num_nodes() == 34);
   REQUIRE(g.num_edges() == 156);
 

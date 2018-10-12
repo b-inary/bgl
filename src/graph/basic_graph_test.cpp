@@ -9,8 +9,6 @@ TEST_CASE("unweighted graph", "[basic-graph]") {
   graph g = es;
 
   SECTION("basic") {
-    g.pretty_print();
-
     REQUIRE(g.num_nodes() == 4);
     REQUIRE(g.num_edges() == 4);
     REQUIRE(g.outdegree(1) == 1);
@@ -88,8 +86,6 @@ TEST_CASE("directed graph", "[basic-graph]") {
   wgraph<int> g = es;
 
   SECTION("basic") {
-    g.pretty_print();
-
     REQUIRE(g.num_nodes() == 4);
     REQUIRE(g.num_edges() == 4);
     REQUIRE(g.outdegree(1) == 1);
