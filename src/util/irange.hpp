@@ -4,7 +4,6 @@
 #include <cstddef>
 
 namespace bgl {
-namespace {
 template <typename T>
 class irange_iterator {
 public:
@@ -23,7 +22,6 @@ public:
 private:
   T value_;
 };
-} // unnamed namespace
 
 template <typename T>
 class irange_type {

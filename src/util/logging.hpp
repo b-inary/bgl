@@ -6,7 +6,14 @@
 #include <string_view>
 #include <tuple>
 #include <chrono>
+#include <cmath>
 #include <ctime>
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+#  define BGL_OS_WIN
+#  include <windows.h>
+#else
+#  include <sys/ioctl.h>
+#endif
 
 /**
  * @brief easy timer logging macro. output to stderr
@@ -74,23 +81,48 @@
 
 
 namespace bgl {
-/**
- * @brief generate string representing current date and time
- * @return generated string
- */
+//! print right-aligned string
+inline void print_right_console(std::ostream &os, const std::string &str) {
+  if (!rang::rang_implementation::isTerminal(os.rdbuf())) {
+    fmt::print(os, " {}\n", str);
+    return;
+  }
+
+  os << std::string(str.length(), ' ') << std::flush;
+
+#ifdef BGL_OS_WIN
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  GetConsoleScreenBufferInfo(rang::rang_implementation::getConsoleHandle(os.rdbuf()), &csbi);
+  int width = csbi.dwSize.X;
+  if (!rang::rang_implementation::supportsAnsi(os.rdbuf())) {
+    COORD pos = csbi.dwCursorPosition;
+    pos.X = width - str.length();
+    SetConsoleCursorPosition(rang::rang_implementation::getConsoleHandle(os.rdbuf()), pos);
+    os << str;
+    return;
+  }
+#else
+  struct winsize ws;
+  ioctl(0, TIOCGWINSZ, &ws);
+  int width = ws.ws_col;
+#endif
+
+  fmt::print(os, "\x1b[{}G{}", width - str.length() + 1, str);
+}
+
+//! generate string representing current date and time
 inline std::string get_date_string() {
   auto now = std::chrono::system_clock::now();
   std::time_t time = std::chrono::system_clock::to_time_t(now);
+  auto now_second = std::chrono::system_clock::from_time_t(time);
+  auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - now_second);
   std::tm tm = *std::localtime(&time);
-  return fmt::format("[{:%m/%d %H:%M:%S}]", tm);
+  return fmt::format("[{:%Y-%m-%d %H:%M:%S}.{:02g}]", tm, std::floor(now_ms.count() / 10.0));
 }
 
-/**
- * @brief output string obtained by get_date_string() to |os|
- * @param os output stream
- */
+//! output string obtained by get_date_string() to |os|
 inline void put_date_string(std::ostream &os) {
-  fmt::print(os, "{} ", get_date_string());
+  print_right_console(os, get_date_string());
 }
 
 template <typename Body>
@@ -102,11 +134,12 @@ void _bgl_timer(std::ostream &os, std::string_view title, const char *file,
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   std::string footer = fmt::format("(in {}(), {}:{})", func, file, line);
 
-  put_date_string(os);
   os << rang::style::bold << rang::fgB::cyan;
   fmt::print(os, "timer: ");
   os << rang::style::reset << rang::fg::reset;
-  fmt::print(os, "{}: {}[ms]\n  {}\n", title, elapsed.count(), footer);
+  fmt::print(os, "{}: {}[ms]", title, elapsed.count());
+  put_date_string(os);
+  fmt::print(os, "  {}\n", footer);
 }
 
 class _bgl_fn_timer {
@@ -120,11 +153,12 @@ public:
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
 
-    put_date_string(os_);
     os_ << rang::style::bold << rang::fgB::cyan;
     fmt::print(os_, "fn-timer: ");
     os_ << rang::style::reset << rang::fg::reset;
-    fmt::print(os_, "{}(): {}[ms]\n  {}\n", func_, elapsed.count(), footer_);
+    fmt::print(os_, "{}(): {}[ms]", func_, elapsed.count());
+    put_date_string(os_);
+    fmt::print(os_, "  {}\n", footer_);
   }
 private:
   std::ostream &os_;
@@ -138,13 +172,15 @@ void _bgl_console_log(std::ostream &os, bool show_position, const char *file, in
                       const char *func, const Args &...args) {
   std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
                                 std::make_tuple(args...));
-  put_date_string(os);
   os << rang::style::bold << rang::fgB::cyan;
   fmt::print(os, "log: ");
   os << rang::style::reset << rang::fg::reset;
-  fmt::print(os, "{}\n", body);
+  fmt::print(os, "{}", body);
+  put_date_string(os);
   if (show_position) {
     fmt::print(os, "  (in {}(), {}:{})\n", func, file, line);
   }
 }
 } // namespace bgl
+
+#undef BGL_OS_WIN

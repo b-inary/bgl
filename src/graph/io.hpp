@@ -138,8 +138,8 @@ GraphType read_graph_binary(std::istream &is) {
   bool is_integral = read_binary<std::uint32_t>(is);
   require_msg(
     edge_size == sizeof_edge_weight(GraphType{}) && is_integral == std::is_integral_v<weight_t>,
-    "read_graph_binary: edge type does not match\n  read type: {}\n"
-    "  edge weight information: size = {} bytes, is_integral = {}",
+    "read_graph_binary: type of edge weight does not match\n  read as: {}\n"
+    "  input weight type: size = {} byte(s), is_integral = {}",
     typename_of(GraphType{}), edge_size, is_integral
   );
 

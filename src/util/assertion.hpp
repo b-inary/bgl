@@ -4,7 +4,7 @@
 #include "logging.hpp"
 #include <iostream>
 #include <tuple>
-#include <cstdlib>
+#include <stdexcept>
 
 #ifndef NDEBUG
 /**
@@ -37,19 +37,19 @@
 #define check_msg(expr, ...) \
   _bgl_check(false, expr, __VA_ARGS__)
 
-#define _bgl_check(abort, expr, ...) \
+#define _bgl_check(is_error, expr, ...) \
   do {  \
     if (!(expr)) { \
       std::string msg = std::apply([](const auto &...args) { return fmt::format(args...); }, \
                                    std::make_tuple(__VA_ARGS__)); \
-      put_date_string(std::cerr); \
-      std::cerr << rang::style::bold << (abort ? rang::fg::red : rang::fg::yellow); \
-      fmt::print(std::cerr, abort ? "error: " : "warning: "); \
-      std::cerr << rang::style::reset << rang::fg::reset; \
-      fmt::print(stderr, "{}\n  assertion: {}\n", msg, #expr); \
-      fmt::print(stderr, "  (in {}(), {}:{})\n", __func__, __FILE__, __LINE__); \
-      if (abort) { \
-        std::exit(EXIT_FAILURE); \
+      std::cerr << rang::style::bold << (is_error ? rang::fg::red : rang::fg::yellow); \
+      fmt::print(std::cerr, is_error ? "error: " : "warning: "); \
+      std::cerr << rang::style::reset << rang::fg::reset << msg; \
+      bgl::put_date_string(std::cerr); \
+      fmt::print(std::cerr, "  assertion: {}\n", #expr); \
+      fmt::print(std::cerr, "  (in {}(), {}:{})\n", __func__, __FILE__, __LINE__); \
+      if (is_error) { \
+        throw std::runtime_error("assertion failed"); \
       } \
     } \
   } while (false)

@@ -11,16 +11,14 @@
 
 namespace bgl {
 #ifdef __GNUG__
-namespace {
-struct deleter {
+struct _bgl_deleter {
   void operator()(char *p) const noexcept { std::free(p); }
 };
-}
 
 //! demangle typeid. usage: demangle(typeid(arg))
 inline std::string demangle(const std::type_info &ti) {
   int status = 0;
-  std::unique_ptr<char, deleter> p(abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status));
+  std::unique_ptr<char, _bgl_deleter> p(abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status));
   if (!p) return "demangle error";
   return p.get();
 }

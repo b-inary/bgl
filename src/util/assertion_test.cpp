@@ -1,6 +1,5 @@
 #include "extlib/catch.hpp"
-#include "macro.hpp"
-using namespace bgl;
+#include "assertion.hpp"
 
 TEST_CASE("macro", "[util]") {
   check(42 == 43);
