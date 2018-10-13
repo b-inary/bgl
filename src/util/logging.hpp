@@ -2,13 +2,16 @@
 #include "extlib/rang.hpp"
 #include "fmt.hpp"
 #include "file.hpp"
+#include "lambda.hpp"
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <functional>
 #include <tuple>
 #include <chrono>
 #include <cmath>
 #include <ctime>
+
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #  define _BGL_OS_WIN
 #  include <windows.h>
@@ -23,13 +26,14 @@
 #define _BGL_EVAL(f, v) f(v)
 #define _BGL_TO_STRING(s) _BGL_EVAL(_BGL_TO_STRING_HELPER, s)
 #define _BGL_TO_STRING_HELPER(s) #s
+
 /**
  * @brief easy timer logging macro. output to stderr
  * @param title title for logging
  * @param ... function that we want to measure (typically lambda function)
  * @note uses __VA_ARGS__ because comma can appear inside lambda function
  */
-#define timer_stderr(title, ...) \
+#define console_timer(title, ...) \
   _bgl_timer(std::cerr, title, __FILE__, __LINE__, __VA_ARGS__)
 
 /**
@@ -46,7 +50,7 @@
  * @brief easy timer logging macro that measures entire function.
  *        usage: declare fn_timer_stderr at the top of function
  */
-#define fn_timer_stderr \
+#define console_fn_timer \
   _bgl_fn_timer _bgl_fn_timer_instance(std::cerr, __FILE__, __LINE__, __func__)
 
 /**
@@ -74,13 +78,16 @@
 
 
 namespace bgl {
-//! print right-aligned string
-inline void print_right_console(std::ostream &os, const std::string &str) {
+//! print right-aligned string when output stream is terminal
+inline void pretty_append(std::ostream &os, std::function<void()> body, const std::string &str) {
   if (!rang::rang_implementation::isTerminal(os.rdbuf())) {
-    fmt::print(os, " {}\n", str);
+    os << str << ' ';
+    body();
+    os << '\n';
     return;
   }
 
+  body();
   os << std::string(str.length(), ' ') << std::flush;
 
 #ifdef _BGL_OS_WIN
@@ -115,8 +122,8 @@ inline std::string get_date_string() {
 }
 
 //! output string obtained by get_date_string() to |os|
-inline void put_date_string(std::ostream &os) {
-  print_right_console(os, get_date_string());
+inline void put_date_string(std::ostream &os, std::function<void()> body) {
+  pretty_append(os, body, get_date_string());
 }
 
 inline std::string _bgl_source_path(const char *file) {
@@ -132,12 +139,13 @@ void _bgl_timer(std::ostream &os, std::string_view title, const char *file, int 
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
-  os << rang::style::bold << rang::fg::cyan;
-  fmt::print(os, "timer: ");
-  os << rang::style::reset << rang::fg::reset;
-  fmt::print(os, "{}: {}[ms]", title, elapsed.count());
-  put_date_string(os);
+  put_date_string(os, lambda() {
+    fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
+    os << rang::style::bold << rang::fg::cyan;
+    fmt::print(os, "timer: ");
+    os << rang::style::reset << rang::fg::reset;
+    fmt::print(os, "{}: {}[ms]", title, elapsed.count());
+  });
 }
 
 class _bgl_fn_timer {
@@ -152,12 +160,13 @@ public:
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
 
-    fmt::print(os_, "{}:{}: ", _bgl_source_path(file_), line_);
-    os_ << rang::style::bold << rang::fg::cyan;
-    fmt::print(os_, "fn-timer: ");
-    os_ << rang::style::reset << rang::fg::reset;
-    fmt::print(os_, "{}(): {}[ms]", func_, elapsed.count());
-    put_date_string(os_);
+    put_date_string(os_, lambda() {
+      fmt::print(os_, "{}:{}: ", _bgl_source_path(file_), line_);
+      os_ << rang::style::bold << rang::fg::cyan;
+      fmt::print(os_, "fn-timer: ");
+      os_ << rang::style::reset << rang::fg::reset;
+      fmt::print(os_, "{}(): {}[ms]", func_, elapsed.count());
+    });
   }
 private:
   std::ostream &os_;
@@ -171,11 +180,13 @@ template <typename... Args>
 void _bgl_console_log(std::ostream &os, const char *file, int line, const Args &...args) {
   std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
                                 std::make_tuple(args...));
-  fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
-  os << rang::style::bold << rang::fg::cyan;
-  fmt::print(os, "log: ");
-  os << rang::style::reset << rang::fg::reset;
-  fmt::print(os, "{}", body);
-  put_date_string(os);
+
+  put_date_string(os, lambda() {
+    fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
+    os << rang::style::bold << rang::fg::cyan;
+    fmt::print(os, "log: ");
+    os << rang::style::reset << rang::fg::reset;
+    fmt::print(os, "{}", body);
+  });
 }
 } // namespace bgl

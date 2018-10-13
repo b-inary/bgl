@@ -5,7 +5,7 @@ int main() {
   /* 1. 頂点の型 */
 
   // 頂点を表す型は |node_t| です．
-  // 実際には using node_t = std::uint32_t として定義されています．
+  // 実際には using node_t = uint32_t として定義されています．
   node_t v = 0;
 
 

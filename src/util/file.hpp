@@ -70,50 +70,52 @@ public:
 
   /* simple test functions */
 
-  bool exists() const {
-    return path_.exists();
+  static bool exists(const path &p) {
+    return p.path_.exists();
   }
 
-  bool is_file() const {
-    return path_.is_file();
+  static bool is_file(const path &p) {
+    return p.path_.is_file();
   }
 
-  bool is_directory() const {
-    return path_.is_directory();
+  static bool is_directory(const path &p) {
+    return p.path_.is_directory();
   }
 
   /* traverse */
 
-  std::vector<path> find(const std::string &wildcard = "") const {
-    return find(std::regex(regex_of_wildcard(wildcard)));
+  static std::vector<path> find(const path &dir, const std::string &wildcard = "") {
+    return find(dir, std::regex(regex_of_wildcard(wildcard)));
   }
 
-  std::vector<path> find(const std::regex &re) const {
-    if (!is_directory()) return {*this};
+  static std::vector<path> find(const path &dir, const std::regex &re) {
+    if (!is_directory(dir)) return {};
     std::vector<path> results;
-    auto ls = apathy::Path::listdir(path_);
-    for (const auto &p : ls) {
+    auto ls = apathy::Path::listdir(dir.path_);
+    for (const auto &el : ls) {
+      path p = el.string();
       if (std::regex_search(p.string(), re)) {
-        results.push_back(p.string());
+        results.push_back(p);
       }
     }
     return results;
   }
 
-  std::vector<path> find_recursive(const std::string &wildcard = "") const {
-    return find_recursive(std::regex(regex_of_wildcard(wildcard)));
+  static std::vector<path> find_recursive(const path &dir, const std::string &wildcard = "") {
+    return find_recursive(dir, std::regex(regex_of_wildcard(wildcard)));
   }
 
-  std::vector<path> find_recursive(const std::regex &re) const {
-    if (!is_directory()) return {*this};
+  static std::vector<path> find_recursive(const path &dir, const std::regex &re) {
+    if (!is_directory(dir)) return {};
     std::vector<path> results;
-    auto ls = apathy::Path::listdir(path_);
-    for (const auto &p : ls) {
-      if (p.is_directory()) {
-        auto ls_recursive = path(p.string()).find_recursive(re);
+    auto ls = apathy::Path::listdir(dir.path_);
+    for (const auto &el : ls) {
+      path p = el.string();
+      if (is_directory(p)) {
+        auto ls_recursive = find_recursive(p, re);
         results.insert(results.end(), ls_recursive.begin(), ls_recursive.end());
       } else if (std::regex_search(p.string(), re)) {
-        results.push_back(p.string());
+        results.push_back(p);
       }
     }
     return results;

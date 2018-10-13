@@ -19,7 +19,7 @@ include_directories(${bgl_SOURCE_DIR})
 include_directories(${bgl_SOURCE_DIR}/extlib/fmt/include)
 include_directories(${bgl_SOURCE_DIR}/src)
 
-set(EXT_LIBRARIES fmt)
+set(EXT_LIBRARIES fmt-header-only)
 set(TEST_LIBRARY ${bgl_SOURCE_DIR}/extlib/catch_main.cpp)
 
 add_subdirectory(extlib/fmt)

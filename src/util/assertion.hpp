@@ -1,6 +1,7 @@
 #pragma once
 #include "extlib/rang.hpp"
 #include "fmt.hpp"
+#include "lambda.hpp"
 #include "logging.hpp"
 #include <iostream>
 #include <tuple>
@@ -42,16 +43,17 @@
     if (!(expr)) { \
       std::string msg = std::apply([](const auto &...args) { return fmt::format(args...); }, \
                                    std::make_tuple(__VA_ARGS__)); \
-      fmt::print(std::cerr, "{}:{}: ", _bgl_source_path(__FILE__), __LINE__); \
-      std::cerr << rang::style::bold << (is_error ? rang::fg::red : rang::fg::yellow); \
-      fmt::print(std::cerr, is_error ? "error: " : "warning: "); \
-      std::cerr << rang::style::reset << rang::fg::reset << msg; \
-      if (msg == "assertion failed") { \
-        fmt::print(std::cerr, "  assertion: {}\n", #expr); \
-      } \
-      bgl::put_date_string(std::cerr); \
+      bgl::put_date_string(std::cerr, lambda() { \
+        fmt::print(std::cerr, "{}:{}: ", _bgl_source_path(__FILE__), __LINE__); \
+        std::cerr << rang::style::bold << (is_error ? rang::fg::red : rang::fg::yellow); \
+        fmt::print(std::cerr, is_error ? "error: " : "warning: "); \
+        std::cerr << rang::style::reset << rang::fg::reset << msg; \
+        if (msg == "assertion failed") { \
+          fmt::print(std::cerr, "\n  assertion: {}", #expr); \
+        } \
+      }); \
       if (is_error) { \
-        throw std::runtime_error("assertion failed"); \
+        std::exit(EXIT_FAILURE); \
       } \
     } \
   } while (false)
