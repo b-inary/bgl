@@ -29,6 +29,18 @@ TEST_CASE("unweighted graph", "[basic-graph]") {
     unweighted_adjacency_list adj = {{1}, {2}, {3}, {1}};
     graph g2 = adj;
     REQUIRE(g == g2);
+
+    graph g3 = g2;
+    g3.add_edge(0, 2);
+    REQUIRE(g2.num_edges() == 4);
+    REQUIRE(g3.num_edges() == 5);
+    REQUIRE(g2.outdegree(0) == 1);
+    REQUIRE(g3.outdegree(0) == 2);
+    g2.swap(g3);
+    REQUIRE(g2.num_edges() == 5);
+    REQUIRE(g3.num_edges() == 4);
+    REQUIRE(g2.outdegree(0) == 2);
+    REQUIRE(g3.outdegree(0) == 1);
   }
 
   SECTION("simplify") {

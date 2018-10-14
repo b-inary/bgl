@@ -36,6 +36,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <cctype>
 
 /* C includes */
 #include <errno.h>
@@ -304,7 +305,6 @@ namespace apathy {
         std::vector<Segment> segments(split());
         /* We may have to test this repeatedly, so let's check once */
         bool relative = !is_absolute();
-        bool windows_rooted = !relative && path[0] == 'C';
 
         /* Now, we'll create a new set of segments */
         std::vector<Segment> pruned;
@@ -349,8 +349,8 @@ namespace apathy {
 
         if (!relative) {
             path = std::string(1, separator) + Path::join(pruned);
-            if (pruned.empty() && windows_rooted) {
-                path = "C:/";
+            if (pruned.empty()) {
+                path = segments[0].segment;
             }
             if (was_directory) {
                 return directory();
@@ -404,7 +404,8 @@ namespace apathy {
      *************************************************************************/
     inline bool Path::is_absolute() const {
         return (path.size() && path[0] == separator) ||
-               (path.length() >= 3 && path.substr(0, 3) == "C:/");
+               (path.length() >= 3 &&
+                std::isalpha(path[0]) &&path.substr(1, 2) == ":/");
     }
 
     inline bool Path::trailing_slash() const {

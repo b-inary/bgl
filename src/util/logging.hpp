@@ -19,10 +19,6 @@
 #  include <sys/ioctl.h>
 #endif
 
-#ifndef _BGL_DIRECTORY
-#  define _BGL_DIRECTORY
-#endif
-
 #define _BGL_EVAL(f, v) f(v)
 #define _BGL_TO_STRING(s) _BGL_EVAL(_BGL_TO_STRING_HELPER, s)
 #define _BGL_TO_STRING_HELPER(s) #s
@@ -95,6 +91,7 @@ inline void pretty_append(std::ostream &os, std::function<void()> body, const st
   CONSOLE_SCREEN_BUFFER_INFO csbi;
   GetConsoleScreenBufferInfo(handle, &csbi);
   int width = csbi.dwSize.X;
+
   if (!rang::rang_implementation::supportsAnsi(os.rdbuf())) {
     COORD pos = csbi.dwCursorPosition;
     pos.X = width - str.length();
@@ -127,9 +124,13 @@ inline void put_date_string(std::ostream &os, std::function<void()> body) {
 }
 
 inline std::string _bgl_source_path(const char *file) {
+#ifdef _BGL_DIRECTORY
   path bgl_dir = _BGL_TO_STRING(_BGL_DIRECTORY);
   path src = bgl_dir / "build" / file;
   return path::relative(src).string();
+#else
+  return file;
+#endif
 }
 
 template <typename Body>

@@ -7,12 +7,13 @@
 #include <unordered_map>
 #include <utility>
 #include <type_traits>
+#include <optional>
 #include <cstdint>
 
 // istream support of weighted_edge_t
 namespace std {
 template <typename WeightType>
-istream &operator<<(istream &is, bgl::weighted_edge_t<WeightType> &e) {
+istream &operator>>(istream &is, bgl::weighted_edge_t<WeightType> &e) {
   return is >> e.first >> e.second;
 }
 } // namespace std
@@ -30,9 +31,11 @@ void write_edge_tsv(std::ostream &os, const weighted_edge_t<WeightType> &e) {
   fmt::print(os, "{} {}", to(e), weight(e));
 }
 
-//! read graph from |is| as tsv file
+/// read graph from |is| as tsv file
+/// when type does not match and |accept_mismatch|, then return |nullopt|
 template <typename GraphType>
-GraphType read_graph_tsv(std::istream &is, bool rename_id = false) {
+std::optional<GraphType>
+read_graph_tsv_optional(std::istream &is, bool rename_id = false, bool accept_mismatch = false) {
   using edge_t = typename GraphType::edge_type;
   require_msg(is, "read_graph_tsv: empty stream");
 
@@ -40,41 +43,86 @@ GraphType read_graph_tsv(std::istream &is, bool rename_id = false) {
   edge_list<edge_t> es;
   node_t num_v = 0;
   std::unordered_map<std::size_t, node_t> id;
+  bool type_checked = false;
 
   for (std::size_t lineno = 1; std::getline(is, line); ++lineno) {
     std::size_t v;
     edge_t e;
+
+    // weight type check
+    static const std::string type_comment = "# weight type: ";
+    if (line.compare(0, type_comment.size(), type_comment) == 0) {
+      std::string type_string = line.substr(type_comment.size());
+      std::string read_as = GraphType{}.weight_string();
+      if (accept_mismatch && type_string != read_as) {
+        return std::nullopt;
+      }
+      require_msg(
+        type_string == read_as,
+        "read_graph_tsv: type of edge weight does not match\n"
+        "  read as: {}\n  input type: {}",
+        read_as, type_string
+      );
+      type_checked = true;
+    }
+
     if (line.empty() || line[0] == '#') continue;
+
     std::stringstream ss(line);
-    require_msg(ss >> v >> e, "read_graph_tsv: read failed at line {}\n  read: {}\n  type: {}",
-                lineno, line, typename_of(GraphType{}));
+    bool read_success = static_cast<bool>(ss >> v >> e);
+    if (!read_success && accept_mismatch && !type_checked) {
+      return std::nullopt;
+    }
+
+    require_msg(
+      read_success,
+      "read_graph_tsv: read failed at line {}\n  read: {}\n  weight type: {}",
+      lineno, line, GraphType{}.weight_string()
+    );
+
     if (rename_id) {
       if (id.count(v) == 0) id[v] = num_v++;
       if (id.count(to(e)) == 0) id[to(e)] = num_v++;
       v = id[v];
       update_to(e, id[to(e)]);
     }
+
     es.emplace_back(static_cast<node_t>(v), e);
   }
 
-  return {es};
+  return GraphType(es);
 }
 
-//! read graph from |filename| as tsv file
+/// read graph from |is| as tsv file
 template <typename GraphType>
-GraphType read_graph_tsv(path file, bool rename_id = false) {
+GraphType read_graph_tsv(std::istream &is, bool rename_id = false) {
+  return read_graph_tsv_optional<GraphType>(is, rename_id).value();
+}
+
+/// read graph from |filename| as tsv file
+/// when type does not match and |accept_mismatch|, then return |nullopt|
+template <typename GraphType>
+std::optional<GraphType>
+read_graph_tsv_optional(path file, bool rename_id = false, bool accept_mismatch = false) {
   std::ifstream ifs(file.string());
   require_msg(ifs, "read_graph_tsv: file not exist: {}", file);
-  return read_graph_tsv<GraphType>(ifs, rename_id);
+  return read_graph_tsv_optional<GraphType>(ifs, rename_id, accept_mismatch);
 }
 
-//! write graph to |os| as tsv file
+/// read graph from |filename| as tsv file
+template <typename GraphType>
+GraphType read_graph_tsv(path filename, bool rename_id = false) {
+  return read_graph_tsv_optional<GraphType>(filename, rename_id).value();
+}
+
+/// write graph to |os| as tsv file
 template <typename GraphType>
 void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = true) {
   require_msg(os, "write_graph_tsv: empty stream");
   if (write_info) {
     fmt::print(os, "# number of nodes: {}\n", g.num_nodes());
     fmt::print(os, "# number of edges: {}\n", g.num_edges());
+    fmt::print(os, "# weight type: {}\n", g.weight_string());
   }
   for (node_t v : g.nodes()) {
     for (const auto &e : g.edges_from(v)) {
@@ -86,7 +134,7 @@ void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = tru
   os.flush();
 }
 
-//! write graph to |filename| as tsv file
+/// write graph to |filename| as tsv file
 template <typename GraphType>
 void write_graph_tsv(path filename, const GraphType &g, bool write_info = true) {
   std::ofstream ofs(filename.string());
@@ -109,18 +157,11 @@ void write_binary(std::ostream &os, const T &t) {
   os.write(reinterpret_cast<const char*>(&t), sizeof(T));
 }
 
-inline std::size_t sizeof_edge_weight(const graph &g [[maybe_unused]]) {
-  return 0;
-}
-
-template <typename WeightType>
-std::size_t sizeof_edge_weight(const wgraph<WeightType> &g [[maybe_unused]]) {
-  return sizeof(WeightType);
-}
-
-//! read graph in binary format from |is|
+/// read graph from |is| in binary format .
+/// when type does not match and |accept_mismatch|, then return |nullopt|
 template <typename GraphType>
-GraphType read_graph_binary(std::istream &is) {
+std::optional<GraphType>
+read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
   using edge_t = typename GraphType::edge_type;
   using weight_t = decltype(weight(edge_t{}));
   static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
@@ -134,13 +175,21 @@ GraphType read_graph_binary(std::istream &is) {
     "read_graph_binary: invalid header"
   );
 
+  // check weight type
   std::uint32_t edge_size = read_binary<std::uint32_t>(is);
   bool is_integral = read_binary<std::uint32_t>(is);
+  bool type_matched = edge_size == GraphType{}.weight_sizeof() &&
+                      is_integral == std::is_integral_v<weight_t>;
+
+  if (accept_mismatch && !type_matched) {
+    return std::nullopt;
+  }
+
   require_msg(
-    edge_size == sizeof_edge_weight(GraphType{}) && is_integral == std::is_integral_v<weight_t>,
-    "read_graph_binary: type of edge weight does not match\n  read as: {}\n"
-    "  input weight type: size = {} byte(s), is_integral = {}",
-    typename_of(GraphType{}), edge_size, is_integral
+    type_matched,
+    "read_graph_binary: type of edge weight does not match\n"
+    "  read as: {}\n  input type: size = {} byte(s), is_integral = {}",
+    GraphType{}.weight_string(), edge_size, is_integral
   );
 
   // graph body
@@ -153,18 +202,31 @@ GraphType read_graph_binary(std::istream &is) {
     is.read(reinterpret_cast<char*>(adj[v].data()), degree * sizeof(edge_t));
   }
 
-  return {num_nodes, num_edges, std::move(adj)};
+  return GraphType(num_nodes, num_edges, std::move(adj));
 }
 
-//! read graph from |filename| in binary format
+/// read graph from |is| in binary format
 template <typename GraphType>
-GraphType read_graph_binary(path filename) {
+GraphType read_graph_binary(std::istream &is) {
+  return read_graph_binary_optional<GraphType>(is).value();
+}
+
+/// read graph from |filename| in binary format.
+/// when type does not match and |accept_mismatch|, then return |nullopt|
+template <typename GraphType>
+std::optional<GraphType> read_graph_binary_optional(path filename, bool accept_mismatch = false) {
   std::ifstream ifs(filename.string(), std::ios_base::binary);
   require_msg(ifs, "read_graph_binary: file not exist: {}", filename);
-  return read_graph_binary<GraphType>(ifs);
+  return read_graph_binary_optional<GraphType>(ifs, accept_mismatch);
 }
 
-//! write graph to |os| in binary format
+/// read graph from |filename| in binary format
+template <typename GraphType>
+GraphType read_graph_binary(path filename) {
+  return read_graph_binary_optional<GraphType>(filename).value();
+}
+
+/// write graph to |os| in binary format
 template <typename GraphType>
 void write_graph_binary(std::ostream &os, const GraphType &g) {
   using edge_t = typename GraphType::edge_type;
@@ -174,7 +236,7 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
 
   // header
   os.write("bgl", 4);
-  write_binary(os, static_cast<std::uint32_t>(sizeof_edge_weight(g)));
+  write_binary(os, static_cast<std::uint32_t>(g.weight_sizeof()));
   write_binary(os, static_cast<std::uint32_t>(std::is_integral_v<weight_t>));
 
   // graph body
@@ -189,11 +251,34 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
   os.flush();
 }
 
-//! write graph to |filename| in binary format
+/// write graph to |filename| in binary format
 template <typename GraphType>
 void write_graph_binary(path filename, const GraphType &g) {
   std::ofstream ofs(filename.string(), std::ios_base::binary);
   require_msg(ofs, "write_graph_binary: file cannot open: {}", filename);
   write_graph_binary(ofs, g);
 }
+
+
+/* traverse directory */
+
+template <typename GraphType>
+void read_graph_folder(path dirname, std::function<void(const GraphType&, const path&)> callback,
+                       bool recursive = true) {
+  auto graphs = recursive ? path::find_recursive(dirname, "*.(bgl|tsv)")
+                          : path::find(dirname, "*.(bgl|tsv)");
+  for (const path &p : graphs) {
+    std::optional<GraphType> g;
+    if (p.extension() == ".bgl") {
+      g = read_graph_binary_optional<GraphType>(p, true);
+    }
+    if (p.extension() == ".tsv") {
+      g = read_graph_tsv_optional<GraphType>(p, false, true);
+    }
+    if (g.has_value()) {
+      callback(g.value(), p);
+    }
+  }
+}
+
 } // namespace bgl

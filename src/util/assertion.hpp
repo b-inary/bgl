@@ -8,37 +8,25 @@
 #include <stdexcept>
 
 #ifndef NDEBUG
-/**
- * @brief custom assertion macro. abort when |expr| is false
- * @param expr condition expression
- */
-#define require(expr) \
-  _bgl_check(true, expr, "assertion failed")
+/// custom assertion macro: abort when |expr| is false.
+/// @param expr condition expression
+#define require(expr) require_msg(expr, "assertion failed")
 
-/**
- * @brief custom assertion macro with message. abort when |expr| is false
- * @param expr condition expression
- * @param ... message of format string
- */
-#define require_msg(expr, ...) \
-  _bgl_check(true, expr, __VA_ARGS__)
+/// custom assertion macro: abort and print error message when |expr| is false.
+/// @param expr condition expression
+/// @param ... format string of error message
+#define require_msg(expr, ...) _bgl_assert(true, expr, __VA_ARGS__)
 
-/**
- * @brief custom assertion macro. continue running even when |expr| is false
- * @param expr condition expression
- */
-#define check(expr) \
-  _bgl_check(false, expr, "assertion failed")
+/// custom assertion macro: continue running even when |expr| is false.
+/// @param expr condition expression
+#define check(expr) check_msg(expr, "assertion failed")
 
-/**
- * @brief custom assertion macro with message. continue running even when |expr| is false
- * @param expr condition expression
- * @param ... message of format string
- */
-#define check_msg(expr, ...) \
-  _bgl_check(false, expr, __VA_ARGS__)
+/// custom assertion macro with message: continue running even when |expr| is false.
+/// @param expr condition expression
+/// @param ... format string of warning message
+#define check_msg(expr, ...) _bgl_assert(false, expr, __VA_ARGS__)
 
-#define _bgl_check(is_error, expr, ...) \
+#define _bgl_assert(is_error, expr, ...) \
   do {  \
     if (!(expr)) { \
       std::string msg = std::apply([](const auto &...args) { return fmt::format(args...); }, \

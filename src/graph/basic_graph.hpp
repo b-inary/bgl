@@ -4,8 +4,9 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
-#include <optional>
 #include <iterator>
+#include <type_traits>
+#include <optional>
 #include <cstdlib>
 #include <cstdint>
 
@@ -48,7 +49,7 @@ constexpr WeightType weight(const weighted_edge_t<WeightType> &e) noexcept {
   return e.second;
 }
 
-/* utility function of edge */
+/* utility functions of edge */
 inline constexpr unweighted_edge_t
 update_to(unweighted_edge_t e [[maybe_unused]], node_t v) noexcept {
   return v;
@@ -232,6 +233,12 @@ public:
         require_msg(to(es.back()) < num_nodes_, "invalid index");
       }
     }
+  }
+
+  void swap(graph_type &other) noexcept {
+    graph_type tmp = std::move(other);
+    other = std::move(*this);
+    *this = std::move(tmp);
   }
 
   /**
@@ -443,7 +450,7 @@ public:
     fmt::print(os, "====================\n");
     fmt::print(os, "  # of nodes: {}\n", num_nodes());
     fmt::print(os, "  # of edges: {}\n", num_edges());
-    fmt::print(os, "  type: {}\n", typename_of(graph_type{}));
+    fmt::print(os, "  weight type: {}\n", weight_string());
     fmt::print(os, "--------------------\n");
     for (node_t v : irange(std::min(num_nodes(), kLimitNumNodes))) {
       fmt::print(os, "  {} -> ", v);
@@ -456,6 +463,18 @@ public:
     }
     if (num_nodes() > kLimitNumNodes) fmt::print(os, "  ...\n");
     fmt::print(os, "====================\n");
+  }
+
+  /* weight information */
+
+  std::string weight_string() const {
+    if (std::is_same_v<edge_type, unweighted_edge_t>) return "unweighted";
+    return typename_of(weight_type{});
+  }
+
+  size_t weight_sizeof() const {
+    if (std::is_same_v<edge_type, unweighted_edge_t>) return 0;
+    return sizeof(weight_type);
   }
 
 private:
@@ -472,3 +491,10 @@ template <typename WeightType>
 using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
 } // namespace bgl
+
+namespace std {
+template <typename EdgeType>
+void swap(bgl::basic_graph<EdgeType> lhs, bgl::basic_graph<EdgeType> rhs) noexcept {
+  lhs.swap(rhs);
+}
+} // namespace std
