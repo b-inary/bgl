@@ -10,21 +10,21 @@
 #ifndef NDEBUG
 /// custom assertion macro: abort when |expr| is false.
 /// @param expr condition expression
-#define require(expr) require_msg(expr, "assertion failed")
+#define ASSERT(expr) ASSERT_MSG(expr, "assertion failed")
 
 /// custom assertion macro: abort and print error message when |expr| is false.
 /// @param expr condition expression
 /// @param ... format string of error message
-#define require_msg(expr, ...) _bgl_assert(true, expr, __VA_ARGS__)
+#define ASSERT_MSG(expr, ...) _bgl_assert(true, expr, __VA_ARGS__)
 
 /// custom assertion macro: continue running even when |expr| is false.
 /// @param expr condition expression
-#define check(expr) check_msg(expr, "assertion failed")
+#define EXPECT(expr) EXPECT_MSG(expr, "assertion failed")
 
 /// custom assertion macro with message: continue running even when |expr| is false.
 /// @param expr condition expression
 /// @param ... format string of warning message
-#define check_msg(expr, ...) _bgl_assert(false, expr, __VA_ARGS__)
+#define EXPECT_MSG(expr, ...) _bgl_assert(false, expr, __VA_ARGS__)
 
 #define _bgl_assert(is_error, expr, ...) \
   do {  \
@@ -46,8 +46,8 @@
     } \
   } while (false)
 #else
-#define require(expr)           (expr)
-#define require_msg(expr, ...)  (expr)
-#define check(expr)             (expr)
-#define check_msg(expr, ...)    (expr)
+#define ASSERT(expr)           (expr)
+#define ASSERT_MSG(expr, ...)  (expr)
+#define EXPECT(expr)             (expr)
+#define EXPECT_MSG(expr, ...)    (expr)
 #endif

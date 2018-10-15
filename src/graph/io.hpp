@@ -37,7 +37,7 @@ template <typename GraphType>
 std::optional<GraphType>
 read_graph_tsv_optional(std::istream &is, bool rename_id = false, bool accept_mismatch = false) {
   using edge_t = typename GraphType::edge_type;
-  require_msg(is, "read_graph_tsv: empty stream");
+  ASSERT_MSG(is, "read_graph_tsv: empty stream");
 
   std::string line;
   edge_list<edge_t> es;
@@ -57,7 +57,7 @@ read_graph_tsv_optional(std::istream &is, bool rename_id = false, bool accept_mi
       if (accept_mismatch && type_string != read_as) {
         return std::nullopt;
       }
-      require_msg(
+      ASSERT_MSG(
         type_string == read_as,
         "read_graph_tsv: type of edge weight does not match\n"
         "  read as: {}\n  input type: {}",
@@ -74,7 +74,7 @@ read_graph_tsv_optional(std::istream &is, bool rename_id = false, bool accept_mi
       return std::nullopt;
     }
 
-    require_msg(
+    ASSERT_MSG(
       read_success,
       "read_graph_tsv: read failed at line {}\n  read: {}\n  weight type: {}",
       lineno, line, GraphType{}.weight_string()
@@ -105,7 +105,7 @@ template <typename GraphType>
 std::optional<GraphType>
 read_graph_tsv_optional(path file, bool rename_id = false, bool accept_mismatch = false) {
   std::ifstream ifs(file.string());
-  require_msg(ifs, "read_graph_tsv: file not exist: {}", file);
+  ASSERT_MSG(ifs, "read_graph_tsv: file not exist: {}", file);
   return read_graph_tsv_optional<GraphType>(ifs, rename_id, accept_mismatch);
 }
 
@@ -118,7 +118,7 @@ GraphType read_graph_tsv(path filename, bool rename_id = false) {
 /// write graph to |os| as tsv file
 template <typename GraphType>
 void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = true) {
-  require_msg(os, "write_graph_tsv: empty stream");
+  ASSERT_MSG(os, "write_graph_tsv: empty stream");
   if (write_info) {
     fmt::print(os, "# number of nodes: {}\n", g.num_nodes());
     fmt::print(os, "# number of edges: {}\n", g.num_edges());
@@ -138,7 +138,7 @@ void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = tru
 template <typename GraphType>
 void write_graph_tsv(path filename, const GraphType &g, bool write_info = true) {
   std::ofstream ofs(filename.string());
-  require_msg(ofs, "write_graph_tsv: file cannot open: {}", filename);
+  ASSERT_MSG(ofs, "write_graph_tsv: file cannot open: {}", filename);
   write_graph_tsv(ofs, g, write_info);
 }
 
@@ -165,12 +165,12 @@ read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
   using edge_t = typename GraphType::edge_type;
   using weight_t = decltype(weight(edge_t{}));
   static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
-  require_msg(is, "read_graph_binary: empty stream");
+  ASSERT_MSG(is, "read_graph_binary: empty stream");
 
   // check header
   char buf[4];
   is.read(buf, 4);
-  require_msg(
+  ASSERT_MSG(
     is.gcount() == 4 && buf[0] == 'b' && buf[1] == 'g' && buf[2] == 'l' && buf[3] == '\0',
     "read_graph_binary: invalid header"
   );
@@ -185,7 +185,7 @@ read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
     return std::nullopt;
   }
 
-  require_msg(
+  ASSERT_MSG(
     type_matched,
     "read_graph_binary: type of edge weight does not match\n"
     "  read as: {}\n  input type: size = {} byte(s), is_integral = {}",
@@ -216,7 +216,7 @@ GraphType read_graph_binary(std::istream &is) {
 template <typename GraphType>
 std::optional<GraphType> read_graph_binary_optional(path filename, bool accept_mismatch = false) {
   std::ifstream ifs(filename.string(), std::ios_base::binary);
-  require_msg(ifs, "read_graph_binary: file not exist: {}", filename);
+  ASSERT_MSG(ifs, "read_graph_binary: file not exist: {}", filename);
   return read_graph_binary_optional<GraphType>(ifs, accept_mismatch);
 }
 
@@ -232,7 +232,7 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
   using edge_t = typename GraphType::edge_type;
   using weight_t = decltype(weight(edge_t{}));
   static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
-  require_msg(os, "write_graph_binary: empty stream");
+  ASSERT_MSG(os, "write_graph_binary: empty stream");
 
   // header
   os.write("bgl", 4);
@@ -255,30 +255,56 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
 template <typename GraphType>
 void write_graph_binary(path filename, const GraphType &g) {
   std::ofstream ofs(filename.string(), std::ios_base::binary);
-  require_msg(ofs, "write_graph_binary: file cannot open: {}", filename);
+  ASSERT_MSG(ofs, "write_graph_binary: file cannot open: {}", filename);
   write_graph_binary(ofs, g);
 }
 
 
 /* traverse directory */
 
+/// read all graphs whose types are |GraphType|
 template <typename GraphType>
-void read_graph_folder(path dirname, std::function<void(const GraphType&, const path&)> callback,
-                       bool recursive = true) {
-  auto graphs = recursive ? path::find_recursive(dirname, "*.(bgl|tsv)")
-                          : path::find(dirname, "*.(bgl|tsv)");
-  for (const path &p : graphs) {
-    std::optional<GraphType> g;
-    if (p.extension() == ".bgl") {
-      g = read_graph_binary_optional<GraphType>(p, true);
+class graph_folder_iterator {
+public:
+  graph_folder_iterator() : index_{0} {}
+  graph_folder_iterator(path dirname, bool recursive = true) : index_{0} {
+    if (recursive) {
+      paths_ = path::find_recursive(dirname, "*.(bgl|tsv)");
+    } else {
+      paths_ = path::find(dirname, "*.(bgl|tsv)");
     }
-    if (p.extension() == ".tsv") {
-      g = read_graph_tsv_optional<GraphType>(p, false, true);
-    }
-    if (g.has_value()) {
-      callback(g.value(), p);
-    }
+    ready();
   }
-}
+  std::pair<GraphType&, const path&> operator*() { return {g_, paths_[index_]}; };
+  graph_folder_iterator &operator++() { ++index_; return ready(); }
+  graph_folder_iterator &begin() { return *this; }
+  graph_folder_iterator end() const { return {}; }
+  bool operator!=(const graph_folder_iterator &rhs) const {
+    return index_ != paths_.size() || rhs.index_ != rhs.paths_.size();
+  }
+
+private:
+  std::size_t index_;
+  std::vector<path> paths_;
+  GraphType g_;
+
+  graph_folder_iterator &ready() {
+    for (; index_ < paths_.size(); ++index_) {
+      const path &p = paths_[index_];
+      std::optional<GraphType> gopt;
+      if (p.extension() == ".bgl") {
+        gopt = read_graph_binary_optional<GraphType>(p, true);
+      }
+      if (p.extension() == ".tsv") {
+        gopt = read_graph_tsv_optional<GraphType>(p, false, true);
+      }
+      if (gopt.has_value()) {
+        g_ = std::move(gopt.value());
+        break;
+      }
+    }
+    return *this;
+  }
+};
 
 } // namespace bgl

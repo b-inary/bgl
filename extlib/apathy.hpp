@@ -301,6 +301,9 @@ namespace apathy {
           return *this;
         }
 
+        /* on Windows, replace backslash with slash */
+        std::replace(path.begin(), path.end(), '\\', '/');
+
         /* Split the path up into segments */
         std::vector<Segment> segments(split());
         /* We may have to test this repeatedly, so let's check once */
@@ -474,9 +477,6 @@ namespace apathy {
         } else {
             perror("cwd");
         }
-
-        /* on Windows, replace backslash with slash */
-        std::replace(p.path.begin(), p.path.end(), '\\', '/');
 
         /* Ensure this is a directory */
         p.directory();

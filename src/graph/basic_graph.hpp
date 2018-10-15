@@ -40,7 +40,7 @@ constexpr node_t to(const weighted_edge_t<WeightType> &e) noexcept {
   return e.first;
 }
 
-inline constexpr int weight(const unweighted_edge_t &e [[maybe_unused]]) noexcept {
+inline constexpr int weight(const unweighted_edge_t&) noexcept {
   return 1;
 }
 
@@ -51,13 +51,13 @@ constexpr WeightType weight(const weighted_edge_t<WeightType> &e) noexcept {
 
 /* utility functions of edge */
 inline constexpr unweighted_edge_t
-update_to(unweighted_edge_t e [[maybe_unused]], node_t v) noexcept {
+update_to(const unweighted_edge_t&, node_t v) noexcept {
   return v;
 }
 
 template <typename WeightType>
 constexpr weighted_edge_t<WeightType>
-update_to(weighted_edge_t<WeightType> e, node_t v) noexcept {
+update_to(const weighted_edge_t<WeightType> e, node_t v) noexcept {
   return {v, weight(e)};
 }
 
@@ -123,8 +123,8 @@ adjacency_list<EdgeType>
 convert_to_adjacency_list(node_t num_nodes, const edge_list<EdgeType> &es) {
   adjacency_list<EdgeType> edges(num_nodes);
   for (const auto &e : es) {
-    require_msg(0 <= e.first && e.first < num_nodes, "invalid node index");
-    require_msg(0 <= to(e.second) && to(e.second) < num_nodes, "invalid node index");
+    ASSERT_MSG(0 <= e.first && e.first < num_nodes, "invalid node index");
+    ASSERT_MSG(0 <= to(e.second) && to(e.second) < num_nodes, "invalid node index");
     edges[e.first].push_back(e.second);
   }
   for (auto &es : edges) {
@@ -230,7 +230,7 @@ public:
       auto &es = adj_[v];
       if (es.size() > 0) {
         std::sort(es.begin(), es.end());
-        require_msg(to(es.back()) < num_nodes_, "invalid index");
+        ASSERT_MSG(to(es.back()) < num_nodes_, "invalid index");
       }
     }
   }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "extlib/CLI11.hpp"
 #include "extlib/rang.hpp"
 
 #include "assertion.hpp"

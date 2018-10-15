@@ -37,13 +37,13 @@ int main() {
 
   /* アサーションマクロ */
 
-  // 動的なアサーションを行う |require()|, |require_msg()| マクロが用意されています．
+  // 動的なアサーションを行う |ASSERT()|, |ASSERT_MSG()| マクロが用意されています．
   // 条件が満たされなかった場合，まあまあ良い感じにエラーを出力して異常終了します．
-  require(true);
-  require_msg(42 == 42, "check {}!", "failed");  // fmtによるエラーメッセージ指定
+  ASSERT(true);
+  ASSERT_MSG(42 == 42, "check {}!", "failed");  // fmtによるエラーメッセージ指定
 
-  // 失敗してもプログラムを続行したい場合は |check()|, |check_msg()| を使います．
-  check(false);   // warning を出力するがプログラムは終了しない
+  // 失敗してもプログラムを続行したい場合は |EXPECT()|, |EXPECT_MSG()| を使います．
+  EXPECT(false);   // warning を出力するがプログラムは終了しない
 
 
   /* ログ出力マクロ */
