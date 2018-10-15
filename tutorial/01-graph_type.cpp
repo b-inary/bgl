@@ -51,4 +51,11 @@ int main() {
   // 重み有りグラフの型は |wgraph<WeightType>| です．
   wgraph<double> wg1 = wes;
   wgraph<double> wg2 = wadj;
+
+
+  /* 5. グラフジェネレータ */
+
+  // いくつかのグラフジェネレータが |gen| 名前空間に実装されています．
+  graph g3 = gen::complete(10);    // 10頂点の完全グラフ
+  graph g4 = gen::grid(5, 5);      // 5×5のグリッドグラフ
 }

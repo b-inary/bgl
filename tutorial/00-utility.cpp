@@ -7,7 +7,7 @@ int main() {
   // bgl.hpp をインクルードするだけで，これらのライブラリを利用することができます．
 
 
-  /* 文字列フォーマット */
+  /* 1. 文字列フォーマット */
 
   // フォーマットにはfmtライブラリ (https://github.com/fmtlib/fmt) を用います．
   // pythonの |format()| などを利用したことがあれば簡単に書けるでしょう．
@@ -27,7 +27,7 @@ int main() {
   fmt::print(cout, "{}\n", vector<pair<int, int>>{{1, 2}});
 
 
-  /* 簡単! ラムダマクロ */
+  /* 2. 簡単! ラムダマクロ */
 
   // C++11のラムダ式を (やや) 簡単に書けるようにするためのマクロが用意されています．
   // lambda(a, b) は [&](const auto &a, const auto &b) に展開されます．(8引数まで対応)
@@ -35,7 +35,7 @@ int main() {
   auto add = lambda(x, y) { return x + y; };
 
 
-  /* アサーションマクロ */
+  /* 3. アサーションマクロ */
 
   // 動的なアサーションを行う |ASSERT()|, |ASSERT_MSG()| マクロが用意されています．
   // 条件が満たされなかった場合，まあまあ良い感じにエラーを出力して異常終了します．
@@ -46,14 +46,14 @@ int main() {
   EXPECT(false);   // warning を出力するがプログラムは終了しない
 
 
-  /* ログ出力マクロ */
+  /* 4. ログ出力マクロ */
 
   // 時刻とソースコードの位置を合わせて簡単にログが残せるマクロも用意されています．
   console_log("this is a {}.", "log");  // 標準エラー出力にログを書き出します
 
   // 実行時間を計測する |console_timer()|, |console_fn_timer| マクロもあります．
   auto fn = lambda() {
-    console_fn_timer;   // 関数の先頭で宣言すると，関数全体の実行時間を計測します
+    console_fn_timer;   // ブロックの先頭で宣言すると，ブロック全体の実行時間を計測します
   };
   console_timer("some process", fn);  // 第2引数で計測を行う関数を指定します
 
@@ -61,7 +61,7 @@ int main() {
   write_log(std::cout, "write to standard output");
 
 
-  /* irange */
+  /* 5. irange */
 
   // 整数の範囲を指定するforループを range-based for で記述できます．
   // vectorを生成したりする実装ではないので，動作も効率的です．
@@ -69,7 +69,7 @@ int main() {
   for (int i : irange(5, 10)) {}  // 開始位置の指定も可能 (この場合は [5, 10) を反復)
 
 
-  /* 乱数 */
+  /* 6. 乱数 */
 
   // 手軽に使えるグローバルな乱数生成機 |bgl_random| が用意されています．
   std::uniform_int_distribution<> dist(1, 10);
@@ -80,13 +80,14 @@ int main() {
   bgl_random.seed(5489);
 
 
-  /* ファイルパス操作 */
+  /* 7. ファイルパス操作 */
 
   // 本来ならばC++17の <filesystem> を利用したいのですが，現状では対応がまだ微妙です．
   // そこで，ミニ filesystem::path もどきが用意されています．
-  path p = "src/";
-  p = p / "graph";  // パスの連結ができます (p /= "graph"; でも同様です)
-  p.extension();    // ファイル名や拡張子などが取得できます．詳細は src/util/file.hpp 参照．
+  path p = "src";
+  p = p / "graph";  // パスの連結ができます (p == "src/graph" となる．p /= "graph" も同様)
+  p.string();       // パスを文字列として得たい場合は |string()| を利用します
+  p.extension();    // ファイル名や拡張子などが取得できます．詳細は src/util/file.hpp 参照
 
   // |path::find()|, |path::find_recursive()| でディレクトリ内のファイル検索もできます．
   // 検索で得られた結果は vector<path> として返ります．

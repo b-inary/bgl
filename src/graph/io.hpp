@@ -105,7 +105,7 @@ template <typename GraphType>
 std::optional<GraphType>
 read_graph_tsv_optional(path file, bool rename_id = false, bool accept_mismatch = false) {
   std::ifstream ifs(file.string());
-  ASSERT_MSG(ifs, "read_graph_tsv: file not exist: {}", file);
+  ASSERT_MSG(ifs, "read_graph_tsv: file does not exist: {}", file);
   return read_graph_tsv_optional<GraphType>(ifs, rename_id, accept_mismatch);
 }
 
@@ -216,7 +216,7 @@ GraphType read_graph_binary(std::istream &is) {
 template <typename GraphType>
 std::optional<GraphType> read_graph_binary_optional(path filename, bool accept_mismatch = false) {
   std::ifstream ifs(filename.string(), std::ios_base::binary);
-  ASSERT_MSG(ifs, "read_graph_binary: file not exist: {}", filename);
+  ASSERT_MSG(ifs, "read_graph_binary: file does not exist: {}", filename);
   return read_graph_binary_optional<GraphType>(ifs, accept_mismatch);
 }
 
@@ -267,7 +267,9 @@ template <typename GraphType>
 class graph_folder_iterator {
 public:
   graph_folder_iterator() : index_{0} {}
-  graph_folder_iterator(path dirname, bool recursive = true) : index_{0} {
+  graph_folder_iterator(path dirname, bool recursive = false, bool rename_id = false)
+    : index_{0}, rename_id_{rename_id}
+  {
     if (recursive) {
       paths_ = path::find_recursive(dirname, "*.(bgl|tsv)");
     } else {
@@ -285,6 +287,7 @@ public:
 
 private:
   std::size_t index_;
+  bool rename_id_;
   std::vector<path> paths_;
   GraphType g_;
 
@@ -296,7 +299,7 @@ private:
         gopt = read_graph_binary_optional<GraphType>(p, true);
       }
       if (p.extension() == ".tsv") {
-        gopt = read_graph_tsv_optional<GraphType>(p, false, true);
+        gopt = read_graph_tsv_optional<GraphType>(p, rename_id_, true);
       }
       if (gopt.has_value()) {
         g_ = std::move(gopt.value());
