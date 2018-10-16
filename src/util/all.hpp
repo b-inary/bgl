@@ -7,6 +7,7 @@
 #include "container_manipulation.hpp"
 #include "demangle_typeid.hpp"
 #include "file.hpp"
+#include "floating_point.hpp"
 #include "fmt.hpp"
 #include "irange.hpp"
 #include "lambda.hpp"

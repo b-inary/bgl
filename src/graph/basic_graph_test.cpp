@@ -16,9 +16,9 @@ TEST_CASE("unweighted graph", "[basic-graph]") {
     std::vector<node_t> nodes = {0, 1, 2, 3};
     REQUIRE(std::equal(g.nodes().begin(), g.nodes().end(), nodes.begin()));
 
-    std::vector<node_t> edges_from_1 = {2};
-    REQUIRE(std::equal(g.edges_from(1).begin(), g.edges_from(1).end(), edges_from_1.begin()));
-    REQUIRE(std::equal(g.neighbors(1).begin(), g.neighbors(1).end(), edges_from_1.begin()));
+    std::vector<node_t> edges_1 = {2};
+    REQUIRE(std::equal(g.edges(1).begin(), g.edges(1).end(), edges_1.begin()));
+    REQUIRE(std::equal(g.neighbors(1).begin(), g.neighbors(1).end(), edges_1.begin()));
 
     REQUIRE(g.is_adjacent(0, 2) == false);
     REQUIRE(g.is_adjacent(2, 3) == true);
@@ -105,8 +105,8 @@ TEST_CASE("directed graph", "[basic-graph]") {
     std::vector<node_t> nodes = {0, 1, 2, 3};
     REQUIRE(std::equal(g.nodes().begin(), g.nodes().end(), nodes.begin()));
 
-    std::vector<weighted_edge_t<int>> edges_from_1 = {{2, 2}};
-    REQUIRE(std::equal(g.edges_from(1).begin(), g.edges_from(1).end(), edges_from_1.begin()));
+    std::vector<weighted_edge_t<int>> edges_1 = {{2, 2}};
+    REQUIRE(std::equal(g.edges(1).begin(), g.edges(1).end(), edges_1.begin()));
 
     std::vector<node_t> neighbors_1 = {2};
     REQUIRE(std::equal(g.neighbors(1).begin(), g.neighbors(1).end(), neighbors_1.begin()));
@@ -139,9 +139,12 @@ TEST_CASE("directed graph", "[basic-graph]") {
     g2 = es3;
     REQUIRE(g2.outdegree(1) == 2);
     REQUIRE(g2.num_edges() == 5);
-    g2.simplify();
+    g2.simplify(true);
     REQUIRE(g2.outdegree(1) == 2);
     REQUIRE(g2.num_edges() == 5);
+    g2.simplify();
+    REQUIRE(g2.outdegree(1) == 1);
+    REQUIRE(g2.num_edges() == 4);
   }
 
   SECTION("transpose") {

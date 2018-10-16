@@ -125,7 +125,7 @@ void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = tru
     fmt::print(os, "# weight type: {}\n", g.weight_string());
   }
   for (node_t v : g.nodes()) {
-    for (const auto &e : g.edges_from(v)) {
+    for (const auto &e : g.edges(v)) {
       fmt::print(os, "{} ", v);
       write_edge_tsv(os, e);
       fmt::print(os, "\n");
@@ -244,7 +244,7 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
   write_binary(os, static_cast<std::uint64_t>(g.num_edges()));
   for (node_t v : g.nodes()) {
     write_binary(os, static_cast<std::uint64_t>(g.outdegree(v)));
-    os.write(reinterpret_cast<const char*>(g.edges_from(v).data()),
+    os.write(reinterpret_cast<const char*>(g.edges(v).data()),
              g.outdegree(v) * sizeof(edge_t));
   }
 

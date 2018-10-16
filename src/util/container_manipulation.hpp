@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <iterator>
+#include <functional>
 
 namespace bgl {
 /**
@@ -29,7 +30,7 @@ Container &remove_elements(Container &c, const T &value) {
 }
 
 /**
- * @brief remove elements equal to |value| from by predicate |p|
+ * @brief remove elements from container |c| by predicate |p|
  * @param c container
  * @param p predicate
  * @return reference of processed container. instance is the same as |c|
@@ -41,14 +42,19 @@ Container &remove_elements_if(Container &c, Pred p) {
 }
 
 /**
- * @brief remove deplicated elements from container |c|
+ * @brief remove deplicated elements from container |c| (by using predicate |p|)
  * @param c input container
  * @return reference of processed container. instance is the same as |c|
  */
+template <typename Container, typename Pred>
+Container &remove_duplicates(Container &c, Pred p)  {
+  std::sort(c.begin(), c.end());
+  c.erase(std::unique(c.begin(), c.end(), p), c.end());
+  return c;
+}
+
 template <typename Container>
 Container &remove_duplicates(Container &c)  {
-  std::sort(c.begin(), c.end());
-  c.erase(std::unique(c.begin(), c.end()), c.end());
-  return c;
+  return remove_duplicates(c, std::equal_to<typename Container::value_type>());
 }
 } // namespace bgl

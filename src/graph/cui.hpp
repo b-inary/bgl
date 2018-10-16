@@ -90,9 +90,9 @@ public:
     get_formatter()->label("REQUIRED", "");
 
     add_option("paths", paths_, "input path(s)")->required()->check(CLI::ExistingPath);
+    add_flag("-d,--rename-id", rename_id_, "rename node IDs when input is tsv format");
     add_flag("-f,--folder", folder_mode_, "read all graphs in folder(s)");
     add_flag("-r,--recursive", recursive_, "read all graphs in folder(s) recursively");
-    add_flag("-q,--rename-id", rename_id_, "rename node IDs when input is tsv format");
     add_flag("-s,--simplify", simplify_, "simplify graph (remove self edges and multiple edges)");
     add_flag("-u,--undirected", undirected_, "make graph undirected");
   }

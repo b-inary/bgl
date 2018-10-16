@@ -16,7 +16,7 @@ namespace bgl {
  * Node type
  */
 
-//! type for representing node
+/// type for representing node
 using node_t = std::uint32_t;
 
 
@@ -24,10 +24,10 @@ using node_t = std::uint32_t;
  * Edge type
  */
 
-//! type for representing unweighted edge
+/// type for representing unweighted edge
 using unweighted_edge_t = node_t;
 
-//! type for representing weighted edge
+/// type for representing weighted edge
 template <typename WeightType>
 using weighted_edge_t = std::pair<node_t, WeightType>;
 
@@ -71,7 +71,7 @@ bool compare_to_rev(node_t v, EdgeType e) {
   return v < to(e);
 }
 
-//! type for representing edge list
+/// type for representing edge list
 template <typename EdgeType>
 using edge_list = std::vector<std::pair<node_t, EdgeType>>;
 
@@ -94,7 +94,7 @@ size_t num_edges(const edge_list<EdgeType> &es) {
   return es.size();
 }
 
-//! type for representing adjacency list
+/// type for representing adjacency list
 template <typename EdgeType>
 using adjacency_list = std::vector<std::vector<EdgeType>>;
 
@@ -117,7 +117,7 @@ size_t num_edges(const adjacency_list<EdgeType> &adj) {
   return n;
 }
 
-//! convert edge list to adjacency list
+/// convert edge list to adjacency list
 template <typename EdgeType>
 adjacency_list<EdgeType>
 convert_to_adjacency_list(node_t num_nodes, const edge_list<EdgeType> &es) {
@@ -133,7 +133,7 @@ convert_to_adjacency_list(node_t num_nodes, const edge_list<EdgeType> &es) {
   return edges;
 }
 
-//! convert adjacency list to edge list
+/// convert adjacency list to edge list
 template <typename EdgeType>
 edge_list<EdgeType> convert_to_edge_list(const adjacency_list<EdgeType> &adj) {
   node_t n = num_nodes(adj);
@@ -158,7 +158,7 @@ public:
   node_t operator*() const noexcept { return to(*static_cast<const Iterator&>(*this)); }
 };
 
-//! neighbor adapter
+/// neighbor adapter
 template <typename EdgeType>
 class neighbor_adapter {
 public:
@@ -169,11 +169,8 @@ private:
   const std::vector<EdgeType> &edges_;
 };
 
-/**
- * Basic graph class<br>
- * Internally, graph is stored as sorted adjacency list: vector<vector<edge_type>>.
- * @brief type for representing unweighted/weighted graph
- */
+/// Basic graph class: type for representing unweighted/weighted graph.
+/// Internally, graph is stored as sorted adjacency list: vector<vector<edge_type>>.
 template <typename EdgeType>
 class basic_graph {
 public:
@@ -183,45 +180,44 @@ public:
 
   /* initialization */
 
-  //! default constructor
+  /// default constructor
   basic_graph() : num_nodes_{0}, num_edges_{0} {}
 
-  //! construct with edge list
+  /// construct with edge list
   basic_graph(const edge_list<edge_type> &es) {
     assign(es);
   }
 
-  //! construct with edge list specifying the number of nodes
+  /// construct with edge list specifying the number of nodes
   basic_graph(node_t num_nodes, const edge_list<edge_type> &es) {
     assign(num_nodes, es);
   }
 
-  //! construct with adjacency list
+  /// construct with adjacency list
   basic_graph(const adjacency_list<edge_type> &adj) {
     assign(adj);
   }
 
-  /**
-   * when the number of nodes and edges are not correct, behavior is undefined. |adj| must be rvalue
-   * @brief construct with sorted adjacency list specifying the number of nodes and edges.
-   */
+  /// construct with sorted adjacency list specifying the number of nodes and edges.
+  /// when the number of nodes and edges are not correct, behavior is undefined.
+  /// |adj| must be rvalue
   basic_graph(node_t num_nodes, std::size_t num_edges, adjacency_list<edge_type> &&adj) {
     assign(num_nodes, num_edges, std::move(adj));
   }
 
-  //! initialize graph with edge list
+  /// initialize graph with edge list
   void assign(const edge_list<edge_type> &es) {
     assign(bgl::num_nodes(es), es);
   }
 
-  //! initialize graph with edge list specifying the number of nodes
+  /// initialize graph with edge list specifying the number of nodes
   void assign(node_t num_nodes, const edge_list<edge_type> &es) {
     num_nodes_ = num_nodes;
     num_edges_ = bgl::num_edges(es);
     adj_ = convert_to_adjacency_list(num_nodes, es);
   }
 
-  //! initialize with adjacency list
+  /// initialize with adjacency list
   void assign(const adjacency_list<edge_type> &adj) {
     num_nodes_ = bgl::num_nodes(adj);
     num_edges_ = bgl::num_edges(adj);
@@ -241,17 +237,16 @@ public:
     *this = std::move(tmp);
   }
 
-  /**
-   * when the number of nodes and edges are not correct, behavior is undefined. |adj| must be rvalue
-   * @brief initialize with sorted adjacency list specifying the number of nodes and edges.
-   */
+  /// initialize with sorted adjacency list specifying the number of nodes and edges.
+  /// when the number of nodes and edges are not correct, behavior is undefined.
+  /// |adj| must be rvalue
   void assign(node_t num_nodes, std::size_t num_edges, adjacency_list<edge_type> &&adj) {
     num_nodes_ = num_nodes;
     num_edges_ = num_edges;
     adj_ = std::move(adj);
   }
 
-  //! remove all nodes
+  /// remove all nodes
   void clear() {
     num_nodes_ = 0;
     num_edges_ = 0;
@@ -259,11 +254,11 @@ public:
     adj_.shrink_to_fit();
   }
 
-  //! resize graph
+  /// resize graph
   void resize(node_t new_num_nodes) {
     if (new_num_nodes < num_nodes_) {
       for (node_t v : irange(new_num_nodes)) {
-        const auto &es = edges_from(v);
+        const auto &es = edges(v);
         auto it = lower_bound(es.begin(), es.end(), new_num_nodes, compare_to<edge_type>);
         num_edges_ -= es.end() - it;
         es.erase(it, es.end());
@@ -280,56 +275,67 @@ public:
 
   /* basic operations */
 
-  //! equality operator
+  /// equality operator
   bool operator==(const graph_type &rhs) const noexcept {
     return num_nodes_ == rhs.num_nodes_
         && num_edges_ == rhs.num_edges_
         && adj_ == rhs.adj_;
   }
 
-  //! inequality operator
+  /// inequality operator
   bool operator!=(const graph_type &rhs) const noexcept {
     return !(*this == rhs);
   }
 
-  //! return the number of nodes
+  /// return the number of nodes
   node_t num_nodes() const noexcept {
     return num_nodes_;
   };
 
-  //! return the number of **directed** edges
+  /// return the number of **directed** edges
   std::size_t num_edges() const noexcept {
     return num_edges_;
   };
 
-  //! return outdegree of node |v|
+  /// return outdegree of node |v|
   size_t outdegree(node_t v) const noexcept {
     return adj_[v].size();
   };
 
-  //! useful adapter of nodes for range-based for-loop
+  /// useful adapter of nodes for range-based for-loop
   irange_type<node_t> nodes() const noexcept {
     return irange(num_nodes());
   };
 
-  //! return edge list from node |v|
-  const std::vector<edge_type> &edges_from(node_t v) const noexcept {
+  /// return an edge from node |v| of index |i|
+  const edge_type &edge(node_t v, std::size_t i) const noexcept {
+    return adj_[v][i];
+  };
+
+  /// return edge list from node |v|
+  const std::vector<edge_type> &edges(node_t v) const noexcept {
     return adj_[v];
   };
 
-  //! useful adapter of neighbors for range-based for-loop
+  /// return a neighbor from node |v| of index |i|
+  node_t neighbor(node_t v, std::size_t i) const noexcept {
+    return to(adj_[v][i]);
+  }
+
+  /// useful adapter of neighbors for range-based for-loop
   neighbor_adapter<edge_type> neighbors(node_t v) const noexcept {
     return neighbor_adapter<edge_type>{adj_[v]};
   };
 
-  //! check if there exists an edge from |u| to |v|
+  /// check if there exists an edge from |u| to |v|
   bool is_adjacent(node_t u, node_t v) const noexcept {
     return get_weight(u, v).has_value();
   }
 
-  //! get (smallest) weight of edge from |u| to |v|. if |u| and |v| are not adjacent, return nullopt
+  /// get (smallest) weight of edge from |u| to |v|.
+  /// if |u| and |v| are not adjacent, return nullopt
   std::optional<weight_type> get_weight(node_t u, node_t v) const noexcept {
-    const auto &es = edges_from(u);
+    const auto &es = edges(u);
     const auto it = std::lower_bound(es.begin(), es.end(), v, compare_to<edge_type>);
     if (it == es.end() || to(*it) != v) {
       return std::nullopt;
@@ -337,27 +343,32 @@ public:
     return weight(*it);
   }
 
-  //! get edge list of the graph
+  /// get edge list of the graph
   edge_list<edge_type> get_edge_list() const {
     return convert_to_edge_list(adj_);
   }
 
-  //! [destructive] simplify graph (i.e., remove self edges and multiple edges)
-  graph_type &simplify() {
+  /// [destructive] simplify graph (i.e., remove self edges and multiple edges)
+  graph_type &simplify(bool preserve_all_weight = false) {
     num_edges_ = 0;
     for (node_t v : nodes()) {
-      remove_elements_if(adj_[v], lambda(e) { return to(e) == v; });
-      remove_duplicates(adj_[v]); // on weighted graphs, remain edges of different weight
-      num_edges_ += adj_[v].size();
+      auto &es = adj_[v];
+      remove_elements_if(es, lambda(e) { return to(e) == v; });
+      if (preserve_all_weight) {
+        remove_duplicates(es);
+      } else {
+        remove_duplicates(es, lambda(lhs, rhs) { return to(lhs) == to(rhs); });
+      }
+      num_edges_ += es.size();
     }
     return *this;
   }
 
-  //! [destructive] transpose graph
+  /// [destructive] transpose graph
   graph_type &transpose() {
     adjacency_list<edge_type> adj(num_nodes());
     for (node_t v : nodes()) {
-      for (const edge_type &e : edges_from(v)) {
+      for (const edge_type &e : edges(v)) {
         adj[to(e)].push_back(update_to(e, v));
       }
     }
@@ -365,7 +376,7 @@ public:
     return *this;
   }
 
-  //! [destructive] make graph undirected
+  /// [destructive] make graph undirected
   graph_type &make_undirected() {
     std::vector<size_t> outdegrees(num_nodes());
     for (node_t v : nodes()) {
@@ -380,14 +391,13 @@ public:
     num_edges_ = 0;
     for (node_t v : nodes()) {
       auto &es = adj_[v];
-      std::sort(es.begin(), es.end());
-      remove_duplicates(adj_[v]);
-      num_edges_ += adj_[v].size();
+      remove_duplicates(es);
+      num_edges_ += es.size();
     }
     return *this;
   }
 
-  //! [destructive] remove isolated nodes (i.e., nodes with degree zero). can rename ID of nodes
+  /// [destructive] remove isolated nodes (i.e., nodes with degree zero). can rename ID of nodes
   graph_type &remove_isolated_nodes() {
     std::vector<char> is_isolated(num_nodes(), true);
     for (node_t u : nodes()) {
@@ -424,14 +434,14 @@ public:
 
   /* dynamic update: since adjacency list is sorted, these operations are slow! */
 
-  //! add edge |e| from |v|
+  /// add edge |e| from |v|
   void add_edge(node_t v, const edge_type &e) {
     auto &es = adj_[v];
     es.insert(std::upper_bound(es.begin(), es.end(), e), e);
     ++num_edges_;
   }
 
-  //! remove all edges from |u| to |v|
+  /// remove all edges from |u| to |v|
   void remove_edge(node_t u, node_t v) {
     auto &es = adj_[u];
     auto lb = std::lower_bound(es.begin(), es.end(), v, compare_to<edge_type>);
@@ -442,7 +452,7 @@ public:
 
   /* pretty print */
 
-  //! do pretty print to |os|
+  /// do pretty print to |os|
   void pretty_print(std::ostream &os = std::cerr) const {
     const node_t kLimitNumNodes = 5;
     const std::size_t kLimitNumEdges = 10;
@@ -456,7 +466,7 @@ public:
       fmt::print(os, "  {} -> ", v);
       for (size_t i : irange(std::min(outdegree(v), kLimitNumEdges))) {
         if (i > 0) fmt::print(os, ", ");
-        fmt::print(os, "{}", edges_from(v)[i]);
+        fmt::print(os, "{}", edges(v)[i]);
       }
       if (outdegree(v) > kLimitNumEdges) fmt::print(os, ", ...");
       fmt::print(os, "\n");
@@ -483,10 +493,10 @@ private:
   std::size_t num_edges_;
 };
 
-//! specialized type for representing unweighted graph
+/// specialized type for representing unweighted graph
 using graph = basic_graph<unweighted_edge_t>;
 
-//! specialized type for representing weighted graph
+/// specialized type for representing weighted graph
 template <typename WeightType>
 using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
