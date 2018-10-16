@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "basic_generator.hpp"
+#include "graph/generator/basic_generator.hpp"
 using namespace bgl;
 
 TEST_CASE("generators") {

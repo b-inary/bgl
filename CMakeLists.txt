@@ -23,6 +23,6 @@ set(EXT_LIBRARIES fmt-header-only)
 set(TEST_LIBRARY ${bgl_SOURCE_DIR}/extlib/catch_main.cpp)
 
 add_subdirectory(extlib/fmt)
-add_subdirectory(src)
+add_subdirectory(test)
 add_subdirectory(playground EXCLUDE_FROM_ALL)
 add_subdirectory(projects EXCLUDE_FROM_ALL)

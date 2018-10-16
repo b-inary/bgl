@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "io.hpp"
+#include "graph/io.hpp"
 #include <iostream>
 using namespace bgl;
 

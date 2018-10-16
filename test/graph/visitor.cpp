@@ -1,6 +1,6 @@
 #include "extlib/catch.hpp"
-#include "visitor.hpp"
-#include "generator/all.hpp"
+#include "graph/visitor.hpp"
+#include "graph/generator/all.hpp"
 using namespace bgl;
 
 TEST_CASE("visitor-unweighted", "[visitor]") {

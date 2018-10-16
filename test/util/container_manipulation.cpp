@@ -1,6 +1,6 @@
 #include "extlib/catch.hpp"
-#include "container_manipulation.hpp"
-#include "lambda.hpp"
+#include "util/container_manipulation.hpp"
+#include "util/lambda.hpp"
 #include <vector>
 using namespace std;
 using namespace bgl;

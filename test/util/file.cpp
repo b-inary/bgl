@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "file.hpp"
+#include "util/file.hpp"
 #include <iostream>
 #include <algorithm>
 using namespace bgl;
@@ -78,10 +78,10 @@ TEST_CASE("file", "[util]") {
   REQUIRE(std::count(ls.begin(), ls.end(), path("README.md")));
 
   auto find_hpp = path::find_recursive(".", "*.hpp");
-  REQUIRE(std::count(find_hpp.begin(), find_hpp.end(), path("src/util/file.hpp")));
-  REQUIRE(std::count(find_hpp.begin(), find_hpp.end(), path("src/util/file_test.cpp")) == 0);
+  REQUIRE(std::count(find_hpp.begin(), find_hpp.end(), path("src/util/file.hpp")) == 1);
+  REQUIRE(std::count(find_hpp.begin(), find_hpp.end(), path("test/util/file.cpp")) == 0);
 
   auto find_cpp = path::find_recursive(".", "*.cpp");
   REQUIRE(std::count(find_cpp.begin(), find_cpp.end(), path("src/util/file.hpp")) == 0);
-  REQUIRE(std::count(find_cpp.begin(), find_cpp.end(), path("src/util/file_test.cpp")));
+  REQUIRE(std::count(find_cpp.begin(), find_cpp.end(), path("test/util/file.cpp")) == 1);
 }

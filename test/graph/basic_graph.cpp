@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "basic_graph.hpp"
+#include "graph/basic_graph.hpp"
 #include <vector>
 #include <algorithm>
 using namespace bgl;

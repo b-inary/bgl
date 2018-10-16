@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "random.hpp"
+#include "util/random.hpp"
 #include <random>
 #include <cmath>
 using namespace std;

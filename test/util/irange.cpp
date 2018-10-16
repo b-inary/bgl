@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "irange.hpp"
+#include "util/irange.hpp"
 using namespace bgl;
 
 TEST_CASE("irange", "[util]") {
