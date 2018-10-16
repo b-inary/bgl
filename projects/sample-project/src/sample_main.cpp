@@ -1,6 +1,6 @@
-#include <iostream>
+#include "bgl.hpp"
 using namespace std;
 
 int main() {
-  cout << "hello, sample project!\n";
+  fmt::print("Hello, {}!\n", "sample project");
 }
