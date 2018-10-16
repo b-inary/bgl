@@ -44,6 +44,7 @@ Container &remove_elements_if(Container &c, Pred p) {
 /**
  * @brief remove deplicated elements from container |c| (by using predicate |p|)
  * @param c input container
+ * @param p predicate
  * @return reference of processed container. instance is the same as |c|
  */
 template <typename Container, typename Pred>

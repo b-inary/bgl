@@ -1,3 +1,4 @@
+#pragma once
 
 // https://rhysd.hatenablog.com/entry/2014/01/28/235958
 

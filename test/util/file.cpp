@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "util/file.hpp"
+#include "bgl/util/file.hpp"
 #include <iostream>
 #include <algorithm>
 using namespace bgl;
@@ -74,14 +74,14 @@ TEST_CASE("file", "[util]") {
   // REQUIRE(path::relative("foo/bar", "../").string() == "bgl/foo/bar");
 
   auto ls = path::find(".");
-  REQUIRE(std::count(ls.begin(), ls.end(), path("src")));
+  REQUIRE(std::count(ls.begin(), ls.end(), path("include")));
   REQUIRE(std::count(ls.begin(), ls.end(), path("README.md")));
 
   auto find_hpp = path::find_recursive(".", "*.hpp");
-  REQUIRE(std::count(find_hpp.begin(), find_hpp.end(), path("src/util/file.hpp")) == 1);
+  REQUIRE(std::count(find_hpp.begin(), find_hpp.end(), path("include/bgl/util/file.hpp")) == 1);
   REQUIRE(std::count(find_hpp.begin(), find_hpp.end(), path("test/util/file.cpp")) == 0);
 
   auto find_cpp = path::find_recursive(".", "*.cpp");
-  REQUIRE(std::count(find_cpp.begin(), find_cpp.end(), path("src/util/file.hpp")) == 0);
+  REQUIRE(std::count(find_cpp.begin(), find_cpp.end(), path("include/bgl/util/file.hpp")) == 0);
   REQUIRE(std::count(find_cpp.begin(), find_cpp.end(), path("test/util/file.cpp")) == 1);
 }

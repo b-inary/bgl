@@ -147,6 +147,8 @@ private:
 /// visit nodes of graph |g| from node |source| by distance.
 /// on each visited node, |pred| is called and stop visiting if its return value is false.
 /// time complexity of initialization: O(n)
+/// @param g input graph
+/// @param source first visited node
 /// @param pred predicate function: bool(node_t, weight_type)
 template <typename GraphType>
 void visit_by_distance(const GraphType &g, node_t source,

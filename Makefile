@@ -16,7 +16,7 @@ target:
 	@mkdir -p build
 	@cd build; cmake .. -GNinja && ninja ${TARGET}
 
-doc: src/
+doc: include/bgl/
 	@doxygen Doxyfile
 
 clean:

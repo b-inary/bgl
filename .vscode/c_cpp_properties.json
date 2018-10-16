@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/",
                 "${workspaceFolder}/extlib/fmt/include/",
-                "${workspaceFolder}/src/"
+                "${workspaceFolder}/include/"
             ],
             "defines": [
                 "_DEBUG",

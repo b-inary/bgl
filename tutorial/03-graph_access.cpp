@@ -1,4 +1,4 @@
-#include "bgl.hpp"
+#include "bgl/bgl.hpp"
 #include <queue>
 using namespace std;
 using namespace bgl;

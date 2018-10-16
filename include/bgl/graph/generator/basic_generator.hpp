@@ -1,6 +1,6 @@
 #pragma once
-#include "util/all.hpp"
-#include "graph/basic_graph.hpp"
+#include "bgl/util/all.hpp"
+#include "bgl/graph/basic_graph.hpp"
 #include <limits>
 #include <cstdint>
 

@@ -82,6 +82,10 @@ public:
     return p.path_.is_directory();
   }
 
+  static std::size_t size(const path &p) {
+    return p.path_.size();
+  }
+
   /* traverse */
 
   static std::vector<path> find(const path &dir, const std::string &wildcard = "") {

@@ -1,6 +1,6 @@
 
 # To avoid conflict, please set distinct project name
-project(sample_project)
+project(sample-project)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 

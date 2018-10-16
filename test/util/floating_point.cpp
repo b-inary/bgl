@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "util/floating_point.hpp"
+#include "bgl/util/floating_point.hpp"
 using namespace bgl;
 
 TEST_CASE("floating point", "[util]") {

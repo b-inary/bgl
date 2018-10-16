@@ -18,6 +18,7 @@ private:
     cui_graph_iterator() {}
     cui_graph_iterator(const bgl_app &app)
       : folder_mode_{app.folder_mode_}
+      , max_mb_{app.max_mb_}
       , recursive_{app.recursive_}
       , rename_id_{app.rename_id_}
       , simplify_{app.simplify_}
@@ -27,7 +28,7 @@ private:
         paths_.push_back(p);
       }
       if (folder_mode_) {
-        iter_ = graph_folder_iterator<GraphType>(paths_[index_], recursive_, rename_id_);
+        iter_ = graph_folder_iterator<GraphType>(paths_[index_], recursive_, rename_id_, max_mb_);
       }
       ready();
     }
@@ -54,11 +55,12 @@ private:
   private:
     std::size_t index_ = 0;
     std::vector<path> paths_;
-    const bool folder_mode_ = false;
-    const bool recursive_ = false;
-    const bool rename_id_ = false;
-    const bool simplify_ = false;
-    const bool undirected_ = false;
+    bool folder_mode_;
+    std::size_t max_mb_;
+    bool recursive_;
+    bool rename_id_;
+    bool simplify_;
+    bool undirected_;
     GraphType g_;
     graph_folder_iterator<GraphType> iter_;
 
@@ -67,7 +69,7 @@ private:
         while (true) {
           if (iter_ != iter_.end()) break;
           if (++index_ >= paths_.size()) return *this;
-          iter_ = graph_folder_iterator<GraphType>(paths_[index_], recursive_, rename_id_);
+          iter_ = graph_folder_iterator<GraphType>(paths_[index_], recursive_, rename_id_, max_mb_);
         }
       } else {
         if (index_ >= paths_.size()) return *this;
@@ -92,6 +94,7 @@ public:
     add_option("paths", paths_, "input path(s)")->required()->check(CLI::ExistingPath);
     add_flag("-d,--rename-id", rename_id_, "rename node IDs when input is tsv format");
     add_flag("-f,--folder", folder_mode_, "read all graphs in folder(s)");
+    add_option("-m,--max-mb", max_mb_, "skip graphs exceeding specified size [MB]");
     add_flag("-r,--recursive", recursive_, "read all graphs in folder(s) recursively");
     add_flag("-s,--simplify", simplify_, "simplify graph (remove self edges and multiple edges)");
     add_flag("-u,--undirected", undirected_, "make graph undirected");
@@ -121,6 +124,7 @@ public:
 private:
   std::vector<std::string> paths_;
   bool folder_mode_;
+  std::size_t max_mb_ = 4096;
   bool recursive_;
   bool rename_id_;
   bool simplify_;

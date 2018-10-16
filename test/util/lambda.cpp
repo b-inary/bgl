@@ -1,5 +1,5 @@
 #include "extlib/catch.hpp"
-#include "util/lambda.hpp"
+#include "bgl/util/lambda.hpp"
 
 TEST_CASE("lambda", "[util]") {
   auto const42 = lambda() { return 42; };

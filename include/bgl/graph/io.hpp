@@ -1,5 +1,5 @@
 #pragma once
-#include "util/all.hpp"
+#include "bgl/util/all.hpp"
 #include "basic_graph.hpp"
 #include <iostream>
 #include <sstream>
@@ -266,9 +266,10 @@ void write_graph_binary(path filename, const GraphType &g) {
 template <typename GraphType>
 class graph_folder_iterator {
 public:
-  graph_folder_iterator() : index_{0} {}
-  graph_folder_iterator(path dirname, bool recursive = false, bool rename_id = false)
-    : index_{0}, rename_id_{rename_id}
+  graph_folder_iterator() {}
+  graph_folder_iterator(path dirname, bool recursive = false, bool rename_id = false,
+                        std::size_t max_mb = 4096)
+    : rename_id_{rename_id}, max_mb_{max_mb}
   {
     if (recursive) {
       paths_ = path::find_recursive(dirname, "*.(bgl|tsv)");
@@ -286,8 +287,9 @@ public:
   }
 
 private:
-  std::size_t index_;
+  std::size_t index_ = 0;
   bool rename_id_;
+  std::size_t max_mb_;
   std::vector<path> paths_;
   GraphType g_;
 
@@ -295,6 +297,7 @@ private:
     for (; index_ < paths_.size(); ++index_) {
       const path &p = paths_[index_];
       std::optional<GraphType> gopt;
+      if (path::size(p) >= (max_mb_ << 20)) continue;
       if (p.extension() == ".bgl") {
         gopt = read_graph_binary_optional<GraphType>(p, true);
       }

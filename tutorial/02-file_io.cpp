@@ -1,4 +1,4 @@
-#include "bgl.hpp"
+#include "bgl/bgl.hpp"
 using namespace bgl;
 
 int main(int argc, char **argv) {
