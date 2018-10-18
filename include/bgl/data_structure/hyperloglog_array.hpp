@@ -12,7 +12,7 @@
 #endif
 
 namespace bgl {
-/// an array of HyperLogLog counters
+/// an array of HyperLogLog counters (key type: std::uint64)
 /// @see "HyperLogLog: the analysis of a near-optimal cardinality estimation algorithm"
 ///      (P. Flajolet et al.). In AOFA'07.
 class hyperloglog_array {
@@ -45,6 +45,7 @@ private:
       regs_[index] = std::max(regs_[index], rank);
     }
 
+    /// merge HyperLogLog counters
     /// @note *this and rhs must have the same number of registers (no check)
     void merge(const hyperloglog_impl &rhs) {
 #ifdef __AVX2__
@@ -76,7 +77,7 @@ private:
 
       sum -= zero_count * (1ull << (63 - outer_.log2k_));
 
-      double z = sum * outer_.coef_ + outer_.sigma_table_[zero_count];
+      double z = sum * outer_.norm_term_ + outer_.sigma_table_[zero_count];
       static const double alpha = 0.5 / std::log(2);
       return alpha * outer_.k_ * outer_.k_ / z;
     }
@@ -99,7 +100,7 @@ private:
     : size_{count}
     , k_{1 << log2k}
     , log2k_{log2k}
-    , coef_{std::pow(2, log2k - 63)}
+    , norm_term_{std::pow(2, log2k - 63)}
     , ary_(count << log2k, 32)
   {
     ASSERT_MSG(5 <= log2k && log2k <= 20,
@@ -114,7 +115,7 @@ private:
     }
   }
 
-  void swap(hyperloglog_array &other) {
+  void swap(hyperloglog_array &other) noexcept {
     hyperloglog_array tmp = std::move(other);
     other = std::move(*this);
     *this = std::move(tmp);
@@ -136,7 +137,7 @@ private:
   size_t size_;
   int k_;
   int log2k_;
-  double coef_;
+  double norm_term_;
   aligned_array<std::uint8_t> ary_;
   std::vector<double> sigma_table_;
 

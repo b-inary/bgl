@@ -202,6 +202,9 @@ read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
     is.read(reinterpret_cast<char*>(adj[v].data()), degree * sizeof(edge_t));
   }
 
+  is.peek();
+  ASSERT_MSG(is.eof() && !is.fail(), "read_graph_binary: read failed (maybe file broken)");
+
   return GraphType(num_nodes, num_edges, std::move(adj));
 }
 

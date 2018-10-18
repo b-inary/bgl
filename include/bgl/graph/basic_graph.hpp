@@ -231,6 +231,7 @@ public:
     }
   }
 
+  /// swap graphs
   void swap(graph_type &other) noexcept {
     graph_type tmp = std::move(other);
     other = std::move(*this);

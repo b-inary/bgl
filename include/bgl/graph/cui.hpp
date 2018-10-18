@@ -16,30 +16,24 @@ private:
   class cui_graph_iterator {
   public:
     cui_graph_iterator() {}
-    cui_graph_iterator(const bgl_app &app)
-      : folder_mode_{app.folder_mode_}
-      , max_mb_{app.max_mb_}
-      , recursive_{app.recursive_}
-      , rename_id_{app.rename_id_}
-      , simplify_{app.simplify_}
-      , undirected_{app.undirected_}
-    {
-      for (const std::string &p : app.paths_) {
+    cui_graph_iterator(const bgl_app &app) : app_{&app} {
+      for (const std::string &p : app_->paths_) {
         paths_.push_back(p);
       }
-      if (folder_mode_) {
-        iter_ = graph_folder_iterator<GraphType>(paths_[index_], recursive_, rename_id_, max_mb_);
+      if (app_->folder_mode_) {
+        iter_ = graph_folder_iterator<GraphType>(paths_[index_], app_->recursive_,
+                                                 app_->rename_id_, app_->max_mb_);
       }
       ready();
     }
 
     std::pair<GraphType&, const path&> operator*() {
-      if (folder_mode_) return *iter_;
+      if (app_->folder_mode_) return *iter_;
       return {g_, paths_[index_]};
     }
 
     cui_graph_iterator &operator++() {
-      if (folder_mode_) ++iter_; else ++index_;
+      if (app_->folder_mode_) ++iter_; else ++index_;
       return ready();
     }
 
@@ -53,35 +47,31 @@ private:
     }
 
   private:
+    const bgl_app *app_ = nullptr;
     std::size_t index_ = 0;
     std::vector<path> paths_;
-    bool folder_mode_;
-    std::size_t max_mb_;
-    bool recursive_;
-    bool rename_id_;
-    bool simplify_;
-    bool undirected_;
     GraphType g_;
     graph_folder_iterator<GraphType> iter_;
 
     cui_graph_iterator &ready() {
-      if (folder_mode_) {
+      if (app_->folder_mode_) {
         while (true) {
           if (iter_ != iter_.end()) break;
           if (++index_ >= paths_.size()) return *this;
-          iter_ = graph_folder_iterator<GraphType>(paths_[index_], recursive_, rename_id_, max_mb_);
+          iter_ = graph_folder_iterator<GraphType>(paths_[index_], app_->recursive_,
+                                                   app_->rename_id_, app_->max_mb_);
         }
       } else {
         if (index_ >= paths_.size()) return *this;
         if (paths_[index_].extension() == ".bgl") {
           g_ = read_graph_binary<GraphType>(paths_[index_]);
         } else {
-          g_ = read_graph_tsv<GraphType>(paths_[index_], rename_id_);
+          g_ = read_graph_tsv<GraphType>(paths_[index_], app_->rename_id_);
         }
       }
-      GraphType &g = folder_mode_ ? (*iter_).first : g_;
-      if (simplify_) g.simplify();
-      if (undirected_) g.make_undirected();
+      GraphType &g = app_->folder_mode_ ? (*iter_).first : g_;
+      if (app_->simplify_) g.simplify();
+      if (app_->undirected_) g.make_undirected();
       return *this;
     }
   };
