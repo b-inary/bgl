@@ -17,6 +17,6 @@ TEST_CASE("random", "[util]") {
   }
 
   const double pi = c * 4.0 / kNumPoints;
-  REQUIRE(3.14 < pi);
+  REQUIRE(3.13 < pi);
   REQUIRE(pi < 3.15);
 }
