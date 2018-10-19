@@ -145,6 +145,20 @@ void write_graph_tsv(path filename, const GraphType &g, bool write_info = true) 
 
 /* binary I/O */
 
+/*
+ *  binary format specification:
+ *    - 4 bytes: magic constant: "bgl\0"
+ *    - 4 bytes: weight size [byte]
+ *    - 4 bytes: whether weight type is integral (0 or 1; 1 when unweighted)
+ *    - 4 bytes: the number of nodes
+ *    - 8 bytes: the number of edges
+ *    + repeat (# of nodes) times:
+ *        - 8 bytes: outdegree of node
+ *        + repeat (outdegree) times:
+ *            - 4 bytes: connected node (sorted)
+ *            - (weight size) bytes: edge weight
+ */
+
 template <typename T>
 T read_binary(std::istream &is) {
   T t{};

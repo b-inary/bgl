@@ -11,10 +11,10 @@ class aligned_array {
  public:
   using value_type = T;
 
-  aligned_array(std::size_t n, std::size_t align) :
-    n_{n},
+  aligned_array(std::size_t count, std::size_t align) :
+    n_{count},
     align_{align},
-    data_{aligned_malloc(n * sizeof(T), align)} {}
+    data_{aligned_malloc(count * sizeof(T), align)} {}
 
   aligned_array(const aligned_array &a) { *this = a; }
 

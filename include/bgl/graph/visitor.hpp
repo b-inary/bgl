@@ -73,7 +73,7 @@ public:
   using graph_type = GraphType;
   using weight_type = typename GraphType::weight_type;
 
-  visitor_by_distance(const graph_type &g) : g_(g), h_(g) {}
+  visitor_by_distance(const graph_type &g) : g_{g}, h_(g) {}
 
   void visit(node_t source, std::function<bool(node_t, weight_type)> pred) {
     h_.decrease(source, 0);
@@ -106,7 +106,7 @@ class visitor_by_distance<graph> {
   using weight_type = graph_type::weight_type;
 
   visitor_by_distance(const graph_type &g)
-    : g_(g)
+    : g_{g}
     , queue_(g.num_nodes())
     , visited_(g.num_nodes(), false) {}
 

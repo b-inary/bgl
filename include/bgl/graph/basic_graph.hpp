@@ -349,6 +349,8 @@ public:
     return convert_to_edge_list(adj_);
   }
 
+  /* graph conversion */
+
   /// [destructive] simplify graph (i.e., remove self edges and multiple edges)
   graph_type &simplify(bool preserve_all_weight = false) {
     num_edges_ = 0;
@@ -398,39 +400,49 @@ public:
     return *this;
   }
 
-  /// [destructive] remove isolated nodes (i.e., nodes with degree zero). can rename ID of nodes
-  graph_type &remove_isolated_nodes() {
-    std::vector<char> is_isolated(num_nodes(), true);
-    for (node_t u : nodes()) {
-      for (node_t v : neighbors(u)) {
-        is_isolated[u] = false;
-        is_isolated[v] = false;
-      }
-    }
-
+  /// [destructive] filter nodes by |filter_list|. can rename ID of nodes
+  graph_type &filter_nodes(const std::vector<bool> &filter_list) {
+    ASSERT_MSG(num_nodes() == filter_list.size(), "filter_nodes: invalid argument");
     node_t new_num_nodes = 0;
+    std::size_t new_num_edges = 0;
     std::vector<node_t> new_id(num_nodes());
     std::vector<node_t> new_id_rev(num_nodes());
     for (node_t v : nodes()) {
-      if (!is_isolated[v]) {
+      if (filter_list[v]) {
         new_id[v] = new_num_nodes++;
         new_id_rev[new_id[v]] = v;
       }
     }
 
     for (node_t v : irange(new_num_nodes)) {
+      auto &es = adj_[v];
       if (v != new_id_rev[v]) {
-        adj_[v] = std::move(adj_[new_id_rev[v]]);
+        es = std::move(adj_[new_id_rev[v]]);
       }
-      for (auto &e : adj_[v]) {
+      filter(es, lambda(e) { return filter_list[to(e)]; });
+      new_num_edges += es.size();
+      for (auto &e : es) {
         e = update_to(e, new_id[to(e)]);
       }
     }
 
     num_nodes_ = new_num_nodes;
+    num_edges_ = new_num_edges;
     adj_.resize(new_num_nodes);
     adj_.shrink_to_fit();
     return *this;
+  }
+
+  /// [destructive] remove isolated nodes (i.e., nodes with degree zero). can rename ID of nodes
+  graph_type &remove_isolated_nodes() {
+    std::vector<bool> is_not_isolated(num_nodes(), false);
+    for (node_t u : nodes()) {
+      for (node_t v : neighbors(u)) {
+        is_not_isolated[u] = true;
+        is_not_isolated[v] = true;
+      }
+    }
+    return filter_nodes(is_not_isolated);
   }
 
   /* dynamic update: since adjacency list is sorted, these operations are slow! */
