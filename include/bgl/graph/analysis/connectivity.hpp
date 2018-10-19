@@ -79,7 +79,7 @@ std::pair<node_t, std::vector<node_t>> strongly_connected_components(const Graph
     if (visited[u]) continue;
     dfs_stack.emplace(u, 0);
 
-    // to prevent stack overflow, do dfs using stack data structure
+    // to prevent stack overflow, do DFS using stack data structure
     while (!dfs_stack.empty()) {
       node_t v = dfs_stack.top().first;
       node_t i = dfs_stack.top().second;
@@ -142,6 +142,13 @@ GraphType& extract_largest_scc(GraphType &g) {
 /// determine if graph is strongly connected
 template <typename GraphType>
 bool is_strongly_connected(const GraphType &g) {
-  return strongly_connected_components(g).first == 1;
+  const node_t n = g.num_nodes();
+  if (n == 0) return true;
+  std::vector<bool> visited(n, false);
+  visit_by_distance(g, 0, lambda(v, d [[maybe_unused]]) {
+    visited[v] = true;
+    return true;
+  });
+  return std::find(visited.begin(), visited.end(), false) == visited.end();
 }
 } // namespace bgl

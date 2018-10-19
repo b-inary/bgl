@@ -44,12 +44,6 @@ class aligned_array {
     return *this;
   }
 
-  void swap(aligned_array &other) noexcept {
-    aligned_array tmp = std::move(other);
-    other = std::move(*this);
-    *this = std::move(tmp);
-  }
-
   value_type &operator[](size_t pos) {
     return data_[pos];
   }

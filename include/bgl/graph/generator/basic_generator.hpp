@@ -15,7 +15,7 @@ inline graph complete(node_t num_nodes) {
       adj[v].push_back(u);
     }
   }
-  return {adj};
+  return adj;
 }
 
 //! [directed] generate a directed complete bipartite graph
@@ -27,7 +27,7 @@ inline graph dir_complete_bipartite(node_t num_left, node_t num_right) {
       adj[u].push_back(v + num_left);
     }
   }
-  return {adj};
+  return adj;
 }
 
 //! [undirected] generate a complete bipartite graph
@@ -43,7 +43,7 @@ inline graph star(node_t num_nodes) {
     adj[0].push_back(v);
     adj[v].push_back(0);
   }
-  return {adj};
+  return adj;
 }
 
 //! [undirected] generate a 3D-grid graph
@@ -73,7 +73,7 @@ inline graph grid_3d(node_t num_x, node_t num_y, node_t num_z) {
     }
   }
 
-  return {adj};
+  return adj;
 }
 
 //! [undirected] generate a 2D-grid graph
@@ -98,7 +98,7 @@ inline graph dir_cycle(node_t num_nodes) {
   if (num_nodes > 1) {
     adj[num_nodes - 1].push_back(0);
   }
-  return {adj};
+  return adj;
 }
 
 //! [undirected] generate a cycle graph

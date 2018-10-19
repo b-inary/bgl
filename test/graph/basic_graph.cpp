@@ -36,7 +36,7 @@ TEST_CASE("unweighted graph", "[basic-graph]") {
     REQUIRE(g3.num_edges() == 5);
     REQUIRE(g2.outdegree(0) == 1);
     REQUIRE(g3.outdegree(0) == 2);
-    g2.swap(g3);
+    std::swap(g2, g3);
     REQUIRE(g2.num_edges() == 5);
     REQUIRE(g3.num_edges() == 4);
     REQUIRE(g2.outdegree(0) == 2);

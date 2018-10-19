@@ -198,6 +198,11 @@ public:
     assign(adj);
   }
 
+  /// construct with adjacency list
+  basic_graph(adjacency_list<edge_type> &&adj) {
+    assign(std::move(adj));
+  }
+
   /// construct with sorted adjacency list specifying the number of nodes and edges.
   /// when the number of nodes and edges are not correct, behavior is undefined.
   /// |adj| must be rvalue
@@ -219,9 +224,15 @@ public:
 
   /// initialize with adjacency list
   void assign(const adjacency_list<edge_type> &adj) {
+    auto adj_copy = adj;
+    assign(std::move(adj_copy));
+  }
+
+  /// initialize with adjacency list
+  void assign(adjacency_list<edge_type> &&adj) {
     num_nodes_ = bgl::num_nodes(adj);
     num_edges_ = bgl::num_edges(adj);
-    adj_ = adj;
+    adj_ = std::move(adj);
     for (node_t v : nodes()) {
       auto &es = adj_[v];
       if (es.size() > 0) {
@@ -229,13 +240,6 @@ public:
         ASSERT_MSG(to(es.back()) < num_nodes_, "invalid index");
       }
     }
-  }
-
-  /// swap graphs
-  void swap(graph_type &other) noexcept {
-    graph_type tmp = std::move(other);
-    other = std::move(*this);
-    *this = std::move(tmp);
   }
 
   /// initialize with sorted adjacency list specifying the number of nodes and edges.
@@ -253,6 +257,11 @@ public:
     num_edges_ = 0;
     adj_.clear();
     adj_.shrink_to_fit();
+  }
+
+  /// make clone
+  graph_type clone() {
+    return *this;
   }
 
   /// resize graph
@@ -351,7 +360,7 @@ public:
 
   /* graph conversion */
 
-  /// [destructive] simplify graph (i.e., remove self edges and multiple edges)
+  /// [destructive] simplify graph (i.e., remove self loops and multiple edges)
   graph_type &simplify(bool preserve_all_weight = false) {
     num_edges_ = 0;
     for (node_t v : nodes()) {
@@ -514,10 +523,3 @@ template <typename WeightType>
 using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
 } // namespace bgl
-
-namespace std {
-template <typename EdgeType>
-void swap(bgl::basic_graph<EdgeType> lhs, bgl::basic_graph<EdgeType> rhs) noexcept {
-  lhs.swap(rhs);
-}
-} // namespace std

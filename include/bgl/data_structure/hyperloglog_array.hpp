@@ -115,12 +115,6 @@ private:
     }
   }
 
-  void swap(hyperloglog_array &other) noexcept {
-    hyperloglog_array tmp = std::move(other);
-    other = std::move(*this);
-    *this = std::move(tmp);
-  }
-
   hyperloglog_impl operator[](std::size_t pos) {
     return {*this, ary_.data() + (pos << log2k_)};
   }
