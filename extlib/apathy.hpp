@@ -211,6 +211,11 @@ namespace apathy {
         /* Current working directory */
         static Path cwd();
 
+        /* Remove a file
+         *
+         * @param path - path to remove */
+        static bool rm(const Path& p);
+
         static Path relative(const Path& p, const Path& base);
 
         /* List all the paths in a directory
@@ -482,6 +487,14 @@ namespace apathy {
         p.directory();
         p.sanitize();
         return p;
+    }
+
+    inline bool Path::rm(const Path& p) {
+        if (remove(p.path.c_str()) != 0) {
+            perror("Remove");
+            return false;
+        }
+        return true;
     }
 
     inline Path Path::relative(const Path& p, const Path& base) {

@@ -15,4 +15,7 @@ TEST_CASE("graph I/O", "[graph-io]") {
   write_graph_binary("datasets/karate.out.bgl", g);
   graph g3 = read_graph_binary<graph>("datasets/karate.out.bgl");
   REQUIRE(g == g3);
+
+  path::remove("datasets/karate.out.tsv");
+  path::remove("datasets/karate.out.bgl");
 }

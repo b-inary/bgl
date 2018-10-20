@@ -5,9 +5,8 @@
 #include <cstdint>
 
 namespace bgl::gen {
-//! [undirected] generate a complete graph (clique)
+/// [undirected] generate a complete graph (clique)
 inline graph complete(node_t num_nodes) {
-  ASSERT(num_nodes > 0);
   unweighted_adjacency_list adj(num_nodes);
   for (node_t u : irange(num_nodes)) {
     for (node_t v : irange(u)) {
@@ -18,9 +17,8 @@ inline graph complete(node_t num_nodes) {
   return adj;
 }
 
-//! [directed] generate a directed complete bipartite graph
+/// [directed] generate a directed complete bipartite graph
 inline graph dir_complete_bipartite(node_t num_left, node_t num_right) {
-  ASSERT(num_left + num_right > 0);
   unweighted_adjacency_list adj(num_left + num_right);
   for (node_t u : irange(num_left)) {
     for (node_t v : irange(num_right)) {
@@ -30,14 +28,13 @@ inline graph dir_complete_bipartite(node_t num_left, node_t num_right) {
   return adj;
 }
 
-//! [undirected] generate a complete bipartite graph
+/// [undirected] generate a complete bipartite graph
 inline graph complete_bipartite(node_t num_left, node_t num_right) {
   return dir_complete_bipartite(num_left, num_right).make_undirected();
 }
 
-//! [undirected] generate a star graph
+/// [undirected] generate a star graph
 inline graph star(node_t num_nodes) {
-  ASSERT(num_nodes > 0);
   unweighted_adjacency_list adj(num_nodes);
   for (node_t v : irange(1u, num_nodes)) {
     adj[0].push_back(v);
@@ -46,9 +43,8 @@ inline graph star(node_t num_nodes) {
   return adj;
 }
 
-//! [undirected] generate a 3D-grid graph
+/// [undirected] generate a 3D-grid graph
 inline graph grid_3d(node_t num_x, node_t num_y, node_t num_z) {
-  ASSERT(num_x > 0 && num_y > 0 && num_z > 0);
   ASSERT_MSG(std::uint64_t(num_x) * num_y * num_z <= std::numeric_limits<node_t>::max(),
               "graph too large");
 
@@ -76,21 +72,18 @@ inline graph grid_3d(node_t num_x, node_t num_y, node_t num_z) {
   return adj;
 }
 
-//! [undirected] generate a 2D-grid graph
+/// [undirected] generate a 2D-grid graph
 inline graph grid(node_t num_cols, node_t num_rows) {
-  ASSERT(num_cols > 0 && num_rows > 0);
   return grid_3d(num_cols, num_rows, 1);
 }
 
-//! [undirected] generate a path graph
+/// [undirected] generate a path graph
 inline graph path(node_t num_nodes) {
-  ASSERT(num_nodes > 0);
   return grid_3d(num_nodes, 1, 1);
 }
 
-//! [directed] generate a directed cycle graph
+/// [directed] generate a directed cycle graph
 inline graph dir_cycle(node_t num_nodes) {
-  ASSERT(num_nodes > 0);
   unweighted_adjacency_list adj(num_nodes);
   for (node_t v : irange(num_nodes - 1)) {
     adj[v].push_back(v + 1);
@@ -101,9 +94,8 @@ inline graph dir_cycle(node_t num_nodes) {
   return adj;
 }
 
-//! [undirected] generate a cycle graph
+/// [undirected] generate a cycle graph
 inline graph cycle(node_t num_nodes) {
-  ASSERT(num_nodes > 0);
   return dir_cycle(num_nodes).make_undirected();
 }
 } // namespace bgl::gen

@@ -13,7 +13,7 @@ public:
 
   /// class initialization: O(n)
   union_find(integral_t count) : count_{count}, parent_(count), rank_(count) {
-    std::iota(parent_.begin(), parent_.end(), 0u);
+    std::iota(parent_.begin(), parent_.end(), static_cast<integral_t>(0));
   }
 
   /// merge sets that includes x and includes y: approximately O(1)
@@ -53,7 +53,8 @@ private:
 
   /// find representative ID
   integral_t find(integral_t x) {
-    return parent_[x] == x ? x : (parent_[x] = find(parent_[x]));
+    if (parent_[x] == x) return x;
+    return parent_[x] = find(parent_[x]);
   }
 };
 } // namespace bgl

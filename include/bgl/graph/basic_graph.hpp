@@ -234,7 +234,7 @@ public:
     num_edges_ = bgl::num_edges(adj);
     adj_ = std::move(adj);
     for (node_t v : nodes()) {
-      auto &es = adj_[v];
+      auto &es = mutable_edges(v);
       if (es.size() > 0) {
         std::sort(es.begin(), es.end());
         ASSERT_MSG(to(es.back()) < num_nodes_, "invalid index");
@@ -260,27 +260,8 @@ public:
   }
 
   /// make clone
-  graph_type clone() {
+  graph_type clone() const {
     return *this;
-  }
-
-  /// resize graph
-  void resize(node_t new_num_nodes) {
-    if (new_num_nodes < num_nodes_) {
-      for (node_t v : irange(new_num_nodes)) {
-        const auto &es = edges(v);
-        auto it = lower_bound(es.begin(), es.end(), new_num_nodes, compare_to<edge_type>);
-        num_edges_ -= es.end() - it;
-        es.erase(it, es.end());
-        es.shrink_to_fit();
-      }
-    }
-    for (node_t v : irange(new_num_nodes, num_nodes_)) {
-      num_edges_ -= outdegree(v);
-    }
-    num_nodes_ = new_num_nodes;
-    adj_.resize(new_num_nodes);
-    adj_.shrink_to_fit();
   }
 
   /* basic operations */
@@ -327,6 +308,11 @@ public:
     return adj_[v];
   };
 
+  /// return **mutable** edge list from node |v| (do not call without special reason)
+  std::vector<edge_type> &mutable_edges(node_t v) noexcept {
+    return adj_[v];
+  }
+
   /// return a neighbor from node |v| of index |i|
   node_t neighbor(node_t v, std::size_t i) const noexcept {
     return to(adj_[v][i]);
@@ -364,7 +350,7 @@ public:
   graph_type &simplify(bool preserve_all_weight = false) {
     num_edges_ = 0;
     for (node_t v : nodes()) {
-      auto &es = adj_[v];
+      auto &es = mutable_edges(v);
       remove_elements_if(es, lambda(e) { return to(e) == v; });
       if (preserve_all_weight) {
         remove_duplicates(es);
@@ -396,13 +382,13 @@ public:
     }
     for (node_t v : nodes()) {
       for (size_t i : irange(outdegrees[v])) {
-        const edge_type &e = adj_[v][i];
+        const edge_type &e = edge(v, i);
         adj_[to(e)].push_back(update_to(e, v));
       }
     }
     num_edges_ = 0;
     for (node_t v : nodes()) {
-      auto &es = adj_[v];
+      auto &es = mutable_edges(v);
       remove_duplicates(es);
       num_edges_ += es.size();
     }
@@ -424,7 +410,7 @@ public:
     }
 
     for (node_t v : irange(new_num_nodes)) {
-      auto &es = adj_[v];
+      auto &es = mutable_edges(v);
       if (v != new_id_rev[v]) {
         es = std::move(adj_[new_id_rev[v]]);
       }
@@ -458,14 +444,14 @@ public:
 
   /// add edge |e| from |v|
   void add_edge(node_t v, const edge_type &e) {
-    auto &es = adj_[v];
+    auto &es = mutable_edges(v);
     es.insert(std::upper_bound(es.begin(), es.end(), e), e);
     ++num_edges_;
   }
 
   /// remove all edges from |u| to |v|
   void remove_edge(node_t u, node_t v) {
-    auto &es = adj_[u];
+    auto &es = mutable_edges(u);
     auto lb = std::lower_bound(es.begin(), es.end(), v, compare_to<edge_type>);
     auto ub = std::upper_bound(es.begin(), es.end(), v, compare_to_rev<edge_type>);
     num_edges_ -= ub - lb;

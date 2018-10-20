@@ -86,6 +86,10 @@ public:
     return p.path_.size();
   }
 
+  static bool remove(const path &p) {
+    return apathy::Path::rm(p.path_);
+  }
+
   /* traverse */
 
   static std::vector<path> find(const path &dir, const std::string &wildcard = "") {
