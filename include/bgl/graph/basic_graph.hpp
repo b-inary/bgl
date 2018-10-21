@@ -351,11 +351,11 @@ public:
     num_edges_ = 0;
     for (node_t v : nodes()) {
       auto &es = mutable_edges(v);
-      remove_elements_if(es, lambda(e) { return to(e) == v; });
+      remove_elements_if(es, fn(e) { return to(e) == v; });
       if (preserve_all_weight) {
         remove_duplicates(es);
       } else {
-        remove_duplicates(es, lambda(lhs, rhs) { return to(lhs) == to(rhs); });
+        remove_duplicates(es, fn(lhs, rhs) { return to(lhs) == to(rhs); });
       }
       num_edges_ += es.size();
     }
@@ -414,7 +414,7 @@ public:
       if (v != new_id_rev[v]) {
         es = std::move(adj_[new_id_rev[v]]);
       }
-      filter(es, lambda(e) { return filter_list[to(e)]; });
+      filter(es, fn(e) { return filter_list[to(e)]; });
       new_num_edges += es.size();
       for (auto &e : es) {
         e = update_to(e, new_id[to(e)]);

@@ -31,7 +31,7 @@
     if (!(expr)) { \
       std::string msg = std::apply([](const auto &...args) { return fmt::format(args...); }, \
                                    std::make_tuple(__VA_ARGS__)); \
-      bgl::put_date_string(std::cerr, lambda() { \
+      bgl::put_date_string(std::cerr, fn() { \
         fmt::print(std::cerr, "{}:{}: ", _bgl_source_path(__FILE__), __LINE__); \
         std::cerr << rang::style::bold << (is_error ? rang::fg::red : rang::fg::yellow); \
         fmt::print(std::cerr, is_error ? "error: " : "warning: "); \

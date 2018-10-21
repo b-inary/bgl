@@ -144,7 +144,7 @@ private:
     // construct preprocessed graph
     for (node_t v : g_.nodes()) {
       auto &es = g_.mutable_edges(v);
-      if (alive[v]) filter(es, lambda(w) { return alive[w]; });
+      if (alive[v]) filter(es, fn(w) { return alive[w]; });
       else es.clear();
     }
   }

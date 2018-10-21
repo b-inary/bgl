@@ -162,7 +162,7 @@ std::vector<typename GraphType::weight_type>
 single_source_distance(const GraphType &g, node_t source) {
   using weight_type = typename GraphType::weight_type;
   std::vector<weight_type> result(g.num_nodes(), std::numeric_limits<weight_type>::max());
-  visit_by_distance(g, source, lambda(v, w) {
+  visit_by_distance(g, source, fn(v, w) {
     result[v] = w;
     return true;
   });

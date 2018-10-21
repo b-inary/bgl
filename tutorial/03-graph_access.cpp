@@ -103,7 +103,7 @@ int main() {
 
   // 頂点 0 から近い頂点を順に訪問します．
   // ラムダ式が false を返すと，その頂点からの探索を打ち切ります．
-  visit_by_distance(g, 0, lambda(v, w) {
+  visit_by_distance(g, 0, fn(v, w) {
     fmt::print("visit: {} / distance: {}\n", v, w);
     return true;
   });
@@ -112,7 +112,7 @@ int main() {
   // 狭い範囲の探索を繰り返す場合，|visitor_by_distance| クラスを利用することで
   // 再初期化のコストを抑えられます．
   visitor_by_distance<graph> visitor(g);
-  visitor.visit(0, lambda(v, w) { return true; });
+  visitor.visit(0, fn(v, w) { return true; });
 
   // 単一始点最短距離は |single_source_distance()| 関数で求められます．
   vector<int> distances = single_source_distance(g, 0);

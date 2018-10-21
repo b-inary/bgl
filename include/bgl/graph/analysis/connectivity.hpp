@@ -15,7 +15,7 @@ std::pair<node_t, std::vector<node_t>> weakly_connected_components(const GraphTy
   visitor_by_distance<GraphType> visitor(g);
 
   for (node_t v : g.nodes()) {
-    visitor.visit(v, lambda(w, d [[maybe_unused]]) {
+    visitor.visit(v, fn(w, d [[maybe_unused]]) {
       uf.unite(v, w);
       if (visited[w]) return false;
       visited[w] = true;
@@ -145,7 +145,7 @@ bool is_strongly_connected(const GraphType &g) {
   const node_t n = g.num_nodes();
   if (n == 0) return true;
   std::vector<bool> visited(n, false);
-  visit_by_distance(g, 0, lambda(v, d [[maybe_unused]]) {
+  visit_by_distance(g, 0, fn(v, d [[maybe_unused]]) {
     visited[v] = true;
     return true;
   });

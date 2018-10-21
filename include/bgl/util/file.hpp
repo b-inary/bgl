@@ -154,7 +154,7 @@ private:
 
   static std::string regex_of_wildcard(const std::string &wildcard) {
     std::string result = wildcard;
-    auto replace = lambda(target, replacement) {
+    auto replace = fn(target, replacement) {
       std::string::size_type pos = 0;
       while ((pos = result.find(target, pos)) != std::string::npos) {
         result.replace(pos, 1, replacement);

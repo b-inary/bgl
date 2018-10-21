@@ -30,9 +30,9 @@ int main() {
   /* 2. 簡単! ラムダマクロ */
 
   // C++11のラムダ式を (やや) 簡単に書けるようにするためのマクロが用意されています．
-  // lambda(a, b) は [&](const auto &a, const auto &b) に展開されます．(8引数まで対応)
-  auto const42 = lambda() { return 42; };
-  auto add = lambda(x, y) { return x + y; };
+  // fn(a, b) は [&](const auto &a, const auto &b) に展開されます．(8引数まで対応)
+  auto const42 = fn() { return 42; };
+  auto add = fn(x, y) { return x + y; };
 
 
   /* 3. アサーションマクロ */
@@ -52,10 +52,10 @@ int main() {
   console_log("this is a {}.", "log");  // 標準エラー出力にログを書き出します
 
   // 実行時間を計測する |console_timer()|, |console_fn_timer| マクロもあります．
-  auto fn = lambda() {
+  auto lambda = fn() {
     console_fn_timer;   // ブロックの先頭で宣言すると，ブロック全体の実行時間を計測します
   };
-  console_timer("some process", fn);  // 第2引数で計測を行う関数を指定します
+  console_timer("some process", lambda);  // 第2引数で計測を行う関数を指定します
 
   // 出力ストリームを指定する場合はそれぞれ |write_log()|, |timer()|, |fn_timer()| です．
   write_log(std::cout, "write to standard output");

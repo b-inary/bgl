@@ -140,7 +140,7 @@ void _bgl_timer(std::ostream &os, std::string_view title, const char *file, int 
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  put_date_string(os, lambda() {
+  put_date_string(os, fn() {
     fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
     os << rang::style::bold << rang::fg::cyan;
     fmt::print(os, "timer: ");
@@ -161,7 +161,7 @@ public:
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
 
-    put_date_string(os_, lambda() {
+    put_date_string(os_, fn() {
       fmt::print(os_, "{}:{}: ", _bgl_source_path(file_), line_);
       os_ << rang::style::bold << rang::fg::cyan;
       fmt::print(os_, "fn-timer: ");
@@ -182,7 +182,7 @@ void _bgl_console_log(std::ostream &os, const char *file, int line, const Args &
   std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
                                 std::make_tuple(args...));
 
-  put_date_string(os, lambda() {
+  put_date_string(os, fn() {
     fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
     os << rang::style::bold << rang::fg::cyan;
     fmt::print(os, "log: ");

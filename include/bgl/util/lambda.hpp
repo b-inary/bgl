@@ -3,11 +3,11 @@
 // https://rhysd.hatenablog.com/entry/2014/01/28/235958
 
 /**
- * @brief easy lambda wrapper. ex) lambda(a, b) -> [&](const auto &a, const auto &b)<br>
+ * @brief easy lambda wrapper. ex) fn(a, b) -> [&](const auto &a, const auto &b)<br>
  *        supports up to 8 arguments. does not work on MSVC...
  * @param ... arguments
  */
-#define lambda(...) _BGL_LAMBDA_III(_BGL_IS_EMPTY(__VA_ARGS__))(__VA_ARGS__)
+#define fn(...) _BGL_LAMBDA_III(_BGL_IS_EMPTY(__VA_ARGS__))(__VA_ARGS__)
 
 
 #define _BGL_HAS_COMMA_I(a0, a1, a2, a3, a4, a5, a6, a7, ...) a7

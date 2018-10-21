@@ -46,10 +46,10 @@ inline graph star(node_t num_nodes) {
 /// [undirected] generate a 3D-grid graph
 inline graph grid_3d(node_t num_x, node_t num_y, node_t num_z) {
   ASSERT_MSG(std::uint64_t(num_x) * num_y * num_z <= std::numeric_limits<node_t>::max(),
-              "graph too large");
+             "graph too large");
 
   unweighted_adjacency_list adj(num_x * num_y * num_z);
-  auto idx = lambda(x, y, z) { return x + num_x * (y + num_y * z); };
+  auto idx = fn(x, y, z) { return x + num_x * (y + num_y * z); };
   for (node_t z : irange(num_z)) {
     for (node_t y : irange(num_y)) {
       for (node_t x : irange(num_x)) {
