@@ -90,7 +90,7 @@ node_t num_nodes(const edge_list<EdgeType> &es) {
 }
 
 template <typename EdgeType>
-size_t num_edges(const edge_list<EdgeType> &es) {
+std::size_t num_edges(const edge_list<EdgeType> &es) {
   return es.size();
 }
 
@@ -109,8 +109,8 @@ node_t num_nodes(const adjacency_list<EdgeType> &adj) {
 }
 
 template <typename EdgeType>
-size_t num_edges(const adjacency_list<EdgeType> &adj) {
-  size_t n = 0;
+std::size_t num_edges(const adjacency_list<EdgeType> &adj) {
+  std::size_t n = 0;
   for (const auto &es : adj) {
     n += es.size();
   }
@@ -289,7 +289,7 @@ public:
   };
 
   /// return outdegree of node |v|
-  size_t outdegree(node_t v) const noexcept {
+  std::size_t outdegree(node_t v) const noexcept {
     return adj_[v].size();
   };
 
@@ -376,12 +376,12 @@ public:
 
   /// [destructive] make graph undirected
   graph_type &make_undirected() {
-    std::vector<size_t> outdegrees(num_nodes());
+    std::vector<std::size_t> outdegrees(num_nodes());
     for (node_t v : nodes()) {
       outdegrees[v] = outdegree(v);
     }
     for (node_t v : nodes()) {
-      for (size_t i : irange(outdegrees[v])) {
+      for (std::size_t i : irange(outdegrees[v])) {
         const edge_type &e = edge(v, i);
         adj_[to(e)].push_back(update_to(e, v));
       }
@@ -472,7 +472,7 @@ public:
     fmt::print(os, "--------------------\n");
     for (node_t v : irange(std::min(num_nodes(), kLimitNumNodes))) {
       fmt::print(os, "  {} -> ", v);
-      for (size_t i : irange(std::min(outdegree(v), kLimitNumEdges))) {
+      for (std::size_t i : irange(std::min(outdegree(v), kLimitNumEdges))) {
         if (i > 0) fmt::print(os, ", ");
         fmt::print(os, "{}", edges(v)[i]);
       }
@@ -490,7 +490,7 @@ public:
     return typename_of(weight_type{});
   }
 
-  size_t weight_sizeof() const {
+  std::size_t weight_sizeof() const {
     if (std::is_same_v<edge_type, unweighted_edge_t>) return 0;
     return sizeof(weight_type);
   }

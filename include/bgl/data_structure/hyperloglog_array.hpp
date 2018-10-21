@@ -32,7 +32,7 @@ private:
 
     /// insert 64-bit integer element
     void insert(std::uint64_t elem) {
-      insert_hash(internal_hash(elem));
+      insert_hash(internal_hash(elem ^ outer_.seed_));
     }
 
     /// insert 64-bit hash value directly
@@ -63,7 +63,7 @@ private:
     }
 
     /// estimate the number of distinct elements (modified version)
-    /// @see: http://oertl.github.io/hyperloglog-sketch-estimation-paper/
+    /// @see http://oertl.github.io/hyperloglog-sketch-estimation-paper/
     double count() const {
       int zero_count = 0;
 
@@ -90,17 +90,18 @@ private:
       return !(*this == rhs);
     }
 
-   private:
+  private:
     hyperloglog_array &outer_;
     uint8_t *regs_;
   };
 
- public:
-  hyperloglog_array(std::size_t count, int log2k)
+public:
+  hyperloglog_array(std::size_t count, int log2k, std::uint64_t seed = 0)
     : size_{count}
     , k_{1 << log2k}
     , log2k_{log2k}
     , norm_term_{std::pow(2, log2k - 63)}
+    , seed_{internal_hash(seed)}
     , ary_(count << log2k, 32)
   {
     ASSERT_MSG(5 <= log2k && log2k <= 20,
@@ -127,11 +128,12 @@ private:
     return !(*this == rhs);
   }
 
- private:
+private:
   size_t size_;
   int k_;
   int log2k_;
   double norm_term_;
+  std::uint64_t seed_;
   aligned_array<std::uint8_t> ary_;
   std::vector<double> sigma_table_;
 

@@ -29,7 +29,7 @@ int main() {
     for (auto &e : g.edges(v)) {}
 
     // C++17の記法を利用することで，重み有りグラフの辺の走査は次のようにも書けます．
-    // for (const auto [node, weight] : g.edges(v)) {}
+    // for (auto [node, weight] : g.edges(v)) {}
 
     // 辺の重みに興味がない場合は，|neighbors()| を使うことで重み無し/有りで共通に書けます．
     for (node_t u : g.neighbors(v)) {}

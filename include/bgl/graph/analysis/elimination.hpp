@@ -16,12 +16,13 @@ namespace bgl {
  *  [possible connection]
  *    - normal -> normal, hub, dead
  *    - hub -> normal
- *    - dead -> hub, dead
+ *    - dead -> hub, dead (parent link)
  *
- *  |purify_adjacency_list()| deletes normal -> dead links.
+ *  |purify()| deletes normal -> dead links.
  */
 class min_degree_eliminator {
 public:
+  /// constructor: input graph must be undirected
   min_degree_eliminator(const graph &g, std::size_t threshold)
     : min_degree_eliminator(g.clone(), threshold) {}
 
@@ -36,7 +37,7 @@ public:
     do_contraction_loop(threshold);
   }
 
-  const std::vector<node_t> &order() const { return order_; }
+  const std::vector<node_t> &partial_ordering() const { return order_; }
   const std::vector<node_t> &width_ends() const { return width_ends_; }
 
 private:
@@ -52,7 +53,7 @@ private:
     return parent_[v] = find_parent_hub(parent_[v]);
   }
 
-  void purify_adjacency_list(node_t v) {
+  void purify(node_t v) {
     auto &es = g_.mutable_edges(v);
     for (node_t &w : es) {
       if (is_dead_[w]) w = find_parent_hub(w);
@@ -96,7 +97,7 @@ private:
 
   std::size_t get_degree(node_t v) {
     std::vector<node_t> neighbors;
-    purify_adjacency_list(v);
+    purify(v);
 
     for (node_t w : g_.neighbors(v)) {
       if (is_hub_[w]) {
