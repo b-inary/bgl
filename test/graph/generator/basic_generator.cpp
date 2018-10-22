@@ -2,7 +2,7 @@
 #include "bgl/graph/generator/basic_generator.hpp"
 using namespace bgl;
 
-TEST_CASE("generators") {
+TEST_CASE("basic-generators", "[generator]") {
   SECTION("complete") {
     graph g = gen::complete(10);
     REQUIRE(g.num_nodes() == 10);
