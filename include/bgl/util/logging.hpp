@@ -23,58 +23,31 @@
 #define _BGL_TO_STRING(s) _BGL_EVAL(_BGL_TO_STRING_HELPER, s)
 #define _BGL_TO_STRING_HELPER(s) #s
 
-/**
- * @brief easy timer logging macro. output to stderr
- * @param title title for logging
- * @param ... function that we want to measure (typically lambda function)
- * @note uses __VA_ARGS__ because comma can appear inside lambda function
- */
-#define console_timer(title, ...) \
-  _bgl_timer(std::cerr, title, __FILE__, __LINE__, __VA_ARGS__)
+/// easy timer logging macro that measures entire block.
+/// usage: declare CONSOLE_TIMER at the top of block
+#define CONSOLE_TIMER \
+  _bgl_timer _bgl_timer_instance(std::cerr, __FILE__, __LINE__, __func__)
 
-/**
- * @brief easy timer logging macro. specify output stream
- * @param os output stream for logging
- * @param title title for logging
- * @param ... function that we want to measure (typically lambda function)
- * @note uses __VA_ARGS__ because comma can appear inside lambda function
- */
-#define timer(os, title, ...) \
-  _bgl_timer(os, title, __FILE__, __LINE__, __VA_ARGS__)
+/// easy timer logging macro that measures entire block.
+/// usage: declare TIMER(os) at the top of block
+/// @param os output stream for logging
+#define TIMER(os) \
+  _bgl_timer _bgl_timer_instance(os, __FILE__, __LINE__, __func__)
 
-/**
- * @brief easy timer logging macro that measures entire function.
- *        usage: declare fn_timer_stderr at the top of function
- */
-#define console_fn_timer \
-  _bgl_fn_timer _bgl_fn_timer_instance(std::cerr, __FILE__, __LINE__, __func__)
-
-/**
- * @brief easy timer logging macro that measures entire function.
- *        usage: declare fn_timer(os) at the top of function
- * @param os output stream for logging
- */
-#define fn_timer(os) \
-  _bgl_fn_timer _bgl_fn_timer_instance(os, __FILE__, __LINE__, __func__)
-
-/**
- * @brief logging wrapper macro that outputs to stderr
- * @param ... format string (of fmt library)
- */
-#define console_log(...) \
+/// logging macro
+/// @param ... format string (of fmt library)
+#define CONSOLE_LOG(...) \
   _bgl_console_log(std::cerr, __FILE__, __LINE__, __VA_ARGS__)
 
-/**
- * @brief logging wrapper macro specifying output stream
- * @param os output stream for logging
- * @param ... format string (of fmt library)
- */
-#define write_log(os, ...) \
+/// logging macro for specified output stream
+/// @param os output stream for logging
+/// @param ... format string (of fmt library)
+#define WRITE_LOG(os, ...) \
   _bgl_console_log(os, __FILE__, __LINE__, __VA_ARGS__)
 
 
 namespace bgl {
-//! print right-aligned string when output stream is terminal
+/// print right-aligned string when output stream is terminal
 inline void pretty_append(std::ostream &os, std::function<void()> body, const std::string &str) {
   if (!rang::rang_implementation::isTerminal(os.rdbuf())) {
     os << str << ' ';
@@ -108,7 +81,7 @@ inline void pretty_append(std::ostream &os, std::function<void()> body, const st
   fmt::print(os, "\x1b[{}G{}", width - str.length() + 1, str);
 }
 
-//! generate string representing current date and time
+/// generate string representing current date and time
 inline std::string get_date_string() {
   auto now = std::chrono::system_clock::now();
   std::time_t time = std::chrono::system_clock::to_time_t(now);
@@ -118,7 +91,7 @@ inline std::string get_date_string() {
   return fmt::format("[{:%Y-%m-%d %H:%M:%S}.{:02g}]", tm, std::floor(now_ms.count() / 10.0));
 }
 
-//! output string obtained by get_date_string() to |os|
+/// output string obtained by |get_date_string()| to |os|
 inline void put_date_string(std::ostream &os, std::function<void()> body) {
   pretty_append(os, body, get_date_string());
 }
@@ -133,31 +106,15 @@ inline std::string _bgl_source_path(const char *file) {
 #endif
 }
 
-template <typename Body>
-void _bgl_timer(std::ostream &os, std::string_view title, const char *file, int line, Body body) {
-  auto start = std::chrono::system_clock::now();
-  body();
-  auto end = std::chrono::system_clock::now();
-  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-  put_date_string(os, fn() {
-    fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
-    os << rang::style::bold << rang::fg::cyan;
-    fmt::print(os, "timer: ");
-    os << rang::style::reset << rang::fg::reset;
-    fmt::print(os, "{}: {}[ms]", title, elapsed.count());
-  });
-}
-
-class _bgl_fn_timer {
+class _bgl_timer {
 public:
-  _bgl_fn_timer(std::ostream &os, const char *file, int line, const char *func)
+  _bgl_timer(std::ostream &os, const char *file, int line, const char *func)
     : os_{os}
     , file_{file}
     , func_{func}
     , line_{line}
     , start_{std::chrono::high_resolution_clock::now()} {}
-  ~_bgl_fn_timer() {
+  ~_bgl_timer() {
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
 

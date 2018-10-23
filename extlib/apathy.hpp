@@ -448,7 +448,7 @@ namespace apathy {
     }
 
     inline size_t Path::size() const {
-        std::ifstream ifs(path, std::ios::binary | std::ios::ate);
+        std::ifstream ifs(path, std::ios_base::binary | std::ios_base::ate);
         return ifs.tellg();
     }
 

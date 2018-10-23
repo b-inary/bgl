@@ -49,16 +49,16 @@ int main() {
   /* 4. ログ出力マクロ */
 
   // 時刻とソースコードの位置を合わせて簡単にログが残せるマクロも用意されています．
-  console_log("this is a {}.", "log");  // 標準エラー出力にログを書き出します
+  CONSOLE_LOG("this is a {}.", "log");  // 標準エラー出力にログを残します
 
-  // 実行時間を計測する |console_timer()|, |console_fn_timer| マクロもあります．
-  auto lambda = fn() {
-    console_fn_timer;   // ブロックの先頭で宣言すると，ブロック全体の実行時間を計測します
+  // 実行時間を計測する |CONSOLE_TIMER| マクロもあります．
+  {
+    // ブロックの先頭で宣言すると，ブロック全体の実行時間を計測します
+    CONSOLE_TIMER;
   };
-  console_timer("some process", lambda);  // 第2引数で計測を行う関数を指定します
 
-  // 出力ストリームを指定する場合はそれぞれ |write_log()|, |timer()|, |fn_timer()| です．
-  write_log(std::cout, "write to standard output");
+  // 出力ストリームを指定する場合はそれぞれ |WRITE_LOG()|, |TIMER()| です．
+  WRITE_LOG(std::cout, "write to standard output");
 
 
   /* 5. irange */
