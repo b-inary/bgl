@@ -37,7 +37,7 @@ private:
       return ready();
     }
 
-    cui_graph_iterator &begin() { return *this; }
+    cui_graph_iterator &&begin() { return std::move(*this); }
     cui_graph_iterator end() const { return {}; }
     bool operator==(const cui_graph_iterator &rhs) const {
       return index_ == paths_.size() && rhs.index_ == rhs.paths_.size();
