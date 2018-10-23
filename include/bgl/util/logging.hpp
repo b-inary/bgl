@@ -32,7 +32,7 @@
 /// usage: declare TIMER(os) at the top of block
 /// @param os output stream for logging
 #define TIMER(os) \
-  _bgl_timer _bgl_timer_instance(os, __FILE__, __LINE__)
+  _bgl_timer _bgl_timer_instance((os), __FILE__, __LINE__)
 
 /// logging macro
 /// @param ... format string (of fmt library)
@@ -43,7 +43,7 @@
 /// @param os output stream for logging
 /// @param ... format string (of fmt library)
 #define WRITE_LOG(os, ...) \
-  _bgl_console_log(os, __FILE__, __LINE__, __VA_ARGS__)
+  _bgl_console_log((os), __FILE__, __LINE__, __VA_ARGS__)
 
 
 namespace bgl {

@@ -297,7 +297,7 @@ public:
   }
   std::pair<GraphType&, const path&> operator*() { return {g_, paths_[index_]}; };
   graph_folder_iterator &operator++() { ++index_; return ready(); }
-  graph_folder_iterator &begin() { return *this; }
+  graph_folder_iterator &&begin() { return std::move(*this); }
   graph_folder_iterator end() const { return {}; }
   bool operator!=(const graph_folder_iterator &rhs) const {
     return index_ != paths_.size() || rhs.index_ != rhs.paths_.size();
