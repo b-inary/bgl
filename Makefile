@@ -1,16 +1,14 @@
 
-.PHONY: all debug test target target-debug doc clean
+.PHONY: test debug target target-debug doc clean
 
-all:
+test:
 	@mkdir -p build
 	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja
+	@bin/run_tests
 
 debug:
 	@mkdir -p build
 	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug && ninja
-
-test: all
-	@bin/run_tests
 
 target:
 	@mkdir -p build

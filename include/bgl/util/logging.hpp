@@ -26,13 +26,13 @@
 /// easy timer logging macro that measures entire block.
 /// usage: declare CONSOLE_TIMER at the top of block
 #define CONSOLE_TIMER \
-  _bgl_timer _bgl_timer_instance(std::cerr, __FILE__, __LINE__, __func__)
+  _bgl_timer _bgl_timer_instance(std::cerr, __FILE__, __LINE__)
 
 /// easy timer logging macro that measures entire block.
 /// usage: declare TIMER(os) at the top of block
 /// @param os output stream for logging
 #define TIMER(os) \
-  _bgl_timer _bgl_timer_instance(os, __FILE__, __LINE__, __func__)
+  _bgl_timer _bgl_timer_instance(os, __FILE__, __LINE__)
 
 /// logging macro
 /// @param ... format string (of fmt library)
@@ -108,10 +108,9 @@ inline std::string _bgl_source_path(const char *file) {
 
 class _bgl_timer {
 public:
-  _bgl_timer(std::ostream &os, const char *file, int line, const char *func)
+  _bgl_timer(std::ostream &os, const char *file, int line)
     : os_{os}
     , file_{file}
-    , func_{func}
     , line_{line}
     , start_{std::chrono::high_resolution_clock::now()} {}
   ~_bgl_timer() {
@@ -121,15 +120,14 @@ public:
     put_date_string(os_, fn() {
       fmt::print(os_, "{}:{}: ", _bgl_source_path(file_), line_);
       os_ << rang::style::bold << rang::fg::cyan;
-      fmt::print(os_, "fn-timer: ");
+      fmt::print(os_, "timer: ");
       os_ << rang::style::reset << rang::fg::reset;
-      fmt::print(os_, "{}(): {}[ms]", func_, elapsed.count());
+      fmt::print(os_, "{}[ms]", elapsed.count());
     });
   }
 private:
   std::ostream &os_;
   const char *file_;
-  const char *func_;
   const int line_;
   const std::chrono::time_point<std::chrono::high_resolution_clock> start_;
 };
