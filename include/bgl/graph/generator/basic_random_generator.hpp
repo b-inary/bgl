@@ -34,7 +34,7 @@ inline graph erdos_renyi(node_t num_nodes, double average_degree) {
 
 /// [undirected] generate a random graph by the configuration model with a given degree sequence.
 /// note that configuration model can produce self loops and multiple edges.
-/// @param g target graph (must be undirected without loops)
+/// @param g target graph that specifies a degree sequence (must be undirected without loops)
 inline graph configuration(const graph &g) {
   std::vector<node_t> half_edges;
   for (node_t v : g.nodes()) {

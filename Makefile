@@ -1,9 +1,9 @@
 
-.PHONY: all debug test target doc clean
+.PHONY: all debug test target target-debug doc clean
 
 all:
 	@mkdir -p build
-	@cd build; cmake .. -GNinja && ninja
+	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja
 
 debug:
 	@mkdir -p build
@@ -14,7 +14,11 @@ test: all
 
 target:
 	@mkdir -p build
-	@cd build; cmake .. -GNinja && ninja ${TARGET}
+	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja ${TARGET}
+
+target-debug:
+	@mkdir -p build
+	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug && ninja ${TARGET}
 
 doc: include/bgl/
 	@doxygen Doxyfile

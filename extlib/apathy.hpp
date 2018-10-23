@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <iterator>
 #include <cctype>
@@ -447,12 +448,8 @@ namespace apathy {
     }
 
     inline size_t Path::size() const {
-        struct stat buf;
-        if (stat(path.c_str(), &buf) != 0) {
-            return 0;
-        } else {
-            return buf.st_size;
-        }
+        std::ifstream ifs(path, std::ios::binary | std::ios::ate);
+        return ifs.tellg();
     }
 
     /**************************************************************************

@@ -390,6 +390,7 @@ public:
     for (node_t v : nodes()) {
       auto &es = mutable_edges(v);
       remove_duplicates(es);
+      es.shrink_to_fit();
       num_edges_ += es.size();
     }
     return *this;
