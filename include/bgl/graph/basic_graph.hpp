@@ -57,17 +57,17 @@ update_to(const unweighted_edge_t&, node_t v) noexcept {
 
 template <typename WeightType>
 constexpr weighted_edge_t<WeightType>
-update_to(const weighted_edge_t<WeightType> e, node_t v) noexcept {
+update_to(const weighted_edge_t<WeightType> &e, node_t v) noexcept {
   return {v, weight(e)};
 }
 
 template <typename EdgeType>
-bool compare_to(EdgeType e, node_t v) {
+bool compare_to(const EdgeType &e, node_t v) {
   return to(e) < v;
 }
 
 template <typename EdgeType>
-bool compare_to_rev(node_t v, EdgeType e) {
+bool compare_to_rev(node_t v, const EdgeType &e) {
   return v < to(e);
 }
 
@@ -357,6 +357,7 @@ public:
       } else {
         remove_duplicates(es, fn(lhs, rhs) { return to(lhs) == to(rhs); });
       }
+      es.shrink_to_fit();
       num_edges_ += es.size();
     }
     return *this;
@@ -366,9 +367,12 @@ public:
   graph_type &transpose() {
     adjacency_list<edge_type> adj(num_nodes());
     for (node_t v : nodes()) {
-      for (const edge_type &e : edges(v)) {
+      auto &es = mutable_edges(v);
+      for (const edge_type &e : es) {
         adj[to(e)].push_back(update_to(e, v));
       }
+      es.clear();
+      es.shrink_to_fit();
     }
     adj_ = std::move(adj);
     return *this;
