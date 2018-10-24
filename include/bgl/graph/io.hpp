@@ -295,6 +295,13 @@ public:
     }
     ready();
   }
+
+  // prohibit copying
+  graph_folder_iterator(const graph_folder_iterator&) = delete;
+  graph_folder_iterator(graph_folder_iterator&&) = default;
+  graph_folder_iterator &operator=(const graph_folder_iterator&) = delete;
+  graph_folder_iterator &operator=(graph_folder_iterator&&) = default;
+
   std::pair<GraphType&, const path&> operator*() { return {g_, paths_[index_]}; };
   graph_folder_iterator &operator++() { ++index_; return ready(); }
   graph_folder_iterator &&begin() { return std::move(*this); }

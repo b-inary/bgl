@@ -1,6 +1,7 @@
 #pragma once
 #include "bgl/util/all.hpp"
 #include <utility>
+#include <new>
 #include <cstdlib>
 #include <cstring>
 
@@ -85,7 +86,7 @@ class aligned_array {
   static value_type *aligned_malloc(std::size_t size, std::size_t align) {
     std::size_t offset = align + sizeof(std::size_t);
     void *p = std::malloc(size + offset);
-    if (!p) return nullptr;
+    if (!p) throw std::bad_alloc();
     std::size_t addr = reinterpret_cast<std::size_t>(p);
     void **aligned = reinterpret_cast<void**>((addr + offset) & ~(align - 1));
     aligned[-1] = p;

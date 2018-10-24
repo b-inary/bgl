@@ -27,6 +27,12 @@ private:
       ready();
     }
 
+    // prohibit copying
+    cui_graph_iterator(const cui_graph_iterator&) = delete;
+    cui_graph_iterator(cui_graph_iterator&&) = default;
+    cui_graph_iterator &operator=(const cui_graph_iterator&) = delete;
+    cui_graph_iterator &operator=(cui_graph_iterator&&) = default;
+
     std::pair<GraphType&, const path&> operator*() {
       if (app_->folder_mode_) return *iter_;
       return {g_, paths_[index_]};

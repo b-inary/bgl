@@ -60,8 +60,7 @@ inline graph configuration(const graph &g) {
   std::shuffle(half_edges_out.begin(), half_edges_out.end(), bgl_random);
 
   unweighted_adjacency_list adj(g.num_nodes());
-  const std::size_t num_edges = half_edges_in.size();
-  for (std::size_t i : irange(num_edges)) {
+  for (std::size_t i : irange(g.num_edges())) {
     node_t v = half_edges_out[i];
     node_t w = half_edges_in[i];
     adj[v].push_back(w);
