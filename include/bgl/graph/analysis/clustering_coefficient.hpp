@@ -5,12 +5,12 @@
 namespace bgl {
 // compute clustering coefficient per degree up to |degree_threshold|: |g| must be undirected
 std::vector<double> clustering_coefficient_per_degree(const graph &g, node_t degree_threshold) {
-  std::vector<std::size_t> count(degree_threshold + 1);
-  std::vector<std::size_t> num_triangles(degree_threshold + 1);
+  std::vector<std::atomic<std::size_t>> count(degree_threshold + 1);
+  std::vector<std::atomic<std::size_t>> num_triangles(degree_threshold + 1);
 
-  for (node_t u : g.nodes()) {
+  g.for_each_node(fn(u) {
     std::size_t du = g.outdegree(u);
-    if (du > degree_threshold) continue;
+    if (du > degree_threshold) return;
     ++count[du];
 
     for (std::size_t i : irange(du)) {
@@ -22,7 +22,7 @@ std::vector<double> clustering_coefficient_per_degree(const graph &g, node_t deg
         }
       }
     }
-  }
+  });
 
   std::vector<double> result(degree_threshold + 1);
   for (node_t i : irange(degree_threshold + 1)) {

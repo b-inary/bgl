@@ -5,7 +5,10 @@
 #include <algorithm>
 #include <utility>
 #include <iterator>
+#include <functional>
 #include <type_traits>
+#include <thread>
+#include <atomic>
 #include <optional>
 #include <cstdlib>
 #include <cstdint>
@@ -178,6 +181,8 @@ public:
   using weight_type = decltype(weight(edge_type{}));
   using graph_type = basic_graph<EdgeType>;
 
+  static const node_t kParallelUnit = 1024;
+
   /* initialization */
 
   /// default constructor
@@ -342,6 +347,35 @@ public:
   /// get edge list of the graph
   edge_list<edge_type> get_edge_list() const {
     return convert_to_edge_list(adj_);
+  }
+
+  /* parallel node for-loop */
+
+  /// parallel for-each
+  /// @param callback callback function (must be thread safe): argument is node ID
+  /// @param num_threads the number of threads: when specified 0, set automatically
+  void for_each_node(std::function<void(node_t)> callback, int num_threads = 0) const {
+    std::atomic<int> counter = 0;
+    std::vector<std::thread> workers;
+    if (num_threads == 0) num_threads = std::thread::hardware_concurrency();
+
+    for (int i [[maybe_unused]] : irange(num_threads)) {
+      workers.push_back(std::thread(fn() {
+        while (true) {
+          int cnt = counter++;
+          node_t start = cnt * kParallelUnit;
+          node_t end = std::min((cnt + 1) * kParallelUnit, num_nodes());
+          for (node_t v : irange(start, end)) {
+            callback(v);
+          }
+          if (end == num_nodes()) return;
+        }
+      }));
+    }
+
+    for (int i : irange(num_threads)) {
+      workers[i].join();
+    }
   }
 
   /* graph conversion */

@@ -29,10 +29,10 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
   std::vector<bool> next_updated;
 
   for (node_t d : irange(threshold)) {
-    bool loop = false;
+    std::atomic<bool> loop = false;
     next_updated.assign(n, false);
 
-    for (node_t u : g.nodes()) {
+    g.for_each_node(fn(u) {
       bool merged = false;
       for (node_t v : g.neighbors(u)) {
         if (curr_updated[v]) {
@@ -46,7 +46,7 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
         callback(u, d + 1, count - cache[u]);
         cache[u] = count;
       }
-    }
+    });
 
     if (!loop) break;
     curr_hll = next_hll;

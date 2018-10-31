@@ -21,8 +21,8 @@ private:
         paths_.push_back(p);
       }
       if (app_->folder_mode_) {
-        iter_ = graph_folder_iterator<GraphType>(paths_[index_], app_->recursive_,
-                                                 app_->rename_id_, app_->max_mb_);
+        iter_ = graph_folder_iterator<GraphType>(
+          paths_[index_], app_->recursive_, app_->rename_id_, app_->max_mb_);
       }
       ready();
     }
@@ -64,8 +64,8 @@ private:
         while (true) {
           if (iter_ != iter_.end()) break;
           if (++index_ >= paths_.size()) return *this;
-          iter_ = graph_folder_iterator<GraphType>(paths_[index_], app_->recursive_,
-                                                   app_->rename_id_, app_->max_mb_);
+          iter_ = graph_folder_iterator<GraphType>(
+            paths_[index_], app_->recursive_, app_->rename_id_, app_->max_mb_);
         }
       } else {
         if (index_ >= paths_.size()) return *this;
@@ -103,7 +103,7 @@ public:
 
   template <typename GraphType>
   cui_graph_iterator<GraphType> graph_iterator() const {
-    cui_graph_iterator<GraphType> iter = *this;
+    cui_graph_iterator<GraphType> iter(*this);
     if (iter == iter.end()) {
       std::cerr << get_name() << ": ";
       std::cerr << rang::style::bold << rang::fg::yellow;
