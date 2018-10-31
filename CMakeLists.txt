@@ -15,7 +15,8 @@ include_directories(${bgl_SOURCE_DIR})
 include_directories(${bgl_SOURCE_DIR}/extlib/fmt/include)
 include_directories(${bgl_SOURCE_DIR}/include)
 
-set(EXT_LIBRARIES fmt-header-only)
+find_package(Threads REQUIRED)
+set(EXT_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} fmt-header-only)
 set(TEST_LIBRARY ${bgl_SOURCE_DIR}/extlib/catch_main.cpp)
 
 add_subdirectory(extlib/fmt)
