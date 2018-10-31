@@ -349,9 +349,9 @@ public:
     return convert_to_edge_list(adj_);
   }
 
-  /* parallel node for-loop */
+  /* parallel for-each loop */
 
-  /// parallel for-each
+  /// parallel for-each loop
   /// @param callback callback function (must be thread safe): argument is node ID
   /// @param num_threads the number of threads: when specified 0, set automatically
   void for_each_node(std::function<void(node_t)> callback, int num_threads = 0) const {
@@ -362,9 +362,9 @@ public:
     for (int i [[maybe_unused]] : irange(num_threads)) {
       workers.push_back(std::thread(fn() {
         while (true) {
-          int cnt = counter++;
-          node_t start = cnt * kParallelUnit;
-          node_t end = std::min((cnt + 1) * kParallelUnit, num_nodes());
+          int index = counter++;
+          node_t start = index * kParallelUnit;
+          node_t end = std::min((index + 1) * kParallelUnit, num_nodes());
           for (node_t v : irange(start, end)) {
             callback(v);
           }

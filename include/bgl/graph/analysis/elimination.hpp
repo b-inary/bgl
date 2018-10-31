@@ -115,7 +115,7 @@ private:
   void preprocess() {
     std::vector<bool> alive(g_.num_nodes(), true);
 
-    // remove zero-degree vertices
+    // remove zero-degree nodes
     for (node_t v : g_.nodes()) {
       if (g_.outdegree(v) == 0) {
         alive[v] = false;
