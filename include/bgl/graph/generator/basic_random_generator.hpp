@@ -73,7 +73,7 @@ inline graph configuration(const graph &g) {
 /// @see "Systematic topology analysis and generation using degree correlations"
 ///      (P. Mahadevan et al.). In SIGCOMM'06.
 /// @param g (directed) target graph
-inline graph configuration_2d(const graph &g) {
+inline graph configuration_2d(const graph &g, int bin_size = 0) {
   std::vector<std::size_t> indegree(g.num_nodes());
   for (node_t v : g.nodes()) {
     for (node_t w : g.neighbors(v)) {
@@ -86,11 +86,13 @@ inline graph configuration_2d(const graph &g) {
   for (node_t v : g.nodes()) {
     std::size_t indeg = indegree[v];
     std::size_t outdeg = g.outdegree(v);
+    std::size_t in_bin = bin_size ? std::floor(std::log10(indeg) * bin_size) : indeg;
+    std::size_t out_bin = bin_size ? std::floor(std::log10(outdeg) * bin_size) : outdeg;
     for (std::size_t i [[maybe_unused]] : irange(indeg)) {
-      half_edges_in[indeg].push_back(v);
+      half_edges_in[in_bin].push_back(v);
     }
     for (std::size_t i [[maybe_unused]] : irange(outdeg)) {
-      half_edges_out[outdeg].push_back(v);
+      half_edges_out[out_bin].push_back(v);
     }
   }
 
@@ -107,10 +109,10 @@ inline graph configuration_2d(const graph &g) {
 
   for (node_t v : g.nodes()) {
     for (node_t w : g.neighbors(v)) {
-      std::size_t dv = g.outdegree(v);
-      std::size_t dw = indegree[w];
-      node_t new_v = half_edges_out[dv][outdeg_count[dv]++];
-      node_t new_w = half_edges_in[dw][indeg_count[dw]++];
+      std::size_t out = bin_size ? std::floor(std::log10(g.outdegree(v)) * bin_size) : g.outdegree(v);
+      std::size_t in = bin_size ? std::floor(std::log10(indegree[w]) * bin_size) : indegree[w];
+      node_t new_v = half_edges_out[out][outdeg_count[out]++];
+      node_t new_w = half_edges_in[in][indeg_count[in]++];
       adj[new_v].push_back(new_w);
     }
   }
