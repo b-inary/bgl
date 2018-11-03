@@ -1,4 +1,4 @@
-#include "extlib/catch.hpp"
+#include "../extlib/catch.hpp"
 #include "bgl/util/all.hpp"
 #include "bgl/data_structure/hyperloglog_array.hpp"
 using namespace bgl;

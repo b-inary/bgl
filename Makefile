@@ -3,12 +3,12 @@
 
 test:
 	@mkdir -p build
-	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja
+	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja run_tests
 	@bin/run_tests
 
 debug:
 	@mkdir -p build
-	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug && ninja
+	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug && ninja run_tests
 
 target:
 	@mkdir -p build

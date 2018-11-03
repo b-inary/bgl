@@ -1,5 +1,5 @@
 #pragma once
-#include "extlib/rang.hpp"
+#include "../extlib/rang.hpp"
 #include "fmt.hpp"
 #include "file.hpp"
 #include "lambda.hpp"

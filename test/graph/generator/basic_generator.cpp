@@ -1,4 +1,4 @@
-#include "extlib/catch.hpp"
+#include "../extlib/catch.hpp"
 #include "bgl/graph/generator/basic_generator.hpp"
 using namespace bgl;
 

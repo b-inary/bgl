@@ -1,4 +1,4 @@
-#include "extlib/catch.hpp"
+#include "../extlib/catch.hpp"
 #include "bgl/graph/analysis/connectivity.hpp"
 using namespace bgl;
 

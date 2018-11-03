@@ -1,4 +1,4 @@
-#include "extlib/catch.hpp"
+#include "../extlib/catch.hpp"
 #include "bgl/util/lambda.hpp"
 
 TEST_CASE("lambda", "[util]") {

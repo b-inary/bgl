@@ -1,4 +1,4 @@
-#include "extlib/CLI11.hpp"
+#include "../extlib/CLI11.hpp"
 #include "io.hpp"
 
 #define BGL_PARSE(app, argc, argv) \

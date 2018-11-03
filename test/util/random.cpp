@@ -1,4 +1,4 @@
-#include "extlib/catch.hpp"
+#include "../extlib/catch.hpp"
 #include "bgl/util/random.hpp"
 #include <random>
 #include <cmath>

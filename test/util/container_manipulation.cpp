@@ -1,4 +1,4 @@
-#include "extlib/catch.hpp"
+#include "../extlib/catch.hpp"
 #include "bgl/util/container_manipulation.hpp"
 #include "bgl/util/lambda.hpp"
 #include <vector>

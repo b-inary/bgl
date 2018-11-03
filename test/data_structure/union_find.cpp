@@ -1,4 +1,4 @@
-#include "extlib/catch.hpp"
+#include "../extlib/catch.hpp"
 #include "bgl/data_structure/union_find.hpp"
 using namespace bgl;
 

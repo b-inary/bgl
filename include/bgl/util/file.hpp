@@ -1,5 +1,5 @@
 #pragma once
-#include "extlib/apathy.hpp"
+#include "../extlib/apathy.hpp"
 #include "lambda.hpp"
 #include <iostream>
 #include <vector>
