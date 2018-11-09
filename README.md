@@ -13,8 +13,9 @@ A modern graph library for research
 ```sh
 $ git clone --recursive git@github.com:b-inary/bgl.git
 $ cd bgl
-$ make test  # run tests
-$ make doc   # generate documents (require Doxygen, Graphviz)
+$ make test     # run tests
+$ make examples # compile examples
+$ make doc      # generate documents (require Doxygen, Graphviz)
 ```
 
 (Since bgl is a header-only library, actually build is not needed)

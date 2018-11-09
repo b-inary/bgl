@@ -33,6 +33,7 @@ target_include_directories(bgl INTERFACE ${bgl_SOURCE_DIR}/include)
 target_link_libraries(bgl INTERFACE ${CMAKE_THREAD_LIBS_INIT} fmt-header-only zstd)
 
 # load subdirectories
+add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(test EXCLUDE_FROM_ALL)
 add_subdirectory(playground EXCLUDE_FROM_ALL)
 add_subdirectory(projects EXCLUDE_FROM_ALL)

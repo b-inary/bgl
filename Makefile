@@ -1,5 +1,5 @@
 
-.PHONY: test debug target target-debug doc clean
+.PHONY: test debug examples target target-debug doc clean
 
 test:
 	@mkdir -p build
@@ -9,6 +9,10 @@ test:
 debug:
 	@mkdir -p build
 	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug && ninja run_tests
+
+examples:
+	@mkdir -p build
+	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja examples
 
 target:
 	@mkdir -p build
