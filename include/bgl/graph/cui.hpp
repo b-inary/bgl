@@ -69,10 +69,15 @@ private:
         }
       } else {
         if (index_ >= paths_.size()) return *this;
-        if (paths_[index_].extension() == ".bgl") {
-          g_ = read_graph_binary<GraphType>(paths_[index_]);
+        const path &p = paths_[index_];
+        std::string ext = p.extension();
+        if (ext == ".zst") {
+          ext = p.clone().replace_extension().extension();
+        }
+        if (ext == ".bgl") {
+          g_ = read_graph_binary<GraphType>(p);
         } else {
-          g_ = read_graph_tsv<GraphType>(paths_[index_], app_->rename_id_);
+          g_ = read_graph_tsv<GraphType>(p, app_->rename_id_);
         }
       }
       GraphType &g = app_->folder_mode_ ? (*iter_).first : g_;

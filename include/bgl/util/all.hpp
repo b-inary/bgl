@@ -13,3 +13,4 @@
 #include "lambda.hpp"
 #include "logging.hpp"
 #include "random.hpp"
+#include "zstd.hpp"

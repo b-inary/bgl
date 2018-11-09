@@ -106,6 +106,11 @@ std::optional<GraphType>
 read_graph_tsv_optional(path file, bool rename_id = false, bool accept_mismatch = false) {
   std::ifstream ifs(file.string());
   ASSERT_MSG(ifs, "read_graph_tsv: file does not exist: {}", file);
+  if (file.extension() == ".zst") {
+    zstd_decode_filter_buf buf(ifs.rdbuf());
+    std::istream is(&buf);
+    return read_graph_tsv_optional<GraphType>(is, rename_id, accept_mismatch);
+  }
   return read_graph_tsv_optional<GraphType>(ifs, rename_id, accept_mismatch);
 }
 
@@ -217,7 +222,7 @@ read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
   }
 
   is.peek();
-  ASSERT_MSG(is.eof() && !is.fail(), "read_graph_binary: read failed (maybe file broken)");
+  ASSERT_MSG(is.eof() && !is.fail(), "read_graph_binary: read failed (invalid bgl file)");
 
   return GraphType(num_nodes, num_edges, std::move(adj));
 }
@@ -234,6 +239,11 @@ template <typename GraphType>
 std::optional<GraphType> read_graph_binary_optional(path filename, bool accept_mismatch = false) {
   std::ifstream ifs(filename.string(), std::ios_base::binary);
   ASSERT_MSG(ifs, "read_graph_binary: file does not exist: {}", filename);
+  if (filename.extension() == ".zst") {
+    zstd_decode_filter_buf buf(ifs.rdbuf());
+    std::istream is(&buf);
+    return read_graph_binary_optional<GraphType>(is, accept_mismatch);
+  }
   return read_graph_binary_optional<GraphType>(ifs, accept_mismatch);
 }
 
@@ -289,9 +299,9 @@ public:
     : rename_id_{rename_id}, max_mb_{max_mb}
   {
     if (recursive) {
-      paths_ = path::find_recursive(dirname, "*.(bgl|tsv)");
+      paths_ = path::find_recursive(dirname, "*.(bgl|tsv|zst)");
     } else {
-      paths_ = path::find(dirname, "*.(bgl|tsv)");
+      paths_ = path::find(dirname, "*.(bgl|tsv|zst)");
     }
     ready();
   }
@@ -322,10 +332,14 @@ private:
       const path &p = paths_[index_];
       std::optional<GraphType> gopt;
       if (path::size(p) >= (max_mb_ << 20)) continue;
-      if (p.extension() == ".bgl") {
+      std::string ext = p.extension();
+      if (ext == ".zst") {
+        ext = p.clone().replace_extension().extension();
+      }
+      if (ext == ".bgl") {
         gopt = read_graph_binary_optional<GraphType>(p, true);
       }
-      if (p.extension() == ".tsv") {
+      if (ext == ".tsv") {
         gopt = read_graph_tsv_optional<GraphType>(p, rename_id_, true);
       }
       if (gopt.has_value()) {

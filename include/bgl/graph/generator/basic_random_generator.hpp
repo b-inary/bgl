@@ -73,6 +73,7 @@ inline graph configuration(const graph &g) {
 /// @see "Systematic topology analysis and generation using degree correlations"
 ///      (P. Mahadevan et al.). In SIGCOMM'06.
 /// @param g (directed) target graph
+/// @param bin_size bin size (log10 scale)
 inline graph configuration_2d(const graph &g, int bin_size = 0) {
   std::vector<std::size_t> indegree(g.num_nodes());
   for (node_t v : g.nodes()) {

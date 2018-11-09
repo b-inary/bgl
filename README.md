@@ -10,10 +10,12 @@ A modern graph library for research
 
 **Build**
 
-    $ git clone --recursive git@github.com:b-inary/bgl.git
-    $ cd bgl
-    $ make test  # run tests
-    $ make doc   # generate documents (require Doxygen, Graphviz)
+```sh
+$ git clone --recursive git@github.com:b-inary/bgl.git
+$ cd bgl
+$ make test  # run tests
+$ make doc   # generate documents (require Doxygen, Graphviz)
+```
 
 (Since bgl is a header-only library, actually build is not needed)
 
@@ -21,13 +23,17 @@ A modern graph library for research
 
 For prototyping, the easiest way is to use the playground:
 
-    $ cd playground
-    $ make  # every "*_main.cpp" file is compiled as executable
+```sh
+$ cd playground
+$ make  # every "*_main.cpp" file is compiled as executable
+```
 
-Or, you can make a new project in ``projects`` directory.  
-Please refer to ``sample-project``.
+Or, you can make a new project in `projects` directory.  
+Please refer to `sample-project`.
 
-bgl can also be used as CMake library:
+bgl can also be used as a CMake library:
 
-    add_subdirectory(bgl)
-    target_link_libraries(<your-project> PRIVATE bgl)
+```CMake
+add_subdirectory(bgl)
+target_link_libraries(<your-target> PRIVATE bgl)
+```

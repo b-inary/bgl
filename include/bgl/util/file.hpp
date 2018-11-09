@@ -14,6 +14,10 @@ public:
   path(const char *str = "") : path_{str} {}
   path(const std::string &str) : path_{str} {}
 
+  path clone() const {
+    return *this;
+  }
+
   path& operator/=(const path &rhs) {
     path_ /= rhs.path_;
     return *this;
@@ -47,6 +51,10 @@ public:
   }
 
   std::string string() const {
+    return path_.string();
+  }
+
+  operator std::string() const {
     return path_.string();
   }
 
