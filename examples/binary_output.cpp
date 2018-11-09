@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     EXPECT_MSG(!path::exists(bgl_path), "overwrite {}", bgl_path);
 
     CONSOLE_LOG("read graph: {}\n  # of nodes: {}\n  # of edges: {}",
-                p, g.num_nodes(), g.num_edges());
+                p, commify(g.num_nodes()), commify(g.num_edges()));
 
     write_graph_binary(bgl_path, g);
   }

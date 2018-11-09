@@ -4,8 +4,9 @@
 #include "file.hpp"
 #include "lambda.hpp"
 #include <iostream>
+#include <sstream>
+#include <locale>
 #include <string>
-#include <string_view>
 #include <functional>
 #include <tuple>
 #include <chrono>
@@ -47,6 +48,21 @@
 
 
 namespace bgl {
+/// format integer with commas
+/// @param num integer number
+template <typename T>
+typename std::enable_if_t<std::is_integral_v<T>, std::string> commify(T num) {
+  class comma_numpunct : public std::numpunct<char> {
+  protected:
+    virtual char do_thousands_sep() const { return ','; }
+    virtual std::string do_grouping() const { return "\03"; }
+  };
+  std::stringstream sst;
+  sst.imbue(std::locale(std::locale(), new comma_numpunct));
+  sst << num;
+  return sst.str();
+}
+
 /// print right-aligned string when output stream is terminal
 inline void pretty_append(std::ostream &os, std::function<void()> body, const std::string &str) {
   if (!rang::rang_implementation::isTerminal(os.rdbuf())) {
@@ -78,7 +94,7 @@ inline void pretty_append(std::ostream &os, std::function<void()> body, const st
   int width = ws.ws_col;
 #endif
 
-  fmt::print(os, "\x1b[{}G{}", width - str.length() + 1, str);
+  fmt::print(os, "\x1b[{}G{} \b", width - str.length() + 1, str);
 }
 
 /// generate string representing current date and time
@@ -122,7 +138,7 @@ public:
       os_ << rang::style::bold << rang::fg::cyan;
       fmt::print(os_, "timer: ");
       os_ << rang::style::reset << rang::fg::reset;
-      fmt::print(os_, "{}[ms]", elapsed.count());
+      fmt::print(os_, "{}[s]", elapsed.count() / 1000.0);
     });
   }
 private:

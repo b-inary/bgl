@@ -10,6 +10,6 @@ int main(int argc, char **argv) {
 
   for (auto [g, p] : app.graph_iterator<graph>()) {
     CONSOLE_LOG("read graph: {}\n  # of nodes: {}\n  # of edges: {}",
-                p, g.num_nodes(), g.num_edges());
+                p, commify(g.num_nodes()), commify(g.num_edges()));
   }
 }
