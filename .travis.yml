@@ -35,8 +35,8 @@ before_install:
   - eval "${MATRIX_EVAL}"
 
 script:
+  - make
   - make test
-  - make examples
-  - make target TARGET=playground
-  - make target TARGET=sample-project
+  - make target=playground
+  - make target=sample-project
   - make doc

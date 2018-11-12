@@ -1,15 +1,17 @@
 
 PROJECT = sample-project
 
-.PHONY: all debug test clean
+.PHONY: build debug test clean
 
-all:
-	@cd ../..; $(MAKE) target TARGET=$(PROJECT)
+build-type ?= Release
 
-debug:
-	@cd ../..; $(MAKE) target-debug TARGET=$(PROJECT)
+build:
+	@cd ../..; $(MAKE) target=$(PROJECT) build-type=$(build-type)
 
-test: all
+debug: build-type = debug
+debug: build
+
+test: build
 	@bin/run_tests
 
 clean:

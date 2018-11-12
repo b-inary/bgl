@@ -1,26 +1,18 @@
 
-.PHONY: test debug examples target target-debug doc clean
+.PHONY: build test run_tests doc clean
 
-test:
+build-type ?= Release
+target ?= examples
+
+build:
 	@mkdir -p build
-	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja run_tests
+	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=$(build-type) && ninja $(target)
+
+test: target = run_tests
+test: build run_tests
+
+run_tests:
 	@bin/run_tests
-
-debug:
-	@mkdir -p build
-	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug && ninja run_tests
-
-examples:
-	@mkdir -p build
-	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja examples
-
-target:
-	@mkdir -p build
-	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release && ninja ${TARGET}
-
-target-debug:
-	@mkdir -p build
-	@cd build; cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug && ninja ${TARGET}
 
 doc: include/bgl/
 	@doxygen Doxyfile
