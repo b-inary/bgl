@@ -32,21 +32,18 @@ void write_edge_tsv(std::ostream &os, const weighted_edge_t<WeightType> &e) {
 }
 
 /// read graph from |is| as tsv file
-/// when type does not match and |accept_mismatch|, then return |nullopt|
+/// when type does not match and |accept_mismatch|, return |nullopt|
 template <typename GraphType>
-std::optional<GraphType>
-read_graph_tsv_optional(std::istream &is, bool rename_id = false, bool accept_mismatch = false) {
+std::optional<GraphType> read_graph_tsv_optional(std::istream &is, bool accept_mismatch = false) {
   using edge_t = typename GraphType::edge_type;
-  ASSERT_MSG(is, "read_graph_tsv: empty stream");
+  ASSERT_MSG(is, "{}: empty stream", __func__);
 
   std::string line;
   edge_list<edge_t> es;
-  node_t num_v = 0;
-  std::unordered_map<std::size_t, node_t> id;
   bool type_checked = false;
 
   for (std::size_t lineno = 1; std::getline(is, line); ++lineno) {
-    std::size_t v;
+    node_t v;
     edge_t e;
 
     // weight type check
@@ -59,9 +56,8 @@ read_graph_tsv_optional(std::istream &is, bool rename_id = false, bool accept_mi
       }
       ASSERT_MSG(
         type_string == read_as,
-        "read_graph_tsv: type of edge weight does not match\n"
-        "  read as: {}\n  input type: {}",
-        read_as, type_string
+        "{}: type of edge weight does not match\n  read as: {}\n  input type: {}",
+        __func__, read_as, type_string
       );
       type_checked = true;
     }
@@ -76,54 +72,41 @@ read_graph_tsv_optional(std::istream &is, bool rename_id = false, bool accept_mi
 
     ASSERT_MSG(
       read_success,
-      "read_graph_tsv: read failed at line {}\n  read: {}\n  weight type: {}",
-      lineno, line, GraphType{}.weight_string()
+      "{}: read failed at line {}\n  read: {}\n  weight type: {}",
+      __func__, lineno, line, GraphType{}.weight_string()
     );
 
-    if (rename_id) {
-      if (id.count(v) == 0) id[v] = num_v++;
-      if (id.count(to(e)) == 0) id[to(e)] = num_v++;
-      v = id[v];
-      update_to(e, id[to(e)]);
-    }
-
-    es.emplace_back(static_cast<node_t>(v), e);
+    es.emplace_back(v, e);
   }
 
   return GraphType(es);
 }
 
+/// read graph from |filename| as tsv file
+/// when type does not match and |accept_mismatch|, return |nullopt|
+template <typename GraphType>
+std::optional<GraphType> read_graph_tsv_optional(const path &file, bool accept_mismatch = false) {
+  std::ifstream ifs(file.string());
+  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, file);
+  return read_graph_tsv_optional<GraphType>(ifs, accept_mismatch);
+}
+
 /// read graph from |is| as tsv file
 template <typename GraphType>
-GraphType read_graph_tsv(std::istream &is, bool rename_id = false) {
-  return read_graph_tsv_optional<GraphType>(is, rename_id).value();
-}
-
-/// read graph from |filename| as tsv file
-/// when type does not match and |accept_mismatch|, then return |nullopt|
-template <typename GraphType>
-std::optional<GraphType>
-read_graph_tsv_optional(path file, bool rename_id = false, bool accept_mismatch = false) {
-  std::ifstream ifs(file.string());
-  ASSERT_MSG(ifs, "read_graph_tsv: file does not exist: {}", file);
-  if (file.extension() == ".zst") {
-    zstd_decode_filter_buf buf(ifs.rdbuf());
-    std::istream is(&buf);
-    return read_graph_tsv_optional<GraphType>(is, rename_id, accept_mismatch);
-  }
-  return read_graph_tsv_optional<GraphType>(ifs, rename_id, accept_mismatch);
+GraphType read_graph_tsv(std::istream &is) {
+  return read_graph_tsv_optional<GraphType>(is).value();
 }
 
 /// read graph from |filename| as tsv file
 template <typename GraphType>
-GraphType read_graph_tsv(path filename, bool rename_id = false) {
-  return read_graph_tsv_optional<GraphType>(filename, rename_id).value();
+GraphType read_graph_tsv(const path &filename) {
+  return read_graph_tsv_optional<GraphType>(filename).value();
 }
 
 /// write graph to |os| as tsv file
 template <typename GraphType>
 void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = true) {
-  ASSERT_MSG(os, "write_graph_tsv: empty stream");
+  ASSERT_MSG(os, "{}: empty stream", __func__);
   if (write_info) {
     fmt::print(os, "# number of nodes: {}\n", g.num_nodes());
     fmt::print(os, "# number of edges: {}\n", g.num_edges());
@@ -141,9 +124,9 @@ void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = tru
 
 /// write graph to |filename| as tsv file
 template <typename GraphType>
-void write_graph_tsv(path filename, const GraphType &g, bool write_info = true) {
+void write_graph_tsv(const path &filename, const GraphType &g, bool write_info = true) {
   std::ofstream ofs(filename.string());
-  ASSERT_MSG(ofs, "write_graph_tsv: file cannot open: {}", filename);
+  ASSERT_MSG(ofs, "{}: file cannot open: {}", __func__, filename);
   write_graph_tsv(ofs, g, write_info);
 }
 
@@ -177,21 +160,21 @@ void write_binary(std::ostream &os, const T &t) {
 }
 
 /// read graph from |is| in binary format .
-/// when type does not match and |accept_mismatch|, then return |nullopt|
+/// when type does not match and |accept_mismatch|, return |nullopt|
 template <typename GraphType>
 std::optional<GraphType>
 read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
   using edge_t = typename GraphType::edge_type;
   using weight_t = decltype(weight(edge_t{}));
   static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
-  ASSERT_MSG(is, "read_graph_binary: empty stream");
+  ASSERT_MSG(is, "{}: empty stream", __func__);
 
   // check header
   char buf[4];
   is.read(buf, 4);
   ASSERT_MSG(
     is.gcount() == 4 && buf[0] == 'b' && buf[1] == 'g' && buf[2] == 'l' && buf[3] == '\0',
-    "read_graph_binary: invalid header"
+    "{}: invalid header", __func__
   );
 
   // check weight type
@@ -206,9 +189,9 @@ read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
 
   ASSERT_MSG(
     type_matched,
-    "read_graph_binary: type of edge weight does not match\n"
+    "{}: type of edge weight does not match\n"
     "  read as: {}\n  input type: size = {} byte(s), is_integral = {}",
-    GraphType{}.weight_string(), edge_size, is_integral
+    __func__, GraphType{}.weight_string(), edge_size, is_integral
   );
 
   // graph body
@@ -222,9 +205,19 @@ read_graph_binary_optional(std::istream &is, bool accept_mismatch = false) {
   }
 
   is.peek();
-  ASSERT_MSG(is.eof() && !is.fail(), "read_graph_binary: read failed (invalid bgl file)");
+  ASSERT_MSG(is.eof() && !is.fail(), "{}: read failed (invalid bgl file)", __func__);
 
   return GraphType(num_nodes, num_edges, std::move(adj));
+}
+
+/// read graph from |filename| in binary format.
+/// when type does not match and |accept_mismatch|, return |nullopt|
+template <typename GraphType>
+std::optional<GraphType>
+read_graph_binary_optional(const path &filename, bool accept_mismatch = false) {
+  std::ifstream ifs(filename.string(), std::ios_base::binary);
+  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, filename);
+  return read_graph_binary_optional<GraphType>(ifs, accept_mismatch);
 }
 
 /// read graph from |is| in binary format
@@ -233,23 +226,9 @@ GraphType read_graph_binary(std::istream &is) {
   return read_graph_binary_optional<GraphType>(is).value();
 }
 
-/// read graph from |filename| in binary format.
-/// when type does not match and |accept_mismatch|, then return |nullopt|
-template <typename GraphType>
-std::optional<GraphType> read_graph_binary_optional(path filename, bool accept_mismatch = false) {
-  std::ifstream ifs(filename.string(), std::ios_base::binary);
-  ASSERT_MSG(ifs, "read_graph_binary: file does not exist: {}", filename);
-  if (filename.extension() == ".zst") {
-    zstd_decode_filter_buf buf(ifs.rdbuf());
-    std::istream is(&buf);
-    return read_graph_binary_optional<GraphType>(is, accept_mismatch);
-  }
-  return read_graph_binary_optional<GraphType>(ifs, accept_mismatch);
-}
-
 /// read graph from |filename| in binary format
 template <typename GraphType>
-GraphType read_graph_binary(path filename) {
+GraphType read_graph_binary(const path &filename) {
   return read_graph_binary_optional<GraphType>(filename).value();
 }
 
@@ -259,7 +238,7 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
   using edge_t = typename GraphType::edge_type;
   using weight_t = decltype(weight(edge_t{}));
   static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
-  ASSERT_MSG(os, "write_graph_binary: empty stream");
+  ASSERT_MSG(os, "{}: empty stream", __func__);
 
   // header
   os.write("bgl", 4);
@@ -280,10 +259,102 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
 
 /// write graph to |filename| in binary format
 template <typename GraphType>
-void write_graph_binary(path filename, const GraphType &g) {
+void write_graph_binary(const path &filename, const GraphType &g) {
   std::ofstream ofs(filename.string(), std::ios_base::binary);
-  ASSERT_MSG(ofs, "write_graph_binary: file cannot open: {}", filename);
+  ASSERT_MSG(ofs, "{}: file cannot open: {}", __func__, filename);
   write_graph_binary(ofs, g);
+}
+
+
+/* compressed input */
+
+/// read compressed tsv graph from |is|
+/// when type does not match and |accept_mismatch|, return |nullopt|
+template <typename GraphType>
+std::optional<GraphType>
+read_graph_tsv_zstd_optional(std::istream &is, bool accept_mismatch = false) {
+  zstd_decode_filter_buf buf(is.rdbuf());
+  std::istream is_decoded(&buf);
+  return read_graph_tsv_optional<GraphType>(is_decoded, accept_mismatch);
+}
+
+/// read comressed tsv graph from |filename|
+/// when type does not match and |accept_mismatch|, return |nullopt|
+template <typename GraphType>
+std::optional<GraphType>
+read_graph_tsv_zstd_optional(const path &file, bool accept_mismatch = false) {
+  std::ifstream ifs(file.string());
+  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, file);
+  return read_graph_tsv_zstd_optional<GraphType>(ifs, accept_mismatch);
+}
+
+/// read compressed tsv graph from |is|
+template <typename GraphType>
+GraphType read_graph_tsv_zstd(std::istream &is) {
+  return read_graph_tsv_zstd_optional<GraphType>(is).value();
+}
+
+/// read compressed tsv graph from |filename|
+template <typename GraphType>
+GraphType read_graph_tsv_zstd(const path &filename) {
+  return read_graph_tsv_zstd_optional<GraphType>(filename).value();
+}
+
+/// read compressed binary graph from |is|
+/// when type does not match and |accept_mismatch|, return |nullopt|
+template <typename GraphType>
+std::optional<GraphType>
+read_graph_binary_zstd_optional(std::istream &is, bool accept_mismatch = false) {
+  zstd_decode_filter_buf buf(is.rdbuf());
+  std::istream is_decoded(&buf);
+  return read_graph_binary_optional<GraphType>(is_decoded, accept_mismatch);
+}
+
+/// read compressed binary graph from |filename|
+/// when type does not match and |accept_mismatch|, return |nullopt|
+template <typename GraphType>
+std::optional<GraphType>
+read_graph_binary_zstd_optional(const path &filename, bool accept_mismatch = false) {
+  std::ifstream ifs(filename.string(), std::ios_base::binary);
+  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, filename);
+  return read_graph_binary_zstd_optional<GraphType>(ifs, accept_mismatch);
+}
+
+/// read compressed binary graph from |is|
+template <typename GraphType>
+GraphType read_graph_binary_zstd(std::istream &is) {
+  return read_graph_binary_zstd_optional<GraphType>(is).value();
+}
+
+/// read compressed binary graph from |filename|
+template <typename GraphType>
+GraphType read_graph_binary_zstd(const path &filename) {
+  return read_graph_binary_zstd_optional<GraphType>(filename).value();
+}
+
+/// read graph in automatically determined format
+/// when type does not match and |accept_mismatch|, return |nullopt|
+template <typename GraphType>
+std::optional<GraphType> read_graph_optional(const path &filename, bool accept_mismatch = false) {
+  std::string ext = filename.extension();
+  if (ext == ".zst") {
+    std::string second_ext = filename.clone().replace_extension().extension();
+    if (second_ext == ".bgl") {
+      return read_graph_binary_zstd_optional<GraphType>(filename, accept_mismatch);
+    } else {
+      return read_graph_tsv_zstd_optional<GraphType>(filename, accept_mismatch);
+    }
+  } else if (ext == ".bgl") {
+    return read_graph_binary_optional<GraphType>(filename, accept_mismatch);
+  } else {
+    return read_graph_tsv_optional<GraphType>(filename, accept_mismatch);
+  }
+}
+
+/// read graph in automatially determined format
+template <typename GraphType>
+GraphType read_graph(const path &filename) {
+  return read_graph_optional<GraphType>(filename).value();
 }
 
 
@@ -294,9 +365,8 @@ template <typename GraphType>
 class graph_folder_iterator {
 public:
   graph_folder_iterator() {}
-  graph_folder_iterator(path dirname, bool recursive = false, bool rename_id = false,
-                        std::size_t max_mb = 4096)
-    : rename_id_{rename_id}, max_mb_{max_mb}
+  graph_folder_iterator(const path &dirname, bool recursive = false, bool rename_id = false)
+    : rename_id_{rename_id}
   {
     if (recursive) {
       paths_ = path::find_recursive(dirname, "*.(bgl|tsv|zst)");
@@ -323,25 +393,12 @@ public:
 private:
   std::size_t index_ = 0;
   bool rename_id_;
-  std::size_t max_mb_;
   std::vector<path> paths_;
   GraphType g_;
 
   graph_folder_iterator &ready() {
     for (; index_ < paths_.size(); ++index_) {
-      const path &p = paths_[index_];
-      std::optional<GraphType> gopt;
-      if (path::size(p) >= (max_mb_ << 20)) continue;
-      std::string ext = p.extension();
-      if (ext == ".zst") {
-        ext = p.clone().replace_extension().extension();
-      }
-      if (ext == ".bgl") {
-        gopt = read_graph_binary_optional<GraphType>(p, true);
-      }
-      if (ext == ".tsv") {
-        gopt = read_graph_tsv_optional<GraphType>(p, rename_id_, true);
-      }
+      std::optional<GraphType> gopt = read_graph_optional<GraphType>(paths_[index_], true);
       if (gopt.has_value()) {
         g_ = std::move(gopt.value());
         break;

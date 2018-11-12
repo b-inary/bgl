@@ -2,7 +2,7 @@
 using namespace bgl;
 
 int main(int argc, char **argv) {
-  bgl_app app("output binary formatted graph file");
+  bgl_app app("Output binary formatted graph file");
   BGL_PARSE(app, argc, argv);
 
   for (auto [g, p] : app.graph_iterator<graph>()) {

@@ -2,50 +2,47 @@
 using namespace bgl;
 
 int main(int argc, char **argv) {
-  /* 1. tsvフォーマット */
+  /* 1. ファイルの読み込み */
 
-  // bglでは，グラフのファイル入出力をいくつかの方法で行うことができます．
-  // 1つ目の方法はタブ(スペース)区切りのtsvフォーマットを利用する方法です．
-  // 標準の拡張子は ".tsv" です．
+  // bglでは，2種類のファイルフォーマットをサポートしています．
 
-  // tsvでは，各行に (from_node) (to_node) をこの順に記録します．
-  // 辺に重みがある場合は，この後ろに重みの情報も記録します．
-  // bglでは先頭の文字が '#' の場合はコメント行として扱います．
+  //  - tsvフォーマット:
+  //      各行に (from_node) (to_node) をこの順に記録します．
+  //      辺に重みがある場合は，この後ろに重みの情報も記録します．
+  //      bglでは先頭の文字が '#' の場合はコメント行として扱います．
+  //  - bglフォーマット:
+  //      bglでより効率よく入出力を行えるバイナリフォーマットです．
 
-  // tsvファイルを読み込むには，|read_graph_tsv()| 関数を利用します．
-  // 関数を呼び出す際には，読み込む型を明示する必要があります．
-  auto g1 = read_graph_tsv<graph>("dataset/karate.tsv");
-  auto g2 = read_graph_tsv<wgraph<int>>("integer-weighted-graph.tsv");
+  // さらに，これらのデータを Zstandard (zstd) 形式で圧縮したファイルにも対応しています．
+  // (なお，読み込まれたグラフはメモリ上に展開されるため，ファイルサイズが小さくても
+  //  メモリ使用量が非常に大きくなる場合があるので注意してください)
+
+  // ファイル形式は拡張子によって判別されます．(.tsv / .bgl / .tsv.zst / .bgl.zst)
+
+  // ファイルを読み込むには，|read_graph()| 関数を利用します．
+  // 関数を呼び出す際には読み込む型を明示する必要があります．
+  auto g1 = read_graph<graph>("dataset/karate.tsv");
+  auto g2 = read_graph<wgraph<int>>("integer-weighted-graph.tsv");
+  auto g3 = read_graph<graph>("bglformat.bgl");
+
+  // 読み込む形式を明示的に指定することもできます．
+  // (関数名は read_graph_(tsv|binary)(_zstd)?)
+  auto g4 = read_graph_binary_zstd<graph>("compressed.bgl.zst");
+
+
+  /* 2. ファイルの書き込み */
 
   // tsvフォーマットでグラフを書き出すには，|write_graph_tsv()| を使います．
   write_graph_tsv("output-filename.tsv", g1);
 
-
-  /* 2. bglフォーマット */
-
-  // bglでより効率よく入出力を行えるバイナリフォーマットを利用することもできます．
-  // 標準で拡張子 ".bgl" を利用することを想定しています．
-
-  // bglファイルを読み込むには，|read_graph_binary()| 関数を利用します．
-  auto g3 = read_graph_binary<graph>("bgl-file.bgl");
-
   // bglファイルを書き出すには，|write_graph_binary()| 関数を利用します．
   write_graph_binary("output-filename.bgl", g1);
 
-
-  /* 3. zstd形式による圧縮ファイル */
-
-  // Zstandard (zstd) 形式で圧縮されたファイルを直接読み込むこともできます．
-  // 圧縮前のフォーマットに応じて，拡張子は ".tsv.zst" か ".bgl.zst" を用いてください．
-  // (なお読み込まれたグラフはメモリ上に展開されるため，ファイルサイズが小さくても
-  //  メモリ使用量が非常に大きくなる場合があるため注意してください)
-  auto g4 = read_graph_binary<graph>("compressed.bgl.zst");
-
-  // なおbglではファイルを圧縮してのファイル書き込みには対応していません．
+  // なおbglではzstd形式でファイルを圧縮しての書き込みには対応していません．
   // 圧縮を行う場合は外部のコマンドラインツールなどを利用してください．
 
 
-  /* 4. フォルダ読み込み */
+  /* 3. フォルダの読み込み */
 
   // フォルダ内のすべてのグラフそれぞれに処理を行いたいこともあるでしょう．
   // そのような際に簡単にフォルダをスキャンできるクラスが用意されています．
@@ -57,7 +54,7 @@ int main(int argc, char **argv) {
   }
 
 
-  /* 5. CUIアプリケーション */
+  /* 4. CUIアプリケーション */
 
   // 読み込むファイルなどをコマンドラインで指定したいという場合も簡単です!
   // |bgl_app| クラスの変数を作り，|BGL_PARSE()| を呼び出すだけです．

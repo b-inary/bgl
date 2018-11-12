@@ -2,7 +2,7 @@
 using namespace bgl;
 
 int main(int argc, char **argv) {
-  bgl_app app("file read bench");
+  bgl_app app("File read bench");
   BGL_PARSE(app, argc, argv);
 
   CONSOLE_TIMER;
