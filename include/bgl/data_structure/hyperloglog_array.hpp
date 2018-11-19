@@ -78,8 +78,7 @@ private:
       sum -= zero_count * (1ull << (63 - outer_.log2k_));
 
       double z = sum * outer_.norm_term_ + outer_.sigma_table_[zero_count];
-      static const double alpha = 0.5 / std::log(2);
-      return alpha * outer_.k_ * outer_.k_ / z;
+      return outer_.alpha_ * outer_.k_ * outer_.k_ / z;
     }
 
     bool operator==(const hyperloglog_impl &rhs) const {
@@ -110,6 +109,16 @@ public:
 
     std::memset(ary_.data(), 0, size_ << log2k_);
 
+    switch (log2k_) {
+      case  5: alpha_ = 0.6971226; break;
+      case  6: alpha_ = 0.7092085; break;
+      case  7: alpha_ = 0.7152712; break;
+      case  8: alpha_ = 0.7183076; break;
+      case  9: alpha_ = 0.7198271; break;
+      case 10: alpha_ = 0.7205872; break;
+      default: alpha_ = 0.5 / std::log(2) / (1.0 + 1.0798634 / k_); break;
+    }
+
     sigma_table_.resize(k_ + 1);
     for (int i : irange(k_ + 1)) {
       sigma_table_[i] = k_ * sigma(static_cast<double>(i) / k_);
@@ -132,6 +141,7 @@ private:
   size_t size_;
   int k_;
   int log2k_;
+  double alpha_;
   double norm_term_;
   std::uint64_t seed_;
   aligned_array<std::uint8_t> ary_;

@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <unordered_map>
 #include <utility>
 #include <type_traits>
 #include <optional>
@@ -283,7 +282,7 @@ read_graph_tsv_zstd_optional(std::istream &is, bool accept_mismatch = false) {
 template <typename GraphType>
 std::optional<GraphType>
 read_graph_tsv_zstd_optional(const path &file, bool accept_mismatch = false) {
-  std::ifstream ifs(file.string());
+  std::ifstream ifs(file.string(), std::ios_base::binary);
   ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, file);
   return read_graph_tsv_zstd_optional<GraphType>(ifs, accept_mismatch);
 }
@@ -365,9 +364,7 @@ template <typename GraphType>
 class graph_folder_iterator {
 public:
   graph_folder_iterator() {}
-  graph_folder_iterator(const path &dirname, bool recursive = false, bool rename_id = false)
-    : rename_id_{rename_id}
-  {
+  graph_folder_iterator(const path &dirname, bool recursive = false) {
     if (recursive) {
       paths_ = path::find_recursive(dirname, "*.(bgl|tsv|zst)");
     } else {
@@ -392,7 +389,6 @@ public:
 
 private:
   std::size_t index_ = 0;
-  bool rename_id_;
   std::vector<path> paths_;
   GraphType g_;
 
