@@ -78,7 +78,7 @@ private:
       sum -= zero_count * (1ull << (63 - outer_.log2k_));
 
       double z = sum * outer_.norm_term_ + outer_.sigma_table_[zero_count];
-      return outer_.alpha_ * outer_.k_ * outer_.k_ / z;
+      return outer_.k_ * outer_.k_ / z;
     }
 
     bool operator==(const hyperloglog_impl &rhs) const {
@@ -99,7 +99,6 @@ public:
     : size_{count}
     , k_{1 << log2k}
     , log2k_{log2k}
-    , norm_term_{std::pow(2, log2k - 63)}
     , seed_{internal_hash(seed)}
     , ary_(count << log2k, 32)
   {
@@ -109,19 +108,23 @@ public:
 
     std::memset(ary_.data(), 0, size_ << log2k_);
 
+    static const double alpha_inf = 0.5 / std::log(2);
+
     switch (log2k_) {
-      case  5: alpha_ = 0.6971226; break;
-      case  6: alpha_ = 0.7092085; break;
-      case  7: alpha_ = 0.7152712; break;
-      case  8: alpha_ = 0.7183076; break;
-      case  9: alpha_ = 0.7198271; break;
+      case 5:  alpha_ = 0.6971226; break;
+      case 6:  alpha_ = 0.7092085; break;
+      case 7:  alpha_ = 0.7152712; break;
+      case 8:  alpha_ = 0.7183076; break;
+      case 9:  alpha_ = 0.7198271; break;
       case 10: alpha_ = 0.7205872; break;
-      default: alpha_ = 0.5 / std::log(2) / (1.0 + 1.0798634 / k_); break;
+      default: alpha_ = alpha_inf / (1.0 + 1.0798634 / k_); break;
     }
+
+    norm_term_ = std::pow(2, log2k - 63) / alpha_;
 
     sigma_table_.resize(k_ + 1);
     for (int i : irange(k_ + 1)) {
-      sigma_table_[i] = k_ * sigma(static_cast<double>(i) / k_);
+      sigma_table_[i] = 2.0 * k_ * sigma(static_cast<double>(i) / k_) / (alpha_ + alpha_inf);
     }
   }
 
@@ -141,9 +144,9 @@ private:
   size_t size_;
   int k_;
   int log2k_;
+  std::uint64_t seed_;
   double alpha_;
   double norm_term_;
-  std::uint64_t seed_;
   aligned_array<std::uint8_t> ary_;
   std::vector<double> sigma_table_;
 
