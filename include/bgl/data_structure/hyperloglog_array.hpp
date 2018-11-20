@@ -70,10 +70,58 @@ private:
       // treat as a 'fixed-point' real number: (1ull << (63 - outer_.log2k_)) == 1.0
       std::uint64_t sum = 0;
 
-      for (int i = 0; i < outer_.k_; ++i) {
+#ifdef __AVX2__
+      const __m256i zeros = _mm256_setzero_si256();
+      const __m256i ones_i64 = _mm256_set1_epi64x(1);
+      const __m256i i8mask_i64 = _mm256_set1_epi64x(255);
+      const __m256i shift_base_i8 = _mm256_set1_epi8(63 - outer_.log2k_);
+
+      __m256i zero_count_i16[2] = { zeros, zeros };
+      __m256i sum_i64 = zeros;
+
+      for (int i = 0; i < outer_.k_; i += 32) {
+        __m256i regs_i8 = _mm256_load_si256(reinterpret_cast<const __m256i*>(regs_ + i));
+
+        __m256i tmp_i16;
+        __m256i cmpzero_i8 = _mm256_sub_epi8(zeros, _mm256_cmpeq_epi8(regs_i8, zeros));
+        tmp_i16 = _mm256_unpacklo_epi8(cmpzero_i8, zeros);
+        zero_count_i16[0] = _mm256_add_epi16(zero_count_i16[0], tmp_i16);
+        tmp_i16 = _mm256_unpackhi_epi8(cmpzero_i8, zeros);
+        zero_count_i16[1] = _mm256_add_epi16(zero_count_i16[1], tmp_i16);
+
+        __m256i shift_i8 = _mm256_sub_epi8(shift_base_i8, regs_i8);
+        for (int j [[maybe_unused]] : irange(8)) {
+          __m256i add_i64 = ones_i64;
+          __m256i shift_i64 = _mm256_and_si256(shift_i8, i8mask_i64);
+          add_i64 = _mm256_sllv_epi64(add_i64, shift_i64);
+          sum_i64 = _mm256_add_epi64(sum_i64, add_i64);
+          shift_i8 = _mm256_srli_epi64(shift_i8, 8);
+        }
+      }
+
+      __m256i zero_count_i32 = zeros;
+      for (int i : irange(2)) {
+        __m256i tmp_i32;
+        tmp_i32 = _mm256_unpacklo_epi16(zero_count_i16[i], zeros);
+        zero_count_i32 = _mm256_add_epi32(zero_count_i32, tmp_i32);
+        tmp_i32 = _mm256_unpackhi_epi16(zero_count_i16[i], zeros);
+        zero_count_i32 = _mm256_add_epi32(zero_count_i32, tmp_i32);
+      }
+      zero_count_i32 = _mm256_hadd_epi32(zero_count_i32, zero_count_i32);
+      zero_count_i32 = _mm256_hadd_epi32(zero_count_i32, zero_count_i32);
+      zero_count += _mm256_extract_epi32(zero_count_i32, 0);
+      zero_count += _mm256_extract_epi32(zero_count_i32, 4);
+
+      sum += _mm256_extract_epi64(sum_i64, 0);
+      sum += _mm256_extract_epi64(sum_i64, 1);
+      sum += _mm256_extract_epi64(sum_i64, 2);
+      sum += _mm256_extract_epi64(sum_i64, 3);
+#else
+      for (int i : irange(outer_.k_)) {
         zero_count += regs_[i] == 0;
         sum += 1ull << (63 - outer_.log2k_ - regs_[i]);
       }
+#endif
 
       sum -= zero_count * (1ull << (63 - outer_.log2k_));
 

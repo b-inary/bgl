@@ -18,13 +18,14 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
   ASSERT(n > 0);
 
   hyperloglog_array curr_hll(n, log2k);
+  std::vector<double> cache(n);
   for (node_t v : g.nodes()) {
     curr_hll[v].insert(v);
+    cache[v] = curr_hll[v].count();
     callback(v, 0, 1.0);
   }
   hyperloglog_array next_hll(curr_hll);
 
-  std::vector<double> cache(n, curr_hll[0].count());
   std::vector<bool> curr_updated(n, true);
   std::vector<bool> next_updated;
 
@@ -32,7 +33,7 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
     std::atomic<bool> loop = false;
     next_updated.assign(n, false);
 
-    g.for_each_node(fn(u) {
+    for (node_t u : g.nodes()) {
       bool merged = false;
       for (node_t v : g.neighbors(u)) {
         if (curr_updated[v]) {
@@ -46,7 +47,7 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
         callback(u, d + 1, count - cache[u]);
         cache[u] = count;
       }
-    });
+    }
 
     if (!loop) break;
     curr_hll = next_hll;
