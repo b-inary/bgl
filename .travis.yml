@@ -1,5 +1,4 @@
-dist: trusty
-sudo: false
+dist: xenial
 language: cpp
 
 matrix:
@@ -7,7 +6,6 @@ matrix:
     - os: linux
       addons:
         apt:
-          update: true
           sources:
             - ubuntu-toolchain-r-test
           packages:
@@ -19,7 +17,6 @@ matrix:
     - os: linux
       addons:
         apt:
-          update: true
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-7
