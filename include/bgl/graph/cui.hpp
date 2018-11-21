@@ -78,14 +78,14 @@ private:
 
 public:
   bgl_app(const std::string &desc = "") : CLI::App(desc) {
-    get_formatter()->column_width(24);
+    get_formatter()->column_width(22);
     get_formatter()->label("REQUIRED", "");
 
-    add_option("paths", paths_, "input path(s)")->required()->check(CLI::ExistingPath);
-    add_flag("-f,--folder", folder_mode_, "read all graphs in folder(s)");
-    add_flag("-r,--recursive", recursive_, "read all graphs in folder(s) recursively");
-    add_flag("-s,--simplify", simplify_, "simplify graph (remove self loops and multiple edges)");
-    add_flag("-u,--undirected", undirected_, "make graph undirected");
+    add_option("paths", paths_, "Input path(s)")->required()->check(CLI::ExistingPath);
+    add_flag("-f,--folder", folder_mode_, "Read all graphs in folder(s)");
+    add_flag("-r,--recursive", recursive_, "Read all graphs in folder(s) recursively");
+    add_flag("-s,--simplify", simplify_, "Simplify graph (remove self loops and multiple edges)");
+    add_flag("-u,--undirected", undirected_, "Make graph undirected");
   }
 
   void parse(int argc, const char *const *argv) {

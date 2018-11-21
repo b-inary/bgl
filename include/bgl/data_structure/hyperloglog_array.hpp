@@ -25,10 +25,18 @@ private:
     hyperloglog_impl(const hyperloglog_impl &rhs) = default;
     hyperloglog_impl(hyperloglog_impl &&rhs) = default;
 
-    /// prohibit assignment operation
-    /// (this class is a kind of reference, so assignment is confusing)
-    hyperloglog_impl& operator=(const hyperloglog_impl &rhs) = delete;
-    hyperloglog_impl& operator=(hyperloglog_impl &&rhs) = delete;
+    /// copy assignment operator
+    /// @note *this and rhs must have the same number of registers (no check)
+    hyperloglog_impl& operator=(const hyperloglog_impl &rhs) {
+      std::memcpy(regs_, rhs.regs_, outer_.k_);
+      return *this;
+    }
+
+    /// move assignment operator
+    /// @note *this and rhs must have the same number of registers (no check)
+    hyperloglog_impl& operator=(hyperloglog_impl &&rhs) {
+      return *this = rhs;
+    }
 
     /// insert 64-bit integer element
     void insert(std::uint64_t elem) {
