@@ -3,7 +3,6 @@
 #include "../extlib/CLI11.hpp"
 #include "../extlib/rang.hpp"
 
-#include "avx_allocator.hpp"
 #include "assertion.hpp"
 #include "container_manipulation.hpp"
 #include "demangle_typeid.hpp"

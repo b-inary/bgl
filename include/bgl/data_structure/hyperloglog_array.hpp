@@ -1,5 +1,6 @@
 #pragma once
 #include "bgl/util/all.hpp"
+#include "bgl/data_structure/aligned_array.hpp"
 #include <vector>
 #include <algorithm>
 #include <cstring>
@@ -225,9 +226,10 @@ private:
 class hyperloglog_array {
 private:
 public:
-  hyperloglog_array(std::size_t count, int log2m) : params_(log2m), buf_(count << log2m) {
+  hyperloglog_array(std::size_t count, int log2m) : buf_(count << log2m, 32), params_(log2m) {
     ASSERT_MSG(5 <= log2m && log2m <= 20,
                "parameter 'log2m' must be in range from 5 to 20\n  given: log2m = {}", log2m);
+    std::memset(buf_.data(), 0, count << log2m);
   }
 
   hyperloglog operator[](std::size_t pos) {
@@ -243,7 +245,7 @@ public:
   }
 
 private:
+  aligned_array<uint8_t> buf_;
   hyperloglog_params params_;
-  std::vector<std::uint8_t, avx_aligned_allocator<std::uint8_t>> buf_;
 };
 } // namespace bgl
