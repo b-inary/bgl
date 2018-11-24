@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     out_path.replace_extension(".tsv");
     EXPECT_MSG(!path::exists(out_path), "overwrite {}", out_path);
 
-    CONSOLE_LOG("read graph: {}\n  # of nodes: {}\n  # of edges: {}",
+    CONSOLE_LOG("graph loaded: {}\n  # of nodes: {}\n  # of edges: {}",
                 p, commify(g.num_nodes()), commify(g.num_edges()));
 
     write_graph_tsv(out_path, g, false);

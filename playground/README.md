@@ -1,6 +1,6 @@
 ## Here is a playground!
 
-every `*_main.cpp` file in this directory is compiled as executable.
+Every `*_main.cpp` file in this directory is compiled to an executable.
 
     $ make
     $ make debug  # for debug build

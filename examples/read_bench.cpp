@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
   CONSOLE_LOG("bench start");
 
   for (auto [g, p] : app.graph_iterator<graph>()) {
-    CONSOLE_LOG("read graph: {}\n  # of nodes: {}\n  # of edges: {}",
+    CONSOLE_LOG("graph loaded: {}\n  # of nodes: {}\n  # of edges: {}",
                 p, commify(g.num_nodes()), commify(g.num_edges()));
   }
 }

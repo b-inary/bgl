@@ -5,7 +5,7 @@
 #include <cmath>
 
 namespace bgl {
-/// run simple HyperBall. when computing centrality, transpose graph in advance
+/// run simple HyperBall. to compute centrality, transpose graph in advance
 /// @param g input unweighted graph
 /// @param log2k specify the number of registers of HyperLogLog counter (5 <= log2k <= 20)
 /// @param callback callback function (must be thread-safe).
@@ -15,7 +15,7 @@ namespace bgl {
 /// @see "HyperANF: Approximating the neighbourhood function of very large graphs on a budget"
 ///       (P. Boldi, M. Rosa and S. Vigna). In WWW'11.
 ///      "In-core computation of geometric centralities with HyperBall: A hundred billion nodes
-///       and beyond" (P. Boldi and S. Vigna). In ICDMW'13.s
+///       and beyond" (P. Boldi and S. Vigna). In ICDMW'13.
 void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, double)> callback,
                int threshold = 100, int num_threads = 0) {
   const node_t n = g.num_nodes();

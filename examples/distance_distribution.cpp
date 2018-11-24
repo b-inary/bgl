@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 
   for (auto [g, p] : app.graph_iterator<graph>()) {
     CONSOLE_TIMER;
-    CONSOLE_LOG("read graph: {}\n  # of nodes: {}\n  # of edges: {}",
+    CONSOLE_LOG("graph loaded: {}\n  # of nodes: {}\n  # of edges: {}",
                 p, commify(g.num_nodes()), commify(g.num_edges()));
 
     std::vector<std::atomic<double>> distance_distribution(101);

@@ -1,6 +1,6 @@
 # bgl [![Build Status](https://travis-ci.com/b-inary/bgl.svg?branch=master)](https://travis-ci.com/b-inary/bgl)
 
-A modern graph library for research
+A modern graph library for research (under development)
 
 ### Requirements
 
@@ -18,21 +18,22 @@ $ make test   # run tests
 $ make doc    # generate documents (require Doxygen, Graphviz)
 ```
 
-(Since bgl is a header-only library, actually build is not needed)
+(Since bgl is a header-only library, build is actually not needed)
 
 ### Usage
 
-For prototyping, the easiest way is to use the playground:
+There are several ways to use bgl:
+
+1. For prototyping, the easiest way is to use the playground:
 
 ```sh
 $ cd playground
-$ make  # every "*_main.cpp" file is compiled as executable
+$ make  # every "*_main.cpp" file is compiled to an executable
 ```
 
-Or, you can make a new project in `projects` directory.  
-Please refer to `sample-project`.
+2. You can make a new project in `projects` directory. Please refer to `sample-project`.
 
-bgl can also be used as a CMake library:
+3. bgl can also be used as a CMake library:
 
 ```CMake
 add_subdirectory(bgl)

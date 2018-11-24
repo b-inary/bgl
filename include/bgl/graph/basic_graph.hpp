@@ -505,8 +505,8 @@ public:
     const std::size_t kLimitNumEdges = 10;
 
     fmt::print(os, "====================\n");
-    fmt::print(os, "  # of nodes: {}\n", num_nodes());
-    fmt::print(os, "  # of edges: {}\n", num_edges());
+    fmt::print(os, "  # of nodes: {}\n", commify(num_nodes()));
+    fmt::print(os, "  # of edges: {}\n", commify(num_edges()));
     fmt::print(os, "  weight type: {}\n", weight_string());
     fmt::print(os, "--------------------\n");
     for (node_t v : irange(std::min(num_nodes(), kLimitNumNodes))) {

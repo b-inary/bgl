@@ -4,7 +4,7 @@
 #include <cstring>
 
 namespace bgl {
-/// dynamic contigious array which starting address is aligned
+/// dynamic contigious array whose starting address is aligned
 template <typename T>
 class aligned_array {
  public:
@@ -88,7 +88,7 @@ class aligned_array {
     void *p = std::aligned_alloc(align, size);
 #endif
     if (p == nullptr) throw std::bad_alloc();
-    return static_cast<T*>(p);
+    return static_cast<value_type*>(p);
   }
 
   static void aligned_free(void *p) {
