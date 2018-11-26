@@ -35,9 +35,10 @@ public:
     std::iota(parent_.begin(), parent_.end(), static_cast<node_t>(0));
     preprocess();
     do_contraction_loop(threshold);
+    complete_ordering();
   }
 
-  const std::vector<node_t> &partial_ordering() const { return order_; }
+  const std::vector<node_t> &ordering() const { return order_; }
   const std::vector<node_t> &width_ends() const { return width_ends_; }
 
 private:
@@ -181,6 +182,18 @@ private:
     }
 
     width_ends_.push_back(order_.size());
+  }
+
+  void complete_ordering() {
+    std::vector<bool> ordered(g_.num_nodes());
+    for (node_t v : order_) {
+      ordered[v] = true;
+    }
+    for (node_t v : g_.nodes()) {
+      if (!ordered[v]) {
+        order_.push_back(v);
+      }
+    }
   }
 };
 } // namespace bgl
