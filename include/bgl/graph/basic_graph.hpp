@@ -65,12 +65,12 @@ update_to(const weighted_edge_t<WeightType> &e, node_t v) noexcept {
 }
 
 template <typename EdgeType>
-bool compare_to(const EdgeType &e, node_t v) {
+bool compare_edge_node(const EdgeType &e, node_t v) {
   return to(e) < v;
 }
 
 template <typename EdgeType>
-bool compare_to_rev(node_t v, const EdgeType &e) {
+bool compare_node_edge(node_t v, const EdgeType &e) {
   return v < to(e);
 }
 
@@ -180,8 +180,6 @@ public:
   using edge_type = EdgeType;
   using weight_type = decltype(weight(edge_type{}));
   using graph_type = basic_graph<EdgeType>;
-
-  static const node_t kParallelUnit = 1024;
 
   /* initialization */
 
@@ -337,7 +335,7 @@ public:
   /// if |u| and |v| are not adjacent, return nullopt
   std::optional<weight_type> get_weight(node_t u, node_t v) const noexcept {
     const auto &es = edges(u);
-    const auto it = std::lower_bound(es.begin(), es.end(), v, compare_to<edge_type>);
+    const auto it = std::lower_bound(es.begin(), es.end(), v, compare_edge_node<edge_type>);
     if (it == es.end() || to(*it) != v) {
       return std::nullopt;
     }
@@ -357,10 +355,13 @@ public:
   void for_each_node(std::function<void(node_t)> callback, int num_threads = 0) const {
     std::atomic<int> counter = 0;
     std::vector<std::thread> workers;
-    if (num_threads == 0) num_threads = std::thread::hardware_concurrency();
+    if (num_threads == 0) {
+      num_threads = std::min(std::thread::hardware_concurrency(),
+                             (num_nodes() + kParallelUnit - 1) / kParallelUnit);
+    }
 
     for (int i [[maybe_unused]] : irange(num_threads)) {
-      workers.push_back(std::thread(fn() {
+      workers.emplace_back(fn() {
         while (true) {
           int index = counter++;
           node_t start = index * kParallelUnit;
@@ -370,7 +371,7 @@ public:
           }
           if (end == num_nodes()) return;
         }
-      }));
+      });
     }
 
     for (int i : irange(num_threads)) {
@@ -491,8 +492,8 @@ public:
   /// remove all edges from |u| to |v|
   void remove_edge(node_t u, node_t v) {
     auto &es = mutable_edges(u);
-    auto lb = std::lower_bound(es.begin(), es.end(), v, compare_to<edge_type>);
-    auto ub = std::upper_bound(es.begin(), es.end(), v, compare_to_rev<edge_type>);
+    auto lb = std::lower_bound(es.begin(), es.end(), v, compare_edge_node<edge_type>);
+    auto ub = std::upper_bound(es.begin(), es.end(), v, compare_node_edge<edge_type>);
     num_edges_ -= ub - lb;
     es.erase(lb, ub);
   }
@@ -538,6 +539,7 @@ private:
   adjacency_list<edge_type> adj_;
   node_t num_nodes_;
   std::size_t num_edges_;
+  static const node_t kParallelUnit = 1024;
 };
 
 /// specialized type for representing unweighted graph

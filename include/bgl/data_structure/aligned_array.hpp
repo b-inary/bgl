@@ -7,7 +7,7 @@ namespace bgl {
 /// dynamic contigious array whose starting address is aligned
 template <typename T>
 class aligned_array {
- public:
+public:
   using value_type = T;
 
   aligned_array(std::size_t n, std::size_t align)
@@ -60,6 +60,22 @@ class aligned_array {
     return data_;
   }
 
+  value_type *begin() noexcept {
+    return data_;
+  }
+
+  const value_type *begin() const noexcept {
+    return data_;
+  }
+
+  value_type *end() noexcept {
+    return data_ + n_;
+  }
+
+  const value_type *end() const noexcept {
+    return data_ + n_;
+  }
+
   std::size_t size() const noexcept {
     return n_;
   }
@@ -76,7 +92,7 @@ class aligned_array {
     return !(*this == rhs);
   }
 
- private:
+protected:
   std::size_t n_ = 0;
   std::size_t align_ = 0;
   value_type *data_ = nullptr;

@@ -150,7 +150,7 @@ private:
 
 template <typename... Args>
 void _bgl_console_log(std::ostream &os, const char *file, int line, const Args &...args) {
-  std::string body = std::apply([](const auto &...args) { return fmt::format(args...); },
+  std::string body = std::apply(fn(...args) { return fmt::format(args...); },
                                 std::make_tuple(args...));
 
   put_date_string(os, fn() {
