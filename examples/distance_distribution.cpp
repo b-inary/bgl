@@ -9,13 +9,13 @@ int main(int argc, char **argv) {
 
   for (auto [g, p] : app.graph_iterator<graph>()) {
     CONSOLE_TIMER;
-    CONSOLE_LOG("graph loaded: {}\n  # of nodes: {}\n  # of edges: {}",
-                p, commify(g.num_nodes()), commify(g.num_edges()));
+    CONSOLE_LOG("graph loaded: {}\n  # of nodes: {}\n  # of edges: {}", p, commify(g.num_nodes()),
+                commify(g.num_edges()));
 
     std::vector<std::atomic<double>> distance_distribution(101);
-    hyperball(g, log2k, fn(v [[maybe_unused]], d, c) {
+    hyperball(g, log2k, fn(v[[maybe_unused]], d, c) {
       double cur = distance_distribution[d];
-      while (!distance_distribution[d].compare_exchange_weak(cur, cur + c));
+      while (!distance_distribution[d].compare_exchange_weak(cur, cur + c)) continue;
     });
 
     fmt::print("distance distribution:\n{}\n", distance_distribution);

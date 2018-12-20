@@ -1,7 +1,7 @@
 #include "../extlib/catch.hpp"
-#include "bgl/graph/io.hpp"
 #include "bgl/graph/generator/basic_generator.hpp"
 #include "bgl/graph/generator/basic_random_generator.hpp"
+#include "bgl/graph/io.hpp"
 using namespace bgl;
 
 TEST_CASE("erdos-renyi", "[generator]") {

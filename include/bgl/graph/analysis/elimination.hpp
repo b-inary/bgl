@@ -1,6 +1,6 @@
 #pragma once
-#include "bgl/util/all.hpp"
 #include "bgl/graph/basic_graph.hpp"
+#include "bgl/util/all.hpp"
 #include <queue>
 #include <tuple>
 
@@ -24,14 +24,13 @@ class min_degree_eliminator {
 public:
   /// constructor: input graph must be undirected
   min_degree_eliminator(const graph &g, std::size_t threshold)
-    : min_degree_eliminator(g.clone(), threshold) {}
+      : min_degree_eliminator(g.clone(), threshold) {}
 
   min_degree_eliminator(graph &&g, std::size_t threshold)
-    : g_{std::move(g)}
-    , parent_(g.num_nodes())
-    , is_hub_(g.num_nodes(), false)
-    , is_dead_(g.num_nodes(), false)
-  {
+      : g_{std::move(g)},
+        parent_(g.num_nodes()),
+        is_hub_(g.num_nodes(), false),
+        is_dead_(g.num_nodes(), false) {
     std::iota(parent_.begin(), parent_.end(), static_cast<node_t>(0));
     preprocess();
     do_contraction_loop(threshold);
@@ -145,8 +144,11 @@ private:
     // construct preprocessed graph
     for (node_t v : g_.nodes()) {
       auto &es = g_.mutable_edges(v);
-      if (alive[v]) filter(es, fn(w) { return alive[w]; });
-      else es.clear();
+      if (alive[v]) {
+        filter(es, fn(w) { return alive[w]; });
+      } else {
+        es.clear();
+      }
     }
   }
 
@@ -196,4 +198,4 @@ private:
     }
   }
 };
-} // namespace bgl
+}  // namespace bgl

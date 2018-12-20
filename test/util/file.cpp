@@ -1,7 +1,7 @@
 #include "../extlib/catch.hpp"
 #include "bgl/util/file.hpp"
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 using namespace bgl;
 
 TEST_CASE("file", "[util]") {

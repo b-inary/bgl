@@ -1,8 +1,8 @@
 #pragma once
-#include "bgl/graph/visitor.hpp"
 #include "bgl/data_structure/union_find.hpp"
-#include <unordered_map>
+#include "bgl/graph/visitor.hpp"
 #include <stack>
+#include <unordered_map>
 
 namespace bgl {
 /// decompose graph into WCCs: nodes in the same components share the same ID
@@ -15,7 +15,7 @@ std::pair<node_t, std::vector<node_t>> weakly_connected_components(const GraphTy
   visitor_by_distance<GraphType> visitor(g);
 
   for (node_t v : g.nodes()) {
-    visitor.visit(v, fn(w, d [[maybe_unused]]) {
+    visitor.visit(v, fn(w, d[[maybe_unused]]) {
       uf.unite(v, w);
       if (visited[w]) return false;
       visited[w] = true;
@@ -38,7 +38,7 @@ std::pair<node_t, std::vector<node_t>> weakly_connected_components(const GraphTy
 
 /// [destructive] extract largest WCC
 template <typename GraphType>
-GraphType& extract_largest_wcc(GraphType &g) {
+GraphType &extract_largest_wcc(GraphType &g) {
   auto [num_components, ids] = weakly_connected_components(g);
   std::vector<node_t> num_nodes(num_components);
   for (node_t id : ids) {
@@ -100,7 +100,7 @@ std::pair<node_t, std::vector<node_t>> strongly_connected_components(const Graph
           dfs_stack.emplace(v, i + 1);
           dfs_stack.emplace(w, 0);
           break;
-        } else if(on_stack[w]) {
+        } else if (on_stack[w]) {
           lowlink[v] = std::min(lowlink[v], order[w]);
         }
       }
@@ -123,7 +123,7 @@ std::pair<node_t, std::vector<node_t>> strongly_connected_components(const Graph
 
 /// [destructive] extract largest SCC
 template <typename GraphType>
-GraphType& extract_largest_scc(GraphType &g) {
+GraphType &extract_largest_scc(GraphType &g) {
   auto [num_components, ids] = strongly_connected_components(g);
   std::vector<node_t> num_nodes(num_components);
   for (node_t id : ids) {
@@ -145,10 +145,10 @@ bool is_strongly_connected(const GraphType &g) {
   const node_t n = g.num_nodes();
   if (n == 0) return true;
   std::vector<bool> visited(n, false);
-  visit_by_distance(g, 0, fn(v, d [[maybe_unused]]) {
+  visit_by_distance(g, 0, fn(v, d[[maybe_unused]]) {
     visited[v] = true;
     return true;
   });
   return std::find(visited.begin(), visited.end(), false) == visited.end();
 }
-} // namespace bgl
+}  // namespace bgl

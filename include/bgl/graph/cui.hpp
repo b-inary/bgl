@@ -1,12 +1,12 @@
-#include "../extlib/CLI11.hpp"
 #include "io.hpp"
+#include "../extlib/CLI11.hpp"
 
-#define BGL_PARSE(app, argc, argv) \
-  try { \
+#define BGL_PARSE(app, argc, argv)                       \
+  try {                                                  \
     (app).name(bgl::path::relative((argv)[0]).string()); \
-    (app).parse((argc), (argv)); \
-  } catch (const CLI::ParseError &e) { \
-    return (app).exit(e); \
+    (app).parse((argc), (argv));                         \
+  } catch (const CLI::ParseError &e) {                   \
+    return (app).exit(e);                                \
   }
 
 namespace bgl {
@@ -27,18 +27,22 @@ private:
     }
 
     // prohibit copying
-    cui_graph_iterator(const cui_graph_iterator&) = delete;
-    cui_graph_iterator(cui_graph_iterator&&) = default;
-    cui_graph_iterator &operator=(const cui_graph_iterator&) = delete;
-    cui_graph_iterator &operator=(cui_graph_iterator&&) = default;
+    cui_graph_iterator(const cui_graph_iterator &) = delete;
+    cui_graph_iterator(cui_graph_iterator &&) = default;
+    cui_graph_iterator &operator=(const cui_graph_iterator &) = delete;
+    cui_graph_iterator &operator=(cui_graph_iterator &&) = default;
 
-    std::pair<GraphType&, const path&> operator*() {
+    std::pair<GraphType &, const path &> operator*() {
       if (app_->folder_mode_) return *iter_;
       return {g_, paths_[index_]};
     }
 
     cui_graph_iterator &operator++() {
-      if (app_->folder_mode_) ++iter_; else ++index_;
+      if (app_->folder_mode_) {
+        ++iter_;
+      } else {
+        ++index_;
+      }
       return ready();
     }
 
@@ -47,9 +51,7 @@ private:
     bool operator==(const cui_graph_iterator &rhs) const {
       return index_ == paths_.size() && rhs.index_ == rhs.paths_.size();
     }
-    bool operator!=(const cui_graph_iterator &rhs) const {
-      return !(*this == rhs);
-    }
+    bool operator!=(const cui_graph_iterator &rhs) const { return !(*this == rhs); }
 
   private:
     const bgl_app *app_ = nullptr;
@@ -116,4 +118,4 @@ private:
   bool simplify_;
   bool undirected_;
 };
-} // namespace bgl
+}  // namespace bgl

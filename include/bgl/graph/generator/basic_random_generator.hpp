@@ -1,10 +1,10 @@
 #pragma once
-#include "bgl/util/all.hpp"
 #include "bgl/graph/basic_graph.hpp"
-#include <map>
-#include <limits>
-#include <random>
+#include "bgl/util/all.hpp"
 #include <cstdint>
+#include <limits>
+#include <map>
+#include <random>
 
 namespace bgl::gen {
 /// [undirected] generate a random graph by the Erdős-Rényi model
@@ -48,10 +48,10 @@ inline graph configuration(const graph &g) {
   for (node_t v : g.nodes()) {
     std::size_t indeg = indegree[v];
     std::size_t outdeg = g.outdegree(v);
-    for (std::size_t i [[maybe_unused]] : irange(indeg)) {
+    for (std::size_t i[[maybe_unused]] : irange(indeg)) {
       half_edges_in.push_back(v);
     }
-    for (std::size_t i [[maybe_unused]] : irange(outdeg)) {
+    for (std::size_t i[[maybe_unused]] : irange(outdeg)) {
       half_edges_out.push_back(v);
     }
   }
@@ -89,10 +89,10 @@ inline graph configuration_2d(const graph &g, int bin_size = 0) {
     std::size_t outdeg = g.outdegree(v);
     std::size_t in_bin = bin_size ? std::floor(std::log10(indeg) * bin_size) : indeg;
     std::size_t out_bin = bin_size ? std::floor(std::log10(outdeg) * bin_size) : outdeg;
-    for (std::size_t i [[maybe_unused]] : irange(indeg)) {
+    for (std::size_t i[[maybe_unused]] : irange(indeg)) {
       half_edges_in[in_bin].push_back(v);
     }
-    for (std::size_t i [[maybe_unused]] : irange(outdeg)) {
+    for (std::size_t i[[maybe_unused]] : irange(outdeg)) {
       half_edges_out[out_bin].push_back(v);
     }
   }
@@ -110,7 +110,8 @@ inline graph configuration_2d(const graph &g, int bin_size = 0) {
 
   for (node_t v : g.nodes()) {
     for (node_t w : g.neighbors(v)) {
-      std::size_t out = bin_size ? std::floor(std::log10(g.outdegree(v)) * bin_size) : g.outdegree(v);
+      std::size_t out =
+          bin_size ? std::floor(std::log10(g.outdegree(v)) * bin_size) : g.outdegree(v);
       std::size_t in = bin_size ? std::floor(std::log10(indegree[w]) * bin_size) : indegree[w];
       node_t new_v = half_edges_out[out][outdeg_count[out]++];
       node_t new_w = half_edges_in[in][indeg_count[in]++];
@@ -120,4 +121,4 @@ inline graph configuration_2d(const graph &g, int bin_size = 0) {
 
   return adj;
 }
-} // namespace bgl::gen
+}  // namespace bgl::gen

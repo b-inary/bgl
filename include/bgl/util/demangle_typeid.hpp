@@ -1,10 +1,10 @@
 #pragma once
-#include <typeinfo>
 #include <string>
+#include <typeinfo>
 #ifdef __GNUG__
-#  include <memory>
 #  include <cstdlib>  // std::free
 #  include <cxxabi.h>
+#  include <memory>
 #endif
 
 // https://cpplover.blogspot.com/2014/10/ctypeidtypeinfotypeindex.html
@@ -23,9 +23,7 @@ inline std::string demangle(const std::type_info &ti) {
   return p.get();
 }
 #else
-inline std::string demangle(const std::type_info &ti) {
-  return ti.name();
-}
+inline std::string demangle(const std::type_info &ti) { return ti.name(); }
 #endif
 
 //! get typename string of |arg|
@@ -33,4 +31,4 @@ template <typename T>
 std::string typename_of(const T &arg) {
   return demangle(typeid(arg));
 }
-} // namespace bgl
+}  // namespace bgl

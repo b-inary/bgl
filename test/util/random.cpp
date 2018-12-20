@@ -1,7 +1,7 @@
 #include "../extlib/catch.hpp"
 #include "bgl/util/random.hpp"
-#include <random>
 #include <cmath>
+#include <random>
 using namespace std;
 using namespace bgl;
 

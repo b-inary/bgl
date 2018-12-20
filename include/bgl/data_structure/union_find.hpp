@@ -1,8 +1,8 @@
 #pragma once
 #include "bgl/util/all.hpp"
-#include <vector>
 #include <numeric>
 #include <type_traits>
+#include <vector>
 
 namespace bgl {
 /// disjoint-set data structure
@@ -31,14 +31,10 @@ public:
   }
 
   /// determine if x and y are included by the same set: approximately O(1)
-  bool is_same(integral_t x, integral_t y) {
-    return find(x) == find(y);
-  }
+  bool is_same(integral_t x, integral_t y) { return find(x) == find(y); }
 
   /// return the number of disjoint sets: O(1)
-  integral_t disjoint_count() {
-    return count_;
-  }
+  integral_t disjoint_count() { return count_; }
 
   /// return list of component IDs
   std::vector<integral_t> components() {
@@ -57,4 +53,4 @@ private:
     return parent_[x] = find(parent_[x]);
   }
 };
-} // namespace bgl
+}  // namespace bgl

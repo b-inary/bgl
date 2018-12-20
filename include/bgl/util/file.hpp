@@ -1,11 +1,11 @@
 #pragma once
-#include "../extlib/apathy.hpp"
 #include "lambda.hpp"
+#include "../extlib/apathy.hpp"
 #include <iostream>
-#include <vector>
-#include <string>
 #include <iterator>
 #include <regex>
+#include <string>
+#include <vector>
 
 namespace bgl {
 //! a super-tiny C++17 filesystem::path like class
@@ -14,11 +14,9 @@ public:
   path(const char *str = "") : path_{str} {}
   path(const std::string &str) : path_{str} {}
 
-  path clone() const {
-    return *this;
-  }
+  path clone() const { return *this; }
 
-  path& operator/=(const path &rhs) {
+  path &operator/=(const path &rhs) {
     path_ /= rhs.path_;
     return *this;
   }
@@ -28,20 +26,20 @@ public:
     return result /= rhs;
   }
 
-  path& remove_filename() {
+  path &remove_filename() {
     if (!path_.trailing_slash()) {
       path_.directory().up();
     }
     return *this;
   }
 
-  path& replace_filename(const path &replacement) {
+  path &replace_filename(const path &replacement) {
     remove_filename();
     path_ /= replacement.path_;
     return *this;
   }
 
-  path& replace_extension(const path &replacement = path()) {
+  path &replace_extension(const path &replacement = path()) {
     std::string st = path_.stem();
     std::string ext = replacement.string();
     if (!ext.empty() && ext[0] != '.') ext = "." + ext;
@@ -50,13 +48,9 @@ public:
     return *this;
   }
 
-  std::string string() const {
-    return path_.string();
-  }
+  std::string string() const { return path_.string(); }
 
-  operator std::string() const {
-    return path_.string();
-  }
+  operator std::string() const { return path_.string(); }
 
   path parent_path() const {
     path p = *this;
@@ -64,39 +58,23 @@ public:
     return p;
   }
 
-  path filename() const {
-    return path_.filename();
-  }
+  path filename() const { return path_.filename(); }
 
-  path stem() const {
-    return path_.stem();
-  }
+  path stem() const { return path_.stem(); }
 
-  path extension() const {
-    return path_.extension();
-  }
+  path extension() const { return path_.extension(); }
 
   /* simple test functions */
 
-  static bool exists(const path &p) {
-    return p.path_.exists();
-  }
+  static bool exists(const path &p) { return p.path_.exists(); }
 
-  static bool is_file(const path &p) {
-    return p.path_.is_file();
-  }
+  static bool is_file(const path &p) { return p.path_.is_file(); }
 
-  static bool is_directory(const path &p) {
-    return p.path_.is_directory();
-  }
+  static bool is_directory(const path &p) { return p.path_.is_directory(); }
 
-  static std::size_t size(const path &p) {
-    return p.path_.size();
-  }
+  static std::size_t size(const path &p) { return p.path_.size(); }
 
-  static bool remove(const path &p) {
-    return apathy::Path::rm(p.path_);
-  }
+  static bool remove(const path &p) { return apathy::Path::rm(p.path_); }
 
   /* traverse */
 
@@ -139,9 +117,7 @@ public:
 
   /* path operations */
 
-  static path current_path() {
-    return apathy::Path::cwd().string();
-  }
+  static path current_path() { return apathy::Path::cwd().string(); }
 
   static path relative(const path &p, const path &base = current_path()) {
     return apathy::Path::relative(p.path_, base.path_).string();
@@ -153,9 +129,7 @@ public:
     return lhs.path_ == rhs.path_;
   }
 
-  friend bool operator!=(const path &lhs, const path &rhs) noexcept {
-    return !(lhs == rhs);
-  }
+  friend bool operator!=(const path &lhs, const path &rhs) noexcept { return !(lhs == rhs); }
 
 private:
   apathy::Path path_;
@@ -180,10 +154,10 @@ private:
     return result;
   }
 };
-} // namespace bgl
+}  // namespace bgl
 
 namespace std {
-inline std::ostream& operator<<(std::ostream &os, const bgl::path &p) {
+inline std::ostream &operator<<(std::ostream &os, const bgl::path &p) {
   return os << '"' << p.string() << '"';
 }
-} // namespace std
+}  // namespace std

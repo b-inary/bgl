@@ -1,11 +1,11 @@
 #pragma once
+#include "aligned_array.hpp"
 #include "bgl/util/all.hpp"
-#include "bgl/data_structure/aligned_array.hpp"
-#include <vector>
 #include <algorithm>
-#include <cstring>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
+#include <vector>
 
 #ifdef __AVX2__
 #  include <immintrin.h>
@@ -21,11 +21,10 @@ public:
   std::vector<double> sigma;
 
   hyperloglog_params(int log2m)
-    : m{1 << log2m}
-    , log2m{log2m}
-    , normalize_coefficient{std::pow(2, -63) / alpha(log2m)}
-    , sigma{generate_sigma_table(log2m)}
-  {}
+      : m{1 << log2m},
+        log2m{log2m},
+        normalize_coefficient{std::pow(2, -63) / alpha(log2m)},
+        sigma{generate_sigma_table(log2m)} {}
 
 private:
   static double alpha(int log2m) {
@@ -47,12 +46,10 @@ private:
     }
   }
 
-  static double alpha_inf() {
-    return 0.5 / std::log(2);
-  }
+  static double alpha_inf() { return 0.5 / std::log(2); }
 
   static double sigma_raw(double x) {
-    if (x == 1.0) return 1.0 / 0.0; // infinity
+    if (x == 1.0) return 1.0 / 0.0;  // infinity
     double y = 0.5;
     double z = x;
     double prev_z = 0.0;
@@ -82,30 +79,28 @@ private:
 class hyperloglog {
 public:
   hyperloglog(std::uint8_t *regs, const hyperloglog_params &params)
-    : regs_{regs}, params_{params} {}
+      : regs_{regs}, params_{params} {}
 
   hyperloglog(const hyperloglog &rhs) = default;
   hyperloglog(hyperloglog &&rhs) = default;
 
   /// copy assignment operator
   /// @note *this and rhs must have the same number of registers (no check)
-  hyperloglog& operator=(const hyperloglog &rhs) {
+  hyperloglog &operator=(const hyperloglog &rhs) {
     std::memcpy(regs_, rhs.regs_, params_.m);
     return *this;
   }
 
   /// move assignment operator (actually do copying)
   /// @note *this and rhs must have the same number of registers (no check)
-  hyperloglog& operator=(hyperloglog &&rhs) {
-    return *this = rhs;
-  }
+  hyperloglog &operator=(hyperloglog &&rhs) { return *this = rhs; }
 
   /// insert 64-bit integer element
   void insert(std::uint64_t elem) {
     std::uint64_t hash = internal_hash(elem);
-    std::size_t index = hash >> (64 - params_.log2m); // first |log2m| bit
-    std::uint8_t rank = __builtin_ffsll(hash | (1LL << (63 - params_.log2m))); // [1, 63 - log2m]
-    regs_[index] = std::max(regs_[index], rank); // update register
+    std::size_t index = hash >> (64 - params_.log2m);  // first |log2m| bit
+    std::uint8_t rank = __builtin_ffsll(hash | (1LL << (63 - params_.log2m)));  // [1, 63 - log2m]
+    regs_[index] = std::max(regs_[index], rank);  // update register
   }
 
   /// merge HyperLogLog counters
@@ -113,10 +108,10 @@ public:
   void merge(const hyperloglog &rhs) {
 #ifdef __AVX2__
     for (int i = 0; i < params_.m; i += 32) {
-      __m256i x = _mm256_load_si256(reinterpret_cast<const __m256i*>(regs_ + i));
-      __m256i y = _mm256_load_si256(reinterpret_cast<const __m256i*>(rhs.regs_ + i));
+      __m256i x = _mm256_load_si256(reinterpret_cast<const __m256i *>(regs_ + i));
+      __m256i y = _mm256_load_si256(reinterpret_cast<const __m256i *>(rhs.regs_ + i));
       __m256i m = _mm256_max_epu8(x, y);
-      _mm256_store_si256(reinterpret_cast<__m256i*>(regs_ + i), m);
+      _mm256_store_si256(reinterpret_cast<__m256i *>(regs_ + i), m);
     }
 #else
     for (int i : irange(params_.m)) {
@@ -139,11 +134,11 @@ public:
     const __m256i i8mask_i64 = _mm256_set1_epi64x(255);
     const __m256i shift_base_i8 = _mm256_set1_epi8(63 - params_.log2m);
 
-    __m256i zero_count_i16[2] = { zeros, zeros };
+    __m256i zero_count_i16[2] = {zeros, zeros};
     __m256i sum_i64 = zeros;
 
     for (int i = 0; i < params_.m; i += 32) {
-      __m256i regs_i8 = _mm256_load_si256(reinterpret_cast<const __m256i*>(regs_ + i));
+      __m256i regs_i8 = _mm256_load_si256(reinterpret_cast<const __m256i *>(regs_ + i));
 
       __m256i tmp_i16;
       __m256i cmpzero_i8 = _mm256_sub_epi8(zeros, _mm256_cmpeq_epi8(regs_i8, zeros));
@@ -153,7 +148,7 @@ public:
       zero_count_i16[1] = _mm256_add_epi16(zero_count_i16[1], tmp_i16);
 
       __m256i shift_i8 = _mm256_sub_epi8(shift_base_i8, regs_i8);
-      for (int j [[maybe_unused]] : irange(8)) {
+      for (int j[[maybe_unused]] : irange(8)) {
         __m256i add_i64 = ones_i64;
         __m256i shift_i64 = _mm256_and_si256(shift_i8, i8mask_i64);
         add_i64 = _mm256_sllv_epi64(add_i64, shift_i64);
@@ -195,16 +190,14 @@ public:
     return std::memcmp(regs_, rhs.regs_, params_.m) == 0;
   }
 
-  bool operator!=(const hyperloglog &rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(const hyperloglog &rhs) const { return !(*this == rhs); }
 
 private:
   uint8_t *regs_;
   const hyperloglog_params &params_;
 
   static std::uint64_t internal_hash(std::uint64_t x) {
-    x *= 11400714819323198549ull; // nearest prime to golden ratio
+    x *= 11400714819323198549ull;  // nearest prime to golden ratio
     x += 12345678900987654321ull;
 
     // http://mostlymangling.blogspot.com/2018/07/on-mixing-functions-in-fast-splittable.html
@@ -216,9 +209,7 @@ private:
     return x;
   }
 
-  static std::uint64_t rotr(std::uint64_t x, int k) {
-    return (x >> k) | (x << (64 - k));
-  }
+  static std::uint64_t rotr(std::uint64_t x, int k) { return (x >> k) | (x << (64 - k)); }
 };
 
 
@@ -240,12 +231,10 @@ public:
     return params_.m == rhs.params_.m && buf_ == rhs.buf_;
   }
 
-  bool operator!=(const hyperloglog_array &rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(const hyperloglog_array &rhs) const { return !(*this == rhs); }
 
 private:
   aligned_array<uint8_t> buf_;
   hyperloglog_params params_;
 };
-} // namespace bgl
+}  // namespace bgl

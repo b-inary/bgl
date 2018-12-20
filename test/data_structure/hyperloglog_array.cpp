@@ -1,6 +1,6 @@
 #include "../extlib/catch.hpp"
-#include "bgl/util/all.hpp"
 #include "bgl/data_structure/hyperloglog_array.hpp"
+#include "bgl/util/all.hpp"
 using namespace bgl;
 
 TEST_CASE("hyperloglog", "[data-structure]") {
@@ -25,7 +25,7 @@ TEST_CASE("hyperloglog", "[data-structure]") {
 
   SECTION("random") {
     hyperloglog_array h(1, 12);
-    for (int i [[maybe_unused]] : irange(1000000)) {
+    for (int i[[maybe_unused]] : irange(1000000)) {
       h[0].insert(bgl_random());
     }
     REQUIRE(h[0].count() > 900000);

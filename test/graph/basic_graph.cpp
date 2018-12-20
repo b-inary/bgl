@@ -1,7 +1,7 @@
 #include "../extlib/catch.hpp"
 #include "bgl/graph/basic_graph.hpp"
-#include <vector>
 #include <algorithm>
+#include <vector>
 using namespace bgl;
 
 TEST_CASE("unweighted graph", "[basic-graph]") {

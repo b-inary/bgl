@@ -1,8 +1,8 @@
 #pragma once
-#include "bgl/graph/basic_graph.hpp"
 #include "bgl/data_structure/hyperloglog_array.hpp"
-#include <functional>
+#include "bgl/graph/basic_graph.hpp"
 #include <cmath>
+#include <functional>
 
 namespace bgl {
 /// run simple HyperBall. to compute centrality, transpose graph in advance
@@ -24,11 +24,13 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
   hyperloglog_array curr_hll(n, log2k);
   std::vector<double> cache(n);
 
-  g.for_each_node(fn(v) {
-    curr_hll[v].insert(v);
-    cache[v] = curr_hll[v].count();
-    callback(v, 0, 1.0);
-  }, num_threads);
+  g.for_each_node(
+      fn(v) {
+        curr_hll[v].insert(v);
+        cache[v] = curr_hll[v].count();
+        callback(v, 0, 1.0);
+      },
+      num_threads);
 
   hyperloglog_array next_hll(curr_hll);
 
@@ -39,30 +41,34 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
     std::atomic<node_t> num_updated = 0;
     next_updated.assign(n, false);
 
-    g.for_each_node(fn(u) {
-      bool merged = false;
-      for (node_t v : g.neighbors(u)) {
-        if (curr_updated[v]) {
-          merged = true;
-          next_hll[u].merge(curr_hll[v]);
-        }
-      }
-      if ((next_updated[u] = merged && curr_hll[u] != next_hll[u])) {
-        ++num_updated;
-        double count = next_hll[u].count();
-        callback(u, d + 1, count - cache[u]);
-        cache[u] = count;
-      }
-    }, num_threads);
+    g.for_each_node(
+        fn(u) {
+          bool merged = false;
+          for (node_t v : g.neighbors(u)) {
+            if (curr_updated[v]) {
+              merged = true;
+              next_hll[u].merge(curr_hll[v]);
+            }
+          }
+          if ((next_updated[u] = merged && curr_hll[u] != next_hll[u])) {
+            ++num_updated;
+            double count = next_hll[u].count();
+            callback(u, d + 1, count - cache[u]);
+            cache[u] = count;
+          }
+        },
+        num_threads);
 
     if (num_updated == 0) break;
 
     if (num_updated < n / 10) {
-      g.for_each_node(fn(v) {
-        if (next_updated[v]) {
-          curr_hll[v] = next_hll[v];
-        }
-      }, num_threads);
+      g.for_each_node(
+          fn(v) {
+            if (next_updated[v]) {
+              curr_hll[v] = next_hll[v];
+            }
+          },
+          num_threads);
     } else {
       curr_hll = next_hll;
     }
@@ -70,4 +76,4 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
     std::swap(curr_updated, next_updated);
   }
 }
-} // namespace bgl
+}  // namespace bgl

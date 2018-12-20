@@ -1,10 +1,10 @@
 #pragma once
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 #include <limits>
-#include <cstdint>
 
-namespace bgl{
+namespace bgl {
 /**
  * xoshiro256** is a fast, high-quality random number generator<br>
  * partially satisfies RandomNumberEngine requirements<br>
@@ -17,13 +17,9 @@ public:
 
   static constexpr result_type default_seed = 1u;
 
-  static constexpr result_type min() {
-    return std::numeric_limits<result_type>::min();
-  }
+  static constexpr result_type min() { return std::numeric_limits<result_type>::min(); }
 
-  static constexpr result_type max() {
-    return std::numeric_limits<result_type>::max();
-  }
+  static constexpr result_type max() { return std::numeric_limits<result_type>::max(); }
 
   /**
    * @brief generate random number
@@ -41,9 +37,7 @@ public:
     return s;
   }
 
-  explicit xoshiro256(result_type value = default_seed) {
-    seed(value);
-  }
+  explicit xoshiro256(result_type value = default_seed) { seed(value); }
 
   template <class Sseq>
   explicit xoshiro256(Sseq& q) {
@@ -66,10 +60,8 @@ public:
    */
   template <class Sseq>
   void seed(Sseq& q) {
-    q.generate(
-      reinterpret_cast<uint32_t*>(std::begin(state_)),
-      reinterpret_cast<uint32_t*>(std::end(state_))
-    );
+    q.generate(reinterpret_cast<uint32_t*>(std::begin(state_)),
+               reinterpret_cast<uint32_t*>(std::end(state_)));
   }
 
   /**
@@ -83,24 +75,16 @@ public:
   }
 
   bool operator==(const xoshiro256& rhs) const {
-    return std::equal(
-      std::begin(state_),
-      std::end(state_),
-      std::begin(rhs.state_)
-    );
+    return std::equal(std::begin(state_), std::end(state_), std::begin(rhs.state_));
   }
 
-  bool operator!=(const xoshiro256& rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(const xoshiro256& rhs) const { return !(*this == rhs); }
 
 private:
   result_type state_[4];
 
   // (modern compilers can optimize this into a single rotate instruction)
-  static result_type rotl(result_type x, int k) {
-    return (x << k) | (x >> (64 - k));
-  }
+  static result_type rotl(result_type x, int k) { return (x << k) | (x >> (64 - k)); }
 
   /**
    * @brief splitmix64 generator. used for seed initialization
@@ -120,4 +104,4 @@ using rng_t = xoshiro256;
 
 //! pre-defined global instance of rng_t for lazy guys
 inline rng_t bgl_random;
-} // namespace bgl
+}  // namespace bgl

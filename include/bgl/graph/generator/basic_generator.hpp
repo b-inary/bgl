@@ -1,8 +1,8 @@
 #pragma once
-#include "bgl/util/all.hpp"
 #include "bgl/graph/basic_graph.hpp"
-#include <limits>
+#include "bgl/util/all.hpp"
 #include <cstdint>
+#include <limits>
 
 namespace bgl::gen {
 /// [undirected] generate a complete graph (clique)
@@ -73,14 +73,10 @@ inline graph grid_3d(node_t num_x, node_t num_y, node_t num_z) {
 }
 
 /// [undirected] generate a 2D-grid graph
-inline graph grid(node_t num_cols, node_t num_rows) {
-  return grid_3d(num_cols, num_rows, 1);
-}
+inline graph grid(node_t num_cols, node_t num_rows) { return grid_3d(num_cols, num_rows, 1); }
 
 /// [undirected] generate a path graph
-inline graph path(node_t num_nodes) {
-  return grid_3d(num_nodes, 1, 1);
-}
+inline graph path(node_t num_nodes) { return grid_3d(num_nodes, 1, 1); }
 
 /// [directed] generate a directed cycle graph
 inline graph dir_cycle(node_t num_nodes) {
@@ -95,7 +91,5 @@ inline graph dir_cycle(node_t num_nodes) {
 }
 
 /// [undirected] generate a cycle graph
-inline graph cycle(node_t num_nodes) {
-  return dir_cycle(num_nodes).make_undirected();
-}
-} // namespace bgl::gen
+inline graph cycle(node_t num_nodes) { return dir_cycle(num_nodes).make_undirected(); }
+}  // namespace bgl::gen

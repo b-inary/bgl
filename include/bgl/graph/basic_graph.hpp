@@ -1,17 +1,17 @@
 #pragma once
 #include "bgl/util/all.hpp"
-#include <iostream>
-#include <vector>
 #include <algorithm>
-#include <utility>
-#include <iterator>
-#include <functional>
-#include <type_traits>
-#include <thread>
 #include <atomic>
-#include <optional>
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <optional>
+#include <thread>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace bgl {
 
@@ -34,18 +34,14 @@ using unweighted_edge_t = node_t;
 template <typename WeightType>
 using weighted_edge_t = std::pair<node_t, WeightType>;
 
-inline constexpr node_t to(const unweighted_edge_t &e) noexcept {
-  return e;
-}
+inline constexpr node_t to(const unweighted_edge_t &e) noexcept { return e; }
 
 template <typename WeightType>
 constexpr node_t to(const weighted_edge_t<WeightType> &e) noexcept {
   return e.first;
 }
 
-inline constexpr int weight(const unweighted_edge_t&) noexcept {
-  return 1;
-}
+inline constexpr int weight(const unweighted_edge_t &) noexcept { return 1; }
 
 template <typename WeightType>
 constexpr WeightType weight(const weighted_edge_t<WeightType> &e) noexcept {
@@ -53,14 +49,13 @@ constexpr WeightType weight(const weighted_edge_t<WeightType> &e) noexcept {
 }
 
 /* utility functions of edge */
-inline constexpr unweighted_edge_t
-update_to(const unweighted_edge_t&, node_t v) noexcept {
+inline constexpr unweighted_edge_t update_to(const unweighted_edge_t &, node_t v) noexcept {
   return v;
 }
 
 template <typename WeightType>
-constexpr weighted_edge_t<WeightType>
-update_to(const weighted_edge_t<WeightType> &e, node_t v) noexcept {
+constexpr weighted_edge_t<WeightType> update_to(const weighted_edge_t<WeightType> &e,
+                                                node_t v) noexcept {
   return {v, weight(e)};
 }
 
@@ -122,8 +117,8 @@ std::size_t num_edges(const adjacency_list<EdgeType> &adj) {
 
 /// convert edge list to adjacency list
 template <typename EdgeType>
-adjacency_list<EdgeType>
-convert_to_adjacency_list(node_t num_nodes, const edge_list<EdgeType> &es) {
+adjacency_list<EdgeType> convert_to_adjacency_list(node_t num_nodes,
+                                                   const edge_list<EdgeType> &es) {
   adjacency_list<EdgeType> edges(num_nodes);
   for (const auto &e : es) {
     ASSERT_MSG(0 <= e.first && e.first < num_nodes, "invalid node index");
@@ -158,7 +153,7 @@ template <typename Iterator>
 class neighbor_iterator : public Iterator {
 public:
   neighbor_iterator(Iterator it) : Iterator{it} {}
-  node_t operator*() const noexcept { return to(*static_cast<const Iterator&>(*this)); }
+  node_t operator*() const noexcept { return to(*static_cast<const Iterator &>(*this)); }
 };
 
 /// neighbor adapter
@@ -168,6 +163,7 @@ public:
   neighbor_adapter(const std::vector<EdgeType> &edges) : edges_{edges} {}
   auto begin() const { return neighbor_iterator{std::begin(edges_)}; }
   auto end() const { return neighbor_iterator{std::end(edges_)}; }
+
 private:
   const std::vector<EdgeType> &edges_;
 };
@@ -187,24 +183,16 @@ public:
   basic_graph() : num_nodes_{0}, num_edges_{0} {}
 
   /// construct with edge list
-  basic_graph(const edge_list<edge_type> &es) {
-    assign(es);
-  }
+  basic_graph(const edge_list<edge_type> &es) { assign(es); }
 
   /// construct with edge list specifying the number of nodes
-  basic_graph(node_t num_nodes, const edge_list<edge_type> &es) {
-    assign(num_nodes, es);
-  }
+  basic_graph(node_t num_nodes, const edge_list<edge_type> &es) { assign(num_nodes, es); }
 
   /// construct with adjacency list
-  basic_graph(const adjacency_list<edge_type> &adj) {
-    assign(adj);
-  }
+  basic_graph(const adjacency_list<edge_type> &adj) { assign(adj); }
 
   /// construct with adjacency list
-  basic_graph(adjacency_list<edge_type> &&adj) {
-    assign(std::move(adj));
-  }
+  basic_graph(adjacency_list<edge_type> &&adj) { assign(std::move(adj)); }
 
   /// construct with sorted adjacency list specifying the number of nodes and edges.
   /// when the number of nodes and edges are not correct, behavior is undefined.
@@ -214,9 +202,7 @@ public:
   }
 
   /// initialize graph with edge list
-  void assign(const edge_list<edge_type> &es) {
-    assign(bgl::num_nodes(es), es);
-  }
+  void assign(const edge_list<edge_type> &es) { assign(bgl::num_nodes(es), es); }
 
   /// initialize graph with edge list specifying the number of nodes
   void assign(node_t num_nodes, const edge_list<edge_type> &es) {
@@ -263,63 +249,41 @@ public:
   }
 
   /// make clone
-  graph_type clone() const {
-    return *this;
-  }
+  graph_type clone() const { return *this; }
 
   /* basic operations */
 
   /// equality operator
   bool operator==(const graph_type &rhs) const noexcept {
-    return num_nodes_ == rhs.num_nodes_
-        && num_edges_ == rhs.num_edges_
-        && adj_ == rhs.adj_;
+    return num_nodes_ == rhs.num_nodes_ && num_edges_ == rhs.num_edges_ && adj_ == rhs.adj_;
   }
 
   /// inequality operator
-  bool operator!=(const graph_type &rhs) const noexcept {
-    return !(*this == rhs);
-  }
+  bool operator!=(const graph_type &rhs) const noexcept { return !(*this == rhs); }
 
   /// return the number of nodes
-  node_t num_nodes() const noexcept {
-    return num_nodes_;
-  };
+  node_t num_nodes() const noexcept { return num_nodes_; };
 
   /// return the number of **directed** edges
-  std::size_t num_edges() const noexcept {
-    return num_edges_;
-  };
+  std::size_t num_edges() const noexcept { return num_edges_; };
 
   /// return outdegree of node |v|
-  std::size_t outdegree(node_t v) const noexcept {
-    return adj_[v].size();
-  };
+  std::size_t outdegree(node_t v) const noexcept { return adj_[v].size(); };
 
   /// useful adapter of nodes for range-based for-loop
-  irange_type<node_t> nodes() const noexcept {
-    return irange(num_nodes());
-  };
+  irange_type<node_t> nodes() const noexcept { return irange(num_nodes()); };
 
   /// return an edge from node |v| of index |i|
-  const edge_type &edge(node_t v, std::size_t i) const noexcept {
-    return adj_[v][i];
-  };
+  const edge_type &edge(node_t v, std::size_t i) const noexcept { return adj_[v][i]; };
 
   /// return edge list from node |v|
-  const std::vector<edge_type> &edges(node_t v) const noexcept {
-    return adj_[v];
-  };
+  const std::vector<edge_type> &edges(node_t v) const noexcept { return adj_[v]; };
 
   /// return **mutable** edge list from node |v| (do not call without special reason)
-  std::vector<edge_type> &mutable_edges(node_t v) noexcept {
-    return adj_[v];
-  }
+  std::vector<edge_type> &mutable_edges(node_t v) noexcept { return adj_[v]; }
 
   /// return a neighbor from node |v| of index |i|
-  node_t neighbor(node_t v, std::size_t i) const noexcept {
-    return to(adj_[v][i]);
-  }
+  node_t neighbor(node_t v, std::size_t i) const noexcept { return to(adj_[v][i]); }
 
   /// useful adapter of neighbors for range-based for-loop
   neighbor_adapter<edge_type> neighbors(node_t v) const noexcept {
@@ -327,9 +291,7 @@ public:
   };
 
   /// check if there exists an edge from |u| to |v|
-  bool is_adjacent(node_t u, node_t v) const noexcept {
-    return get_weight(u, v).has_value();
-  }
+  bool is_adjacent(node_t u, node_t v) const noexcept { return get_weight(u, v).has_value(); }
 
   /// get (smallest) weight of edge from |u| to |v|.
   /// if |u| and |v| are not adjacent, return nullopt
@@ -343,9 +305,7 @@ public:
   }
 
   /// get edge list of the graph
-  edge_list<edge_type> get_edge_list() const {
-    return convert_to_edge_list(adj_);
-  }
+  edge_list<edge_type> get_edge_list() const { return convert_to_edge_list(adj_); }
 
   /* parallel for-each loop */
 
@@ -360,7 +320,7 @@ public:
                              (num_nodes() + kParallelUnit - 1) / kParallelUnit);
     }
 
-    for (int i [[maybe_unused]] : irange(num_threads)) {
+    for (int i[[maybe_unused]] : irange(num_threads)) {
       workers.emplace_back(fn() {
         while (true) {
           int index = counter++;
@@ -549,4 +509,4 @@ using graph = basic_graph<unweighted_edge_t>;
 template <typename WeightType>
 using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
-} // namespace bgl
+}  // namespace bgl

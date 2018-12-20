@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+ColumnLimit: 100
+MaxEmptyLinesToKeep: 2
+AccessModifierOffset: -2
+AlignTrailingComments: false
+IndentPPDirectives: AfterHash
+IncludeCategories:
+  - Regex: '"[^/]*"'
+    Priority: -2
+  - Regex: '".*"'
+    Priority: -1

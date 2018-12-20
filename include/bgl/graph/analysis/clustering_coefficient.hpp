@@ -1,6 +1,6 @@
 #pragma once
-#include "bgl/util/all.hpp"
 #include "bgl/graph/basic_graph.hpp"
+#include "bgl/util/all.hpp"
 
 namespace bgl {
 // compute clustering coefficient per degree up to |degree_threshold|: |g| must be undirected
@@ -36,4 +36,4 @@ std::vector<double> clustering_coefficient_per_degree(const graph &g, node_t deg
 
   return result;
 }
-} // namespace bgl
+}  // namespace bgl

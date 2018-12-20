@@ -1,7 +1,7 @@
 #pragma once
+#include <cstddef>
 #include <iterator>
 #include <type_traits>
-#include <cstddef>
 
 namespace bgl {
 template <typename T>
@@ -9,16 +9,15 @@ class irange_iterator {
 public:
   using difference_type = std::ptrdiff_t;
   using value_type = T;
-  using pointer = T*;
-  using reference = T&;
+  using pointer = T *;
+  using reference = T &;
   using iterator_category = std::forward_iterator_tag;
   constexpr irange_iterator(T value) : value_{value} {}
   constexpr T operator*() const { return value_; }
   // remark: this inequality operator does not satisfy commutativity
-  constexpr bool operator!=(const irange_iterator &rhs) const {
-    return value_ < rhs.value_;
-  }
+  constexpr bool operator!=(const irange_iterator &rhs) const { return value_ < rhs.value_; }
   void operator++() { ++value_; }
+
 private:
   T value_;
 };
@@ -29,6 +28,7 @@ public:
   constexpr irange_type(T start, T stop) : start_{start}, stop_{stop} {}
   constexpr irange_iterator<T> begin() { return start_; }
   constexpr irange_iterator<T> end() { return stop_; }
+
 private:
   const T start_, stop_;
 };
@@ -50,10 +50,9 @@ constexpr irange_type<T> irange(T n) {
  * @param n end value
  * @return range adapter of [m, n)
  */
-template <typename T1, typename T2,
-          typename CommonType = typename std::common_type<T1, T2>::type>
+template <typename T1, typename T2, typename CommonType = typename std::common_type<T1, T2>::type>
 constexpr irange_type<CommonType> irange(T1 m, T2 n) {
   static_assert(std::is_integral_v<CommonType>);
   return {m, n};
 }
-} // namespace bgl
+}  // namespace bgl

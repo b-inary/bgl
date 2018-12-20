@@ -1,23 +1,23 @@
 #pragma once
-#include "../extlib/rang.hpp"
-#include "fmt.hpp"
 #include "file.hpp"
+#include "fmt.hpp"
 #include "lambda.hpp"
-#include <iostream>
-#include <sstream>
-#include <locale>
-#include <string>
-#include <functional>
-#include <tuple>
+#include "../extlib/rang.hpp"
 #include <chrono>
 #include <cmath>
 #include <ctime>
+#include <functional>
+#include <iostream>
+#include <locale>
+#include <sstream>
+#include <string>
+#include <tuple>
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
-#  define _BGL_OS_WIN
-#  include <windows.h>
+#define _BGL_OS_WIN
+#include <windows.h>
 #else
-#  include <sys/ioctl.h>
+#include <sys/ioctl.h>
 #endif
 
 #define _BGL_EVAL(f, v) f(v)
@@ -26,25 +26,21 @@
 
 /// easy timer logging macro that measures entire block.
 /// usage: declare CONSOLE_TIMER at the top of block
-#define CONSOLE_TIMER \
-  _bgl_timer _bgl_timer_instance(std::cerr, __FILE__, __LINE__)
+#define CONSOLE_TIMER _bgl_timer _bgl_timer_instance(std::cerr, __FILE__, __LINE__)
 
 /// easy timer logging macro that measures entire block.
 /// usage: declare TIMER(os) at the top of block
 /// @param os output stream for logging
-#define TIMER(os) \
-  _bgl_timer _bgl_timer_instance((os), __FILE__, __LINE__)
+#define TIMER(os) _bgl_timer _bgl_timer_instance((os), __FILE__, __LINE__)
 
 /// logging macro
 /// @param ... format string (of fmt library)
-#define CONSOLE_LOG(...) \
-  _bgl_console_log(std::cerr, __FILE__, __LINE__, __VA_ARGS__)
+#define CONSOLE_LOG(...) _bgl_console_log(std::cerr, __FILE__, __LINE__, __VA_ARGS__)
 
 /// logging macro for specified output stream
 /// @param os output stream for logging
 /// @param ... format string (of fmt library)
-#define WRITE_LOG(os, ...) \
-  _bgl_console_log((os), __FILE__, __LINE__, __VA_ARGS__)
+#define WRITE_LOG(os, ...) _bgl_console_log((os), __FILE__, __LINE__, __VA_ARGS__)
 
 
 namespace bgl {
@@ -125,10 +121,7 @@ inline std::string _bgl_source_path(const char *file) {
 class _bgl_timer {
 public:
   _bgl_timer(std::ostream &os, const char *file, int line)
-    : os_{os}
-    , file_{file}
-    , line_{line}
-    , start_{std::chrono::high_resolution_clock::now()} {}
+      : os_{os}, file_{file}, line_{line}, start_{std::chrono::high_resolution_clock::now()} {}
   ~_bgl_timer() {
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
@@ -141,6 +134,7 @@ public:
       fmt::print(os_, "{}[s]", elapsed.count() / 1000.0);
     });
   }
+
 private:
   std::ostream &os_;
   const char *file_;
@@ -149,9 +143,9 @@ private:
 };
 
 template <typename... Args>
-void _bgl_console_log(std::ostream &os, const char *file, int line, const Args &...args) {
-  std::string body = std::apply(fn(...args) { return fmt::format(args...); },
-                                std::make_tuple(args...));
+void _bgl_console_log(std::ostream &os, const char *file, int line, const Args &... args) {
+  std::string body =
+      std::apply(fn(... args) { return fmt::format(args...); }, std::make_tuple(args...));
 
   put_date_string(os, fn() {
     fmt::print(os, "{}:{}: ", _bgl_source_path(file), line);
@@ -161,4 +155,4 @@ void _bgl_console_log(std::ostream &os, const char *file, int line, const Args &
     fmt::print(os, "{}", body);
   });
 }
-} // namespace bgl
+}  // namespace bgl

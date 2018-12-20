@@ -1,7 +1,7 @@
 #pragma once
+#include <cmath>
 #include <limits>
 #include <type_traits>
-#include <cmath>
 
 namespace bgl {
 template <typename T>
@@ -40,4 +40,4 @@ template <typename T>
 bool is_ge(T x, T y) noexcept {
   return !is_lt(x, y);
 }
-}
+}  // namespace bgl
