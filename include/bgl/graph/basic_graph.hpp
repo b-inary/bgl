@@ -59,6 +59,16 @@ constexpr weighted_edge_t<WeightType> update_to(const weighted_edge_t<WeightType
   return {v, weight(e)};
 }
 
+[[noreturn]] inline void update_weight(const unweighted_edge_t &) noexcept {
+  ASSERT_MSG(false, "{}: called with unweighted edge", __func__);
+}
+
+template <typename WeightType>
+constexpr weighted_edge_t<WeightType> update_weight(const weighted_edge_t<WeightType> &e,
+                                                    const WeightType &w) noexcept {
+  return {to(e), w};
+}
+
 template <typename EdgeType>
 bool compare_edge_node(const EdgeType &e, node_t v) {
   return to(e) < v;
@@ -186,7 +196,7 @@ public:
   basic_graph(const edge_list<edge_type> &es) { assign(es); }
 
   /// construct with edge list specifying the number of nodes
-  basic_graph(node_t num_nodes, const edge_list<edge_type> &es) { assign(num_nodes, es); }
+  basic_graph(node_t num_nodes, const edge_list<edge_type> &es = {}) { assign(num_nodes, es); }
 
   /// construct with adjacency list
   basic_graph(const adjacency_list<edge_type> &adj) { assign(adj); }
@@ -509,4 +519,34 @@ using graph = basic_graph<unweighted_edge_t>;
 template <typename WeightType>
 using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
+/// convert from unweighted graph to weighted graph
+template <typename WeightType>
+wgraph<WeightType> convert_to_weighted(const graph &g,
+                                       std::function<WeightType(node_t, node_t)> weight_fn =
+                                           [](node_t, node_t) { return 1; }) {
+  weighted_adjacency_list<WeightType> adj(g.num_nodes());
+  for (node_t u : g.nodes()) {
+    for (node_t v : g.neighbors(u)) {
+      adj[u].emplace_back(v, weight_fn(u, v));
+    }
+  }
+  return {g.num_nodes(), g.num_edges(), std::move(adj)};
+}
+
+/// convert from weighted graph to unweighted graph (discard weights)
+template <typename WeightType>
+graph convert_to_unweighted(const wgraph<WeightType> &g) {
+  std::size_t num_zero_weighted = 0;
+  unweighted_adjacency_list adj(g.num_nodes());
+  for (node_t u : g.nodes()) {
+    for (auto [v, w] : g.edges(u)) {
+      if (is_zero(w)) {
+        ++num_zero_weighted;
+      } else {
+        adj[u].push_back(v);
+      }
+    }
+  }
+  return {g.num_nodes(), g.num_edges() - num_zero_weighted, std::move(adj)};
+}
 }  // namespace bgl

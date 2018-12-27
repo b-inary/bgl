@@ -142,13 +142,6 @@ GraphType &extract_largest_scc(GraphType &g) {
 /// determine if graph is strongly connected
 template <typename GraphType>
 bool is_strongly_connected(const GraphType &g) {
-  const node_t n = g.num_nodes();
-  if (n == 0) return true;
-  std::vector<bool> visited(n, false);
-  visit_by_distance(g, 0, fn(v, d[[maybe_unused]]) {
-    visited[v] = true;
-    return true;
-  });
-  return std::find(visited.begin(), visited.end(), false) == visited.end();
+  return strongly_connected_components(g).first == 1;
 }
 }  // namespace bgl

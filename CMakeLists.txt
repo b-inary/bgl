@@ -19,7 +19,7 @@ endif()
 
 # optimization
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
 
 # prepare libraries
 find_package(Threads REQUIRED)

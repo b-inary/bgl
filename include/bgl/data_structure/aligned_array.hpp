@@ -1,4 +1,5 @@
 #pragma once
+#include "bgl/util/all.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <new>
@@ -53,8 +54,8 @@ public:
   const value_type *end() const noexcept { return data_ + n_; }
 
   std::size_t size() const noexcept { return n_; }
-
   std::size_t align() const noexcept { return align_; }
+  std::size_t capacity() const noexcept { return (n_ + align_ - 1) & ~align_; }
 
   bool operator==(const aligned_array &rhs) const {
     return n_ == rhs.n_ && std::memcmp(data_, rhs.data_, n_ * sizeof(T)) == 0;
@@ -68,6 +69,8 @@ protected:
   value_type *data_ = nullptr;
 
   static value_type *aligned_malloc(std::size_t size, std::size_t align) {
+    ASSERT_MSG((align & (align - 1)) == 0, "{}: alignment must be power of two", __func__);
+    size = (size + align - 1) & ~align;
 #ifdef __MINGW32__
     void *p = _aligned_malloc(size, align);
 #else
