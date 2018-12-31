@@ -3,7 +3,7 @@
 #include "bgl/linalg/lu.hpp"
 using namespace bgl;
 
-TEST_CASE("LU decomposition", "[lu][linalg]") {
+TEST_CASE("linsolve", "[lu][gmres][linalg]") {
   sparse_matrix A(100);
   for (int i : irange(100)) {
     for (int j : irange(100)) {
