@@ -8,7 +8,7 @@
 
 namespace bgl {
 /// LU decomposition
-std::pair<sparse_matrix, sparse_matrix> lu_decomposition(const sparse_matrix &A) {
+inline std::pair<sparse_matrix, sparse_matrix> lu_decomposition(const sparse_matrix &A) {
   const node_t n = A.num_nodes();
   weighted_adjacency_list<double> L(n), U(n);
 
@@ -39,7 +39,7 @@ std::pair<sparse_matrix, sparse_matrix> lu_decomposition(const sparse_matrix &A)
 }
 
 /// solve LUx = b; solution is stored to |b|
-real_vector &solve_lu(const std::pair<sparse_matrix, sparse_matrix> &LU, real_vector &b) {
+inline real_vector &solve_lu(const std::pair<sparse_matrix, sparse_matrix> &LU, real_vector &b) {
   std::size_t n = b.size();
   const sparse_matrix &L = LU.first;
   const sparse_matrix &U = LU.second;

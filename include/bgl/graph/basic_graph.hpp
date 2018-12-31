@@ -277,6 +277,9 @@ public:
   /// return the number of **directed** edges
   std::size_t num_edges() const noexcept { return num_edges_; };
 
+  /// determine whether graph is empty
+  bool empty() const noexcept { return num_nodes() == 0; }
+
   /// return outdegree of node |v|
   std::size_t outdegree(node_t v) const noexcept { return adj_[v].size(); };
 

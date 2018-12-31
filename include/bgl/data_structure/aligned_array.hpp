@@ -11,6 +11,7 @@ class aligned_array {
 public:
   using value_type = T;
 
+  aligned_array() {}
   aligned_array(std::size_t n, std::size_t align)
       : n_{n}, align_{align}, data_{aligned_malloc(n * sizeof(T), align)} {}
 

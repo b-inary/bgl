@@ -3,14 +3,16 @@
 #include "bgl/graph/basic_graph.hpp"
 #include "bgl/util/all.hpp"
 #include <algorithm>
-#include <random>
 #include <cstring>
+#include <random>
+
+/* write simple code - optimization is task for compilers */
 
 namespace bgl {
 /// real dense vector
 class real_vector : public aligned_array<double> {
 public:
-  real_vector(std::size_t n) : real_vector(n, double{}) {}
+  real_vector(std::size_t n = 0) : real_vector(n, double{}) {}
   real_vector(std::size_t n, double value) : aligned_array(n, 32) {
     if (value == 0.0) {
       std::memset(data_, 0, n_ * sizeof(double));
@@ -92,41 +94,41 @@ public:
   }
 };
 
-real_vector operator+(const real_vector &lhs, const real_vector &rhs) {
+inline real_vector operator+(const real_vector &lhs, const real_vector &rhs) {
   real_vector res(lhs);
   return res += rhs;
 }
 
-real_vector operator+(const real_vector &vec, double value) {
+inline real_vector operator+(const real_vector &vec, double value) {
   real_vector res(vec);
   return res += value;
 }
 
-real_vector operator+(double value, const real_vector &vec) { return vec + value; }
+inline real_vector operator+(double value, const real_vector &vec) { return vec + value; }
 
-real_vector operator-(const real_vector &lhs, const real_vector &rhs) {
+inline real_vector operator-(const real_vector &lhs, const real_vector &rhs) {
   real_vector res(lhs);
   return res -= rhs;
 }
 
-real_vector operator-(const real_vector &vec, double value) {
+inline real_vector operator-(const real_vector &vec, double value) {
   real_vector res(vec);
   return res -= value;
 }
 
-real_vector operator*(const real_vector &vec, double value) {
+inline real_vector operator*(const real_vector &vec, double value) {
   real_vector res(vec);
   return res *= value;
 }
 
-real_vector operator*(double value, const real_vector &vec) { return vec * value; }
+inline real_vector operator*(double value, const real_vector &vec) { return vec * value; }
 
-real_vector operator/(const real_vector &vec, double value) {
+inline real_vector operator/(const real_vector &vec, double value) {
   real_vector res(vec);
   return res /= value;
 }
 
-double inner_product(const real_vector &lhs, const real_vector &rhs) {
+inline double inner_product(const real_vector &lhs, const real_vector &rhs) {
   return lhs.inner_product(rhs);
 }
 
@@ -146,7 +148,7 @@ real_vector generate_random_unit_vector(std::size_t n, Generator &gen) {
   return res / res.norm();
 }
 
-real_vector generate_random_unit_vector(std::size_t n) {
+inline real_vector generate_random_unit_vector(std::size_t n) {
   return generate_random_unit_vector(n, bgl_random);
 }
 
@@ -154,7 +156,7 @@ real_vector generate_random_unit_vector(std::size_t n) {
 /// define sparse matrix type as weighted-graph: A_ij = weight of edge from |i| to |j|
 using sparse_matrix = wgraph<double>;
 
-real_vector operator*(const sparse_matrix &A, const real_vector &x) {
+inline real_vector operator*(const sparse_matrix &A, const real_vector &x) {
   real_vector y(x.size());
   A.for_each_node(fn(i) {
     for (auto [j, v] : A.edges(i)) {
