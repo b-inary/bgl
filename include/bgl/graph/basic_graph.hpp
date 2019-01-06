@@ -60,7 +60,7 @@ constexpr weighted_edge_t<WeightType> update_to(const weighted_edge_t<WeightType
 }
 
 [[noreturn]] inline void update_weight(const unweighted_edge_t &) noexcept {
-  ASSERT_MSG(false, "{}: called with unweighted edge", __func__);
+  ASSERT_MSG(false, "called with unweighted edge");
 }
 
 template <typename WeightType>

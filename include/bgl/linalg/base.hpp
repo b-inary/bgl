@@ -23,7 +23,7 @@ public:
 
   /// vector-vector addition
   real_vector &operator+=(const real_vector &other) {
-    ASSERT_MSG(n_ == other.n_, "{}: size does not match", __func__);
+    ASSERT_MSG(n_ == other.n_, "size does not match");
     for (std::size_t i : irange(n_)) {
       (*this)[i] += other[i];
     }
@@ -40,7 +40,7 @@ public:
 
   /// vector-vector subtraction
   real_vector &operator-=(const real_vector &other) {
-    ASSERT_MSG(n_ == other.n_, "{}: size does not match", __func__);
+    ASSERT_MSG(n_ == other.n_, "size does not match");
     for (std::size_t i : irange(n_)) {
       (*this)[i] -= other[i];
     }
@@ -73,7 +73,7 @@ public:
 
   /// inner product
   double inner_product(const real_vector &other) const {
-    ASSERT_MSG(n_ == other.n_, "{}: size does not match", __func__);
+    ASSERT_MSG(n_ == other.n_, "size does not match");
     double result = 0.0;
     for (std::size_t i : irange(n_)) {
       result += (*this)[i] * other[i];
@@ -153,7 +153,7 @@ inline real_vector generate_random_unit_vector(std::size_t n) {
 }
 
 
-/// define sparse matrix type as weighted-graph: A_ij = weight of edge from |i| to |j|
+/// define sparse matrix type as weighted graph: A_ij = weight of edge from |i| to |j|
 using sparse_matrix = wgraph<double>;
 
 inline real_vector operator*(const sparse_matrix &A, const real_vector &x) {

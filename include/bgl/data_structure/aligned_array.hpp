@@ -70,7 +70,7 @@ protected:
   value_type *data_ = nullptr;
 
   static value_type *aligned_malloc(std::size_t size, std::size_t align) {
-    ASSERT_MSG((align & (align - 1)) == 0, "{}: alignment must be power of two", __func__);
+    ASSERT_MSG((align & (align - 1)) == 0, "alignment must be power of two");
     size = (size + align - 1) & ~align;
 #ifdef __MINGW32__
     void *p = _aligned_malloc(size, align);

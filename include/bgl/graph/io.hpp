@@ -35,7 +35,7 @@ void write_edge_tsv(std::ostream &os, const weighted_edge_t<WeightType> &e) {
 template <typename GraphType>
 std::optional<GraphType> read_graph_tsv_optional(std::istream &is, bool accept_mismatch = false) {
   using edge_t = typename GraphType::edge_type;
-  ASSERT_MSG(is, "{}: empty stream", __func__);
+  ASSERT_MSG(is, "empty stream");
 
   std::string line;
   edge_list<edge_t> es;
@@ -54,8 +54,8 @@ std::optional<GraphType> read_graph_tsv_optional(std::istream &is, bool accept_m
         return std::nullopt;
       }
       ASSERT_MSG(type_string == read_as,
-                 "{}: type of edge weight does not match\n  read as: {}\n  input type: {}",
-                 __func__, read_as, type_string);
+                 "type of edge weight does not match\n  read as: {}\n  input type: {}", read_as,
+                 type_string);
       type_checked = true;
     }
 
@@ -67,8 +67,8 @@ std::optional<GraphType> read_graph_tsv_optional(std::istream &is, bool accept_m
       return std::nullopt;
     }
 
-    ASSERT_MSG(read_success, "{}: read failed at line {}\n  read: {}\n  weight type: {}", __func__,
-               lineno, line, GraphType{}.weight_string());
+    ASSERT_MSG(read_success, "read failed at line {}\n  read: {}\n  weight type: {}", lineno, line,
+               GraphType{}.weight_string());
 
     es.emplace_back(v, e);
   }
@@ -81,7 +81,7 @@ std::optional<GraphType> read_graph_tsv_optional(std::istream &is, bool accept_m
 template <typename GraphType>
 std::optional<GraphType> read_graph_tsv_optional(const path &file, bool accept_mismatch = false) {
   std::ifstream ifs(file.string());
-  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, file);
+  ASSERT_MSG(ifs, "file does not exist: {}", file);
   return read_graph_tsv_optional<GraphType>(ifs, accept_mismatch);
 }
 
@@ -100,7 +100,7 @@ GraphType read_graph_tsv(const path &filename) {
 /// write graph to |os| as tsv file
 template <typename GraphType>
 void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = true) {
-  ASSERT_MSG(os, "{}: empty stream", __func__);
+  ASSERT_MSG(os, "empty stream");
   if (write_info) {
     fmt::print(os, "# number of nodes: {}\n", g.num_nodes());
     fmt::print(os, "# number of edges: {}\n", g.num_edges());
@@ -120,7 +120,7 @@ void write_graph_tsv(std::ostream &os, const GraphType &g, bool write_info = tru
 template <typename GraphType>
 void write_graph_tsv(const path &filename, const GraphType &g, bool write_info = true) {
   std::ofstream ofs(filename.string());
-  ASSERT_MSG(ofs, "{}: file cannot open: {}", __func__, filename);
+  ASSERT_MSG(ofs, "file cannot open: {}", filename);
   write_graph_tsv(ofs, g, write_info);
 }
 
@@ -161,13 +161,13 @@ std::optional<GraphType> read_graph_binary_optional(std::istream &is,
   using edge_t = typename GraphType::edge_type;
   using weight_t = decltype(weight(edge_t{}));
   static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
-  ASSERT_MSG(is, "{}: empty stream", __func__);
+  ASSERT_MSG(is, "empty stream");
 
   // check header
   char buf[4];
   is.read(buf, 4);
   ASSERT_MSG(is.gcount() == 4 && buf[0] == 'b' && buf[1] == 'g' && buf[2] == 'l' && buf[3] == '\0',
-             "{}: invalid header", __func__);
+             "invalid header");
 
   // check weight type
   std::uint32_t edge_size = read_binary<std::uint32_t>(is);
@@ -180,9 +180,9 @@ std::optional<GraphType> read_graph_binary_optional(std::istream &is,
   }
 
   ASSERT_MSG(type_matched,
-             "{}: type of edge weight does not match\n"
-             "  read as: {}\n  input type: size = {} byte(s), is_integral = {}",
-             __func__, GraphType{}.weight_string(), edge_size, is_integral);
+             "type of edge weight does not match\n  read as: {}\n"
+             "  input type: size = {} byte(s), is_integral = {}",
+             GraphType{}.weight_string(), edge_size, is_integral);
 
   // graph body
   node_t num_nodes = read_binary<node_t>(is);
@@ -195,7 +195,7 @@ std::optional<GraphType> read_graph_binary_optional(std::istream &is,
   }
 
   is.peek();
-  ASSERT_MSG(is.eof() && !is.fail(), "{}: read failed (invalid bgl file)", __func__);
+  ASSERT_MSG(is.eof() && !is.fail(), "read failed (invalid bgl file)");
 
   return GraphType(num_nodes, num_edges, std::move(adj));
 }
@@ -206,7 +206,7 @@ template <typename GraphType>
 std::optional<GraphType> read_graph_binary_optional(const path &filename,
                                                     bool accept_mismatch = false) {
   std::ifstream ifs(filename.string(), std::ios_base::binary);
-  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, filename);
+  ASSERT_MSG(ifs, "file does not exist: {}", filename);
   return read_graph_binary_optional<GraphType>(ifs, accept_mismatch);
 }
 
@@ -228,7 +228,7 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
   using edge_t = typename GraphType::edge_type;
   using weight_t = decltype(weight(edge_t{}));
   static_assert(std::is_arithmetic_v<weight_t>, "edge weight must be arithmetic type");
-  ASSERT_MSG(os, "{}: empty stream", __func__);
+  ASSERT_MSG(os, "empty stream");
 
   // header
   os.write("bgl", 4);
@@ -250,7 +250,7 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
 template <typename GraphType>
 void write_graph_binary(const path &filename, const GraphType &g) {
   std::ofstream ofs(filename.string(), std::ios_base::binary);
-  ASSERT_MSG(ofs, "{}: file cannot open: {}", __func__, filename);
+  ASSERT_MSG(ofs, "file cannot open: {}", filename);
   write_graph_binary(ofs, g);
 }
 
@@ -273,7 +273,7 @@ template <typename GraphType>
 std::optional<GraphType> read_graph_tsv_zstd_optional(const path &file,
                                                       bool accept_mismatch = false) {
   std::ifstream ifs(file.string(), std::ios_base::binary);
-  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, file);
+  ASSERT_MSG(ifs, "file does not exist: {}", file);
   return read_graph_tsv_zstd_optional<GraphType>(ifs, accept_mismatch);
 }
 
@@ -305,7 +305,7 @@ template <typename GraphType>
 std::optional<GraphType> read_graph_binary_zstd_optional(const path &filename,
                                                          bool accept_mismatch = false) {
   std::ifstream ifs(filename.string(), std::ios_base::binary);
-  ASSERT_MSG(ifs, "{}: file does not exist: {}", __func__, filename);
+  ASSERT_MSG(ifs, "file does not exist: {}", filename);
   return read_graph_binary_zstd_optional<GraphType>(ifs, accept_mismatch);
 }
 

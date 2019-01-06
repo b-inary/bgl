@@ -14,10 +14,10 @@
 #include <tuple>
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
-#define _BGL_OS_WIN
-#include <windows.h>
+#  define _BGL_OS_WIN
+#  include <windows.h>
 #else
-#include <sys/ioctl.h>
+#  include <sys/ioctl.h>
 #endif
 
 #define _BGL_EVAL(f, v) f(v)
@@ -26,7 +26,7 @@
 
 /// easy timer logging macro that measures entire block.
 /// usage: declare CONSOLE_TIMER at the top of block
-#define CONSOLE_TIMER _bgl_timer _bgl_timer_instance(std::cerr, __FILE__, __LINE__)
+#define CONSOLE_TIMER TIMER(std::cerr)
 
 /// easy timer logging macro that measures entire block.
 /// usage: declare TIMER(os) at the top of block
@@ -35,7 +35,7 @@
 
 /// logging macro
 /// @param ... format string (of fmt library)
-#define CONSOLE_LOG(...) _bgl_console_log(std::cerr, __FILE__, __LINE__, __VA_ARGS__)
+#define CONSOLE_LOG(...) WRITE_LOG(std::cerr, __VA_ARGS__)
 
 /// logging macro for specified output stream
 /// @param os output stream for logging

@@ -22,8 +22,7 @@ inline std::pair<sparse_matrix, sparse_matrix> lu_decomposition(const sparse_mat
     }
 
     double diag = ai[i];
-    ASSERT_MSG(!is_zero(diag), "{}: singular matrix\n  row index = {}\n  diagonal entry = {}",
-               __func__, i, diag);
+    ASSERT_MSG(!is_zero(diag), "singular matrix\n  row index = {}\n  diagonal entry = {}", i, diag);
 
     for (auto [j, v] : ai) {
       if (is_zero(v)) continue;
