@@ -212,23 +212,24 @@ public:
   }
 
   /// initialize graph with edge list
-  void assign(const edge_list<edge_type> &es) { assign(bgl::num_nodes(es), es); }
+  graph_type &assign(const edge_list<edge_type> &es) { return assign(bgl::num_nodes(es), es); }
 
   /// initialize graph with edge list specifying the number of nodes
-  void assign(node_t num_nodes, const edge_list<edge_type> &es) {
+  graph_type &assign(node_t num_nodes, const edge_list<edge_type> &es) {
     num_nodes_ = num_nodes;
     num_edges_ = bgl::num_edges(es);
     adj_ = convert_to_adjacency_list(num_nodes, es);
+    return *this;
   }
 
   /// initialize with adjacency list
-  void assign(const adjacency_list<edge_type> &adj) {
+  graph_type &assign(const adjacency_list<edge_type> &adj) {
     auto adj_copy = adj;
-    assign(std::move(adj_copy));
+    return assign(std::move(adj_copy));
   }
 
   /// initialize with adjacency list
-  void assign(adjacency_list<edge_type> &&adj) {
+  graph_type &assign(adjacency_list<edge_type> &&adj) {
     num_nodes_ = bgl::num_nodes(adj);
     num_edges_ = bgl::num_edges(adj);
     adj_ = std::move(adj);
@@ -239,23 +240,43 @@ public:
         ASSERT_MSG(to(es.back()) < num_nodes_, "invalid index");
       }
     }
+    return *this;
   }
 
   /// initialize with sorted adjacency list specifying the number of nodes and edges.
   /// when the number of nodes and edges are not correct, behavior is undefined.
   /// |adj| must be rvalue
-  void assign(node_t num_nodes, std::size_t num_edges, adjacency_list<edge_type> &&adj) {
+  graph_type &assign(node_t num_nodes, std::size_t num_edges, adjacency_list<edge_type> &&adj) {
     num_nodes_ = num_nodes;
     num_edges_ = num_edges;
     adj_ = std::move(adj);
+    return *this;
   }
 
   /// remove all nodes
-  void clear() {
+  graph_type &clear() {
     num_nodes_ = 0;
     num_edges_ = 0;
     adj_.clear();
     adj_.shrink_to_fit();
+    return *this;
+  }
+
+  /// resize graph
+  graph_type &resize(node_t new_num) {
+    if (new_num < num_nodes()) {
+      num_edges_ = 0;
+      for (node_t v : irange(new_num)) {
+        auto &es = mutable_edges(v);
+        auto it = std::lower_bound(es.begin(), es.end(), new_num, compare_edge_node<edge_type>);
+        num_edges_ += it - es.begin();
+        es.erase(it, es.end());
+      }
+    }
+    num_nodes_ = new_num;
+    adj_.resize(new_num);
+    adj_.shrink_to_fit();
+    return *this;
   }
 
   /// make clone
@@ -292,7 +313,7 @@ public:
   /// return edge list from node |v|
   const std::vector<edge_type> &edges(node_t v) const noexcept { return adj_[v]; };
 
-  /// return **mutable** edge list from node |v| (do not call without special reason)
+  /// return **mutable** edge list from node |v| (use carefully!)
   std::vector<edge_type> &mutable_edges(node_t v) noexcept { return adj_[v]; }
 
   /// return a neighbor from node |v| of index |i|
@@ -410,34 +431,17 @@ public:
 
   /// [destructive] filter nodes by |filter_list|. can rename ID of nodes
   graph_type &filter_nodes(const std::vector<bool> &filter_list) {
-    ASSERT_MSG(num_nodes() == filter_list.size(), "filter_nodes: invalid argument");
-    node_t new_num_nodes = 0;
-    std::size_t new_num_edges = 0;
-    std::vector<node_t> new_id(num_nodes());
-    std::vector<node_t> new_id_rev(num_nodes());
+    ASSERT_MSG(num_nodes() == filter_list.size(), "invalid argument");
+    std::vector<node_t> perm;
     for (node_t v : nodes()) {
-      if (filter_list[v]) {
-        new_id[v] = new_num_nodes++;
-        new_id_rev[new_id[v]] = v;
-      }
+      if (filter_list[v]) perm.push_back(v);
     }
-
-    for (node_t v : irange(new_num_nodes)) {
-      auto &es = mutable_edges(v);
-      if (v != new_id_rev[v]) {
-        es = std::move(adj_[new_id_rev[v]]);
-      }
-      filter(es, fn(e) { return filter_list[to(e)]; });
-      new_num_edges += es.size();
-      for (auto &e : es) {
-        e = update_to(e, new_id[to(e)]);
-      }
+    node_t new_num = perm.size();
+    for (node_t v : nodes()) {
+      if (!filter_list[v]) perm.push_back(v);
     }
-
-    num_nodes_ = new_num_nodes;
-    num_edges_ = new_num_edges;
-    adj_.resize(new_num_nodes);
-    adj_.shrink_to_fit();
+    permute_nodes(perm);
+    resize(new_num);
     return *this;
   }
 
@@ -453,22 +457,51 @@ public:
     return filter_nodes(is_not_isolated);
   }
 
+  /// [desructive] permute ID of nodes
+  /// @param perm permutation of IDs
+  graph_type &permute_nodes(const std::vector<node_t> &perm) {
+    ASSERT_MSG(num_nodes() == perm.size(), "invalid argument");
+    std::vector<node_t> cur_perm(num_nodes());
+    std::vector<node_t> rev_perm(num_nodes());
+    std::iota(cur_perm.begin(), cur_perm.end(), 0);
+    std::iota(rev_perm.begin(), rev_perm.end(), 0);
+
+    for (node_t v : nodes()) {
+      node_t tmp = cur_perm[v];
+      std::swap(adj_[v], adj_[rev_perm[perm[v]]]);
+      std::swap(cur_perm[v], cur_perm[rev_perm[perm[v]]]);
+      std::swap(rev_perm[perm[v]], rev_perm[tmp]);
+    }
+
+    for (node_t v : nodes()) {
+      auto &es = mutable_edges(v);
+      for (auto &e : es) {
+        e = update_to(e, rev_perm[to(e)]);
+      }
+      std::sort(es.begin(), es.end());
+    }
+
+    return *this;
+  }
+
   /* dynamic update: since adjacency list is sorted, these operations are slow! */
 
   /// add edge |e| from |v|
-  void add_edge(node_t v, const edge_type &e) {
+  graph_type &add_edge(node_t v, const edge_type &e) {
     auto &es = mutable_edges(v);
     es.insert(std::upper_bound(es.begin(), es.end(), e), e);
     ++num_edges_;
+    return *this;
   }
 
   /// remove all edges from |u| to |v|
-  void remove_edge(node_t u, node_t v) {
+  graph_type &remove_edge(node_t u, node_t v) {
     auto &es = mutable_edges(u);
     auto lb = std::lower_bound(es.begin(), es.end(), v, compare_edge_node<edge_type>);
     auto ub = std::upper_bound(es.begin(), es.end(), v, compare_node_edge<edge_type>);
     num_edges_ -= ub - lb;
     es.erase(lb, ub);
+    return *this;
   }
 
   /* pretty print */

@@ -93,7 +93,7 @@ TEST_CASE("unweighted graph", "[basic-graph]") {
   }
 }
 
-TEST_CASE("directed graph", "[basic-graph]") {
+TEST_CASE("weighted graph", "[basic-graph]") {
   weighted_edge_list<int> es = {{0, {1, 1}}, {1, {2, 2}}, {2, {3, 3}}, {3, {1, 4}}};
   wgraph<int> g = es;
 
@@ -172,6 +172,15 @@ TEST_CASE("directed graph", "[basic-graph]") {
     g2 = es3;
     g2.make_undirected();
     REQUIRE(g2.num_edges() == 10);
+  }
+
+  SECTION("permutation") {
+    wgraph<int> g2 = g;
+    g2.permute_nodes({2, 3, 1, 0});
+    REQUIRE(g2.edge(0, 0) == weighted_edge_t<int>{1, 3});
+    REQUIRE(g2.edge(1, 0) == weighted_edge_t<int>{2, 4});
+    REQUIRE(g2.edge(2, 0) == weighted_edge_t<int>{0, 2});
+    REQUIRE(g2.edge(3, 0) == weighted_edge_t<int>{2, 1});
   }
 
   SECTION("dynamic update") {
