@@ -20,7 +20,7 @@ TEST_CASE("linsolve", "[lu][gmres][linalg]") {
 
   REQUIRE((A * x - b).norm() < 1e-9);
 
-  real_vector y = gmres(A, b, {}, 1e-6, 1, 100);
+  real_vector y = gmres(A, b, {}, 1e-6, 100, 1);
   REQUIRE((A * y - b).norm() / b.norm() < 1e-6);
 
   real_vector z = gmres(A, b, LU);

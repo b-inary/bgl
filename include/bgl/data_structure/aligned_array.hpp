@@ -38,6 +38,8 @@ public:
     n_ = rhs.n_;
     align_ = rhs.align_;
     data_ = rhs.data_;
+    rhs.n_ = 0;
+    rhs.align_ = 0;
     rhs.data_ = nullptr;
     return *this;
   }
@@ -57,6 +59,13 @@ public:
   std::size_t size() const noexcept { return n_; }
   std::size_t align() const noexcept { return align_; }
   std::size_t capacity() const noexcept { return (n_ + align_ - 1) & ~align_; }
+
+  void clear() {
+    aligned_free(data_);
+    n_ = 0;
+    align_ = 0;
+    data_ = nullptr;
+  }
 
   bool operator==(const aligned_array &rhs) const {
     return n_ == rhs.n_ && std::memcmp(data_, rhs.data_, n_ * sizeof(T)) == 0;

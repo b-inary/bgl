@@ -22,11 +22,14 @@ namespace bgl {
  */
 class min_degree_eliminator {
 public:
+  min_degree_eliminator() {}
+
   /// constructor: input graph must be undirected
-  min_degree_eliminator(const graph &g, std::size_t threshold)
+  min_degree_eliminator(const graph &g, int threshold)
       : min_degree_eliminator(g.clone(), threshold) {}
 
-  min_degree_eliminator(graph &&g, std::size_t threshold)
+  /// constructor: input graph must be undirected
+  min_degree_eliminator(graph &&g, int threshold)
       : g_{std::move(g)},
         parent_(g.num_nodes()),
         is_hub_(g.num_nodes(), false),
