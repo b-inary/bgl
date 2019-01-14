@@ -38,6 +38,7 @@ public:
     preprocess();
     do_contraction_loop(threshold);
     complete_ordering();
+    clear();
   }
 
   const std::vector<node_t> &ordering() const { return order_; }
@@ -199,6 +200,13 @@ private:
         order_.push_back(v);
       }
     }
+  }
+
+  void clear() {
+    g_.clear();
+    parent_.clear();
+    is_dead_.clear();
+    is_hub_.clear();
   }
 };
 }  // namespace bgl

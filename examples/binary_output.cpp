@@ -7,6 +7,7 @@ int main(int argc, char **argv) {
 
   for (auto [g, p] : app.graph_iterator<graph>()) {
     path out_path = p;
+    if (out_path.extension() == ".zst") out_path.replace_extension("");
     out_path.replace_extension(".bgl");
     EXPECT_MSG(!path::exists(out_path), "overwrite {}", out_path);
 

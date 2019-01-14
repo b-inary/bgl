@@ -48,7 +48,7 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
     std::map<node_t, double> ai(es.begin(), es.end());
     for (auto [j, v] : ai) {
       for (auto [k, w] : U[j]) {
-        if ((j < threshold && k < threshold) || ai.count(k)) {
+        if ((i < threshold && k < threshold) || ai.count(k)) {
           ai[k] -= v * w;
         }
       }

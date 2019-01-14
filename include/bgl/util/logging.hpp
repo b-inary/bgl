@@ -69,7 +69,7 @@ inline void pretty_append(std::ostream &os, std::function<void()> body, const st
   }
 
   body();
-  os << std::string(str.length(), ' ') << std::flush;
+  os << std::string(str.length() + 1, ' ') << std::flush;
 
 #ifdef _BGL_OS_WIN
   HANDLE handle = rang::rang_implementation::getConsoleHandle(os.rdbuf());
