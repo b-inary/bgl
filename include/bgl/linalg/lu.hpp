@@ -40,22 +40,91 @@ inline std::pair<sparse_matrix, sparse_matrix> lu_decomposition(const sparse_mat
 /// incomplete LU decomposition
 inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_matrix &A,
                                                                  node_t threshold = 0) {
+  using edge_type = weighted_edge_t<double>;
   const node_t n = A.num_nodes();
   weighted_adjacency_list<double> L(n), U(n);
 
   for (node_t i : A.nodes()) {
-    auto &es = A.edges(i);
-    std::map<node_t, double> ai(es.begin(), es.end());
-    for (auto [j, v] : ai) {
-      for (auto [k, w] : U[j]) {
-        if ((i < threshold && k < threshold) || ai.count(k)) {
-          ai[k] -= v * w;
+    const auto &es = A.edges(i);
+    auto th_iter = es.begin();
+    if (i < threshold) {
+      th_iter = std::lower_bound(es.begin(), es.end(), threshold, compare_edge_node<edge_type>);
+    }
+    std::map<node_t, double> ai_exact(es.begin(), th_iter);
+    std::vector<edge_type> ai(th_iter, es.end());
+    const auto ai_end = ai.end();
+
+    for (auto [j, v] : ai_exact) {
+      // exact LU
+      auto uj_iter = U[j].begin();
+      for (; uj_iter != U[j].end() && to(*uj_iter) < threshold; ++uj_iter) {
+        ai_exact[to(*uj_iter)] -= v * weight(*uj_iter);
+      }
+
+      const auto uj_end = U[j].end();
+      auto ai_iter = ai.begin();
+      if (uj_iter == uj_end) continue;
+      if (ai_iter == ai_end) continue;
+
+      // incomplete LU
+      while (true) {
+        if (to(*uj_iter) == to(*ai_iter)) {
+          ai_iter->second -= v * weight(*uj_iter);
+          if (++uj_iter == uj_end) break;
+          if (++ai_iter == ai_end) break;
+        }
+        if (to(*uj_iter) < to(*ai_iter)) {
+          uj_iter = std::lower_bound(uj_iter, uj_end, to(*ai_iter), compare_edge_node<edge_type>);
+          if (uj_iter == uj_end) break;
+        }
+        if (to(*uj_iter) > to(*ai_iter)) {
+          ai_iter = std::lower_bound(ai_iter, ai_end, to(*uj_iter), compare_edge_node<edge_type>);
+          if (ai_iter == ai_end) break;
         }
       }
     }
 
-    double diag = ai[i];
+    // incomplete LU
+    for (auto [j, v] : ai) {
+      if (j >= i) break;
+      if (U[j].empty()) continue;
+
+      const auto uj_end = U[j].end();
+      auto uj_iter = U[j].begin();
+      auto ai_iter = ai.begin();
+
+      while (true) {
+        if (to(*uj_iter) == to(*ai_iter)) {
+          ai_iter->second -= v * weight(*uj_iter);
+          if (++uj_iter == uj_end) break;
+          if (++ai_iter == ai_end) break;
+        }
+        if (to(*uj_iter) < to(*ai_iter)) {
+          uj_iter = std::lower_bound(uj_iter, uj_end, to(*ai_iter), compare_edge_node<edge_type>);
+          if (uj_iter == uj_end) break;
+        }
+        if (to(*uj_iter) > to(*ai_iter)) {
+          ai_iter = std::lower_bound(ai_iter, ai_end, to(*uj_iter), compare_edge_node<edge_type>);
+          if (ai_iter == ai_end) break;
+        }
+      }
+    }
+
+    // singular check
+    double diag =
+        i < threshold
+            ? ai_exact[i]
+            : weight(*std::lower_bound(ai.begin(), ai.end(), i, compare_edge_node<edge_type>));
     ASSERT_MSG(!is_zero(diag), "singular matrix\n  row index = {}\n  diagonal entry = {}", i, diag);
+
+    for (auto [j, v] : ai_exact) {
+      if (is_zero(v)) continue;
+      if (j <= i) {
+        L[i].emplace_back(j, v);
+      } else {
+        U[i].emplace_back(j, v / diag);
+      }
+    }
 
     for (auto [j, v] : ai) {
       if (is_zero(v)) continue;
