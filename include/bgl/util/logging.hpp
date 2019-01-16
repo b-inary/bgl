@@ -90,7 +90,7 @@ inline void pretty_append(std::ostream &os, std::function<void()> body, const st
   int width = ws.ws_col;
 #endif
 
-  fmt::print(os, "\x1b[{}G{} \b", width - str.length() + 1, str);
+  fmt::print(os, "\x1b[{}G{}\n", width - str.length() + 1, str);
 }
 
 /// generate string representing current date and time
@@ -112,7 +112,9 @@ inline std::string _bgl_source_path(const char *file) {
 #ifdef _BGL_DIRECTORY
   path bgl_dir = _BGL_TO_STRING(_BGL_DIRECTORY);
   path src = bgl_dir / "build" / file;
-  return path::relative(src).string();
+  std::string abs_str = src.string();
+  std::string rel_str = path::relative(src).string();
+  return abs_str.size() < rel_str.size() ? abs_str : rel_str;
 #else
   return file;
 #endif
