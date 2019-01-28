@@ -110,29 +110,25 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
       }
     }
 
-    // singular check
-    double diag =
-        i < threshold
-            ? ai_exact[i]
-            : weight(*std::lower_bound(ai.begin(), ai.end(), i, compare_edge_node<edge_type>));
-    ASSERT_MSG(!is_zero(diag), "singular matrix\n  row index = {}\n  diagonal entry = {}", i, diag);
-
-    for (auto [j, v] : ai_exact) {
-      if (is_zero(v)) continue;
-      if (j <= i) {
-        L[i].emplace_back(j, v);
-      } else {
-        U[i].emplace_back(j, v / diag);
-      }
+    // construction & singular check
+    double diag = 0.0;
+    if (i < threshold) {
+      diag = ai_exact[i];
+      ASSERT_MSG(!is_zero(diag), "zero diagonal entry\n  row index = {}", i);
+      auto it = ai_exact.upper_bound(i);
+      L[i].assign(ai_exact.begin(), it);
+      U[i].assign(it, ai_exact.end());
+      U[i].insert(U[i].end(), ai.begin(), ai.end());
+    } else {
+      auto it = std::lower_bound(ai.begin(), ai.end(), i, compare_edge_node<edge_type>);
+      if (to(*it) == i) diag = weight(*it);
+      ASSERT_MSG(!is_zero(diag), "zero diagonal entry\n  row index = {}", i);
+      L[i].assign(ai.begin(), ++it);
+      U[i].assign(it, ai.end());
     }
 
-    for (auto [j, v] : ai) {
-      if (is_zero(v)) continue;
-      if (j <= i) {
-        L[i].emplace_back(j, v);
-      } else {
-        U[i].emplace_back(j, v / diag);
-      }
+    for (auto &e : U[i]) {
+      e.second /= diag;
     }
   }
 

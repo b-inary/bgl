@@ -85,18 +85,22 @@ inline real_vector gmres(const sparse_matrix &A, const real_vector &b,
     }
 
     if (std::abs(y[inner_iter]) <= tol * lub_norm) {
+#ifdef SHOW_GMRES_LOG
       real_vector residual = b - A * x;
       if (use_precond) solve_lu(precond_lu, residual);
       CONSOLE_LOG("GMRES({}) converged\n  outer_iter = {}, inner_iter = {}\n  residual = {}",
                   restart, outer_iter + 1, inner_iter, residual.norm() / lub_norm);
+#endif
       return x;
     }
   }
 
+#ifdef SHOW_GMRES_LOG
   real_vector residual = b - A * x;
   if (use_precond) solve_lu(precond_lu, residual);
   CONSOLE_LOG("GMRES({}) did not converge\n  max_iter = {}\n  residual = {}", restart, max_iter,
               residual.norm() / lub_norm);
+#endif
 
   return x;
 }
