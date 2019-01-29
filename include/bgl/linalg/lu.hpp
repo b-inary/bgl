@@ -44,6 +44,36 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
   const node_t n = A.num_nodes();
   weighted_adjacency_list<double> L(n), U(n);
 
+  auto skip = [](auto begin_iter, auto end_iter, node_t value) {
+    // ASSERT(begin_iter < end_iter && to(*begin_iter) < value);
+    std::ptrdiff_t step = 1;
+    auto last_iter = end_iter - 1;
+
+    while (begin_iter < last_iter) {
+      auto next_iter = std::min(begin_iter + step, last_iter);
+      if (to(*next_iter) >= value) {
+        end_iter = next_iter;
+        break;
+      }
+      begin_iter = next_iter;
+      step *= 16;
+    }
+
+    std::ptrdiff_t count = end_iter - begin_iter;
+    while (count > 1) {
+      step = count / 2;
+      auto mid_iter = begin_iter + step;
+      if (to(*mid_iter) < value) {
+        begin_iter = mid_iter;
+        count -= step;
+      } else {
+        count = step;
+      }
+    }
+
+    return begin_iter + 1;
+  };
+
   for (node_t i : A.nodes()) {
     const auto &es = A.edges(i);
     auto th_iter = es.begin();
@@ -74,11 +104,11 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
           if (++ai_iter == ai_end) break;
         }
         if (to(*uj_iter) < to(*ai_iter)) {
-          uj_iter = std::lower_bound(uj_iter, uj_end, to(*ai_iter), compare_edge_node<edge_type>);
+          uj_iter = skip(uj_iter, uj_end, to(*ai_iter));
           if (uj_iter == uj_end) break;
         }
         if (to(*uj_iter) > to(*ai_iter)) {
-          ai_iter = std::lower_bound(ai_iter, ai_end, to(*uj_iter), compare_edge_node<edge_type>);
+          ai_iter = skip(ai_iter, ai_end, to(*uj_iter));
           if (ai_iter == ai_end) break;
         }
       }
@@ -100,11 +130,11 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
           if (++ai_iter == ai_end) break;
         }
         if (to(*uj_iter) < to(*ai_iter)) {
-          uj_iter = std::lower_bound(uj_iter, uj_end, to(*ai_iter), compare_edge_node<edge_type>);
+          uj_iter = skip(uj_iter, uj_end, to(*ai_iter));
           if (uj_iter == uj_end) break;
         }
         if (to(*uj_iter) > to(*ai_iter)) {
-          ai_iter = std::lower_bound(ai_iter, ai_end, to(*uj_iter), compare_edge_node<edge_type>);
+          ai_iter = skip(ai_iter, ai_end, to(*uj_iter));
           if (ai_iter == ai_end) break;
         }
       }
