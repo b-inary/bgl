@@ -43,6 +43,7 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
   using edge_type = weighted_edge_t<double>;
   const node_t n = A.num_nodes();
   weighted_adjacency_list<double> L(n), U(n);
+  std::vector<std::ptrdiff_t> ai_idx(n, -1);
 
   auto skip = [](auto begin_iter, auto end_iter, node_t value) {
     // ASSERT(begin_iter < end_iter && to(*begin_iter) < value);
@@ -84,6 +85,10 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
     std::vector<edge_type> ai(th_iter, es.end());
     const auto ai_end = ai.end();
 
+    for (std::size_t k : irange(ai.size())) {
+      ai_idx[to(ai[k])] = k;
+    }
+
     for (auto [j, v] : ai_exact) {
       // exact LU
       auto uj_iter = U[j].begin();
@@ -97,47 +102,67 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
       if (ai_iter == ai_end) continue;
 
       // incomplete LU
-      while (true) {
-        if (to(*uj_iter) == to(*ai_iter)) {
-          ai_iter->second -= v * weight(*uj_iter);
-          if (++uj_iter == uj_end) break;
-          if (++ai_iter == ai_end) break;
+      if (uj_end - uj_iter < 4 * (ai_end - ai_iter)) {
+        for (auto [k, w] : U[j]) {
+          if (ai_idx[k] != -1) {
+            ai[ai_idx[k]].second -= v * w;
+          }
         }
-        if (to(*uj_iter) < to(*ai_iter)) {
-          uj_iter = skip(uj_iter, uj_end, to(*ai_iter));
-          if (uj_iter == uj_end) break;
-        }
-        if (to(*uj_iter) > to(*ai_iter)) {
-          ai_iter = skip(ai_iter, ai_end, to(*uj_iter));
-          if (ai_iter == ai_end) break;
+      } else {
+        while (true) {
+          if (to(*uj_iter) == to(*ai_iter)) {
+            ai_iter->second -= v * weight(*uj_iter);
+            if (++uj_iter == uj_end) break;
+            if (++ai_iter == ai_end) break;
+          }
+          if (to(*uj_iter) < to(*ai_iter)) {
+            uj_iter = skip(uj_iter, uj_end, to(*ai_iter));
+            if (uj_iter == uj_end) break;
+          }
+          if (to(*uj_iter) > to(*ai_iter)) {
+            ai_iter = skip(ai_iter, ai_end, to(*uj_iter));
+            if (ai_iter == ai_end) break;
+          }
         }
       }
     }
 
     // incomplete LU
+    auto ai_start = ai.begin();
     for (auto [j, v] : ai) {
       if (j >= i) break;
-      if (U[j].empty()) continue;
 
       const auto uj_end = U[j].end();
       auto uj_iter = U[j].begin();
-      auto ai_iter = ai.begin();
+      auto ai_iter = ++ai_start;
 
-      while (true) {
-        if (to(*uj_iter) == to(*ai_iter)) {
-          ai_iter->second -= v * weight(*uj_iter);
-          if (++uj_iter == uj_end) break;
-          if (++ai_iter == ai_end) break;
+      if (uj_end - uj_iter < 4 * (ai_end - ai_iter)) {
+        for (auto [k, w] : U[j]) {
+          if (ai_idx[k] != -1) {
+            ai[ai_idx[k]].second -= v * w;
+          }
         }
-        if (to(*uj_iter) < to(*ai_iter)) {
-          uj_iter = skip(uj_iter, uj_end, to(*ai_iter));
-          if (uj_iter == uj_end) break;
-        }
-        if (to(*uj_iter) > to(*ai_iter)) {
-          ai_iter = skip(ai_iter, ai_end, to(*uj_iter));
-          if (ai_iter == ai_end) break;
+      } else {
+        while (true) {
+          if (to(*uj_iter) == to(*ai_iter)) {
+            ai_iter->second -= v * weight(*uj_iter);
+            if (++uj_iter == uj_end) break;
+            if (++ai_iter == ai_end) break;
+          }
+          if (to(*uj_iter) < to(*ai_iter)) {
+            uj_iter = skip(uj_iter, uj_end, to(*ai_iter));
+            if (uj_iter == uj_end) break;
+          }
+          if (to(*uj_iter) > to(*ai_iter)) {
+            ai_iter = skip(ai_iter, ai_end, to(*uj_iter));
+            if (ai_iter == ai_end) break;
+          }
         }
       }
+    }
+
+    for (std::size_t k : irange(ai.size())) {
+      ai_idx[to(ai[k])] = -1;
     }
 
     // construction & singular check
