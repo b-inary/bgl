@@ -21,9 +21,9 @@ public:
   }
 
   zstd_decode_filter_buf(const zstd_decode_filter_buf&) = delete;
-  zstd_decode_filter_buf(zstd_decode_filter_buf&&) = default;
+  zstd_decode_filter_buf(zstd_decode_filter_buf&&) = delete;
   zstd_decode_filter_buf& operator=(const zstd_decode_filter_buf&) = delete;
-  zstd_decode_filter_buf& operator=(zstd_decode_filter_buf&&) = default;
+  zstd_decode_filter_buf& operator=(zstd_decode_filter_buf&&) = delete;
 
   virtual ~zstd_decode_filter_buf() {
     delete[] buf_in_;

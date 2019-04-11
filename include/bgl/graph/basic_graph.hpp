@@ -460,7 +460,7 @@ public:
   /// [desructive] permute ID of nodes
   /// @param perm node permutation
   graph_type &permute_nodes(const std::vector<node_t> &perm) {
-    ASSERT_MSG(num_nodes() == perm.size(), "invalid argument");
+    ASSERT_MSG(num_nodes() == perm.size(), "invalid argument: size does not match");
     std::vector<node_t> cur_perm(num_nodes());
     std::vector<node_t> rev_perm(num_nodes());
     std::iota(cur_perm.begin(), cur_perm.end(), 0);

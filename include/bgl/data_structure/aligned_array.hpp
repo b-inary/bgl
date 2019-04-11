@@ -83,6 +83,9 @@ protected:
     size = (size + align - 1) & ~align;
 #ifdef __MINGW32__
     void *p = _aligned_malloc(size, align);
+#elif _POSIX_C_SOURCE >= 200112L
+    void *p = nullptr;
+    posix_memalign(&p, align, size);
 #else
     void *p = std::aligned_alloc(align, size);
 #endif

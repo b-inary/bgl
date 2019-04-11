@@ -1,7 +1,6 @@
 #pragma once
 #include "base.hpp"
 #include "bgl/util/all.hpp"
-#include <atomic>
 #include <map>
 #include <utility>
 #include <vector>
