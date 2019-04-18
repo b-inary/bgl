@@ -31,12 +31,13 @@
       if (!(expr)) {                                                                       \
         std::string msg = std::apply(fn(... args) { return fmt::format(args...); },        \
                                      std::make_tuple(__VA_ARGS__));                        \
+        std::string funcname = __func__;                                                   \
         bgl::put_date_string(std::cerr, fn() {                                             \
           fmt::print(std::cerr, "{}:{}: ", _bgl_source_path(__FILE__), __LINE__);          \
           std::cerr << rang::style::bold << (is_error ? rang::fg::red : rang::fg::yellow); \
           fmt::print(std::cerr, is_error ? "error: " : "warning: ");                       \
           std::cerr << rang::style::reset << rang::fg::reset;                              \
-          fmt::print(std::cerr, "{}: {}", __func__, msg);                                  \
+          fmt::print(std::cerr, "{}: {}", funcname, msg);                                  \
           if (msg == "assertion failed") {                                                 \
             fmt::print(std::cerr, "\n  assertion: {}", #expr);                             \
           }                                                                                \
