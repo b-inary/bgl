@@ -143,6 +143,7 @@ real_vector generate_random_unit_vector(std::size_t n, Generator &gen) {
   real_vector res(n);
   std::normal_distribution<> dist{};
   for (std::size_t i : irange(n)) {
+    dist.reset();  // suppress warning on gcc
     res[i] = dist(gen);
   }
   return res / res.norm();

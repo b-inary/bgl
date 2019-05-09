@@ -35,8 +35,12 @@ public:
         is_hub_(g.num_nodes(), false),
         is_dead_(g.num_nodes(), false) {
     std::iota(parent_.begin(), parent_.end(), static_cast<node_t>(0));
-    preprocess();
-    do_contraction_loop(threshold);
+    if (threshold > 0) {
+      preprocess();
+      do_contraction_loop(threshold);
+    } else {
+      width_ends_.push_back(g.num_nodes());
+    }
     complete_ordering();
     clear();
   }

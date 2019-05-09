@@ -85,7 +85,7 @@ protected:
     void *p = _aligned_malloc(size, align);
 #elif _POSIX_C_SOURCE >= 200112L
     void *p = nullptr;
-    posix_memalign(&p, align, size);
+    if (posix_memalign(&p, align, size) != 0) throw std::bad_alloc();
 #else
     void *p = std::aligned_alloc(align, size);
 #endif
