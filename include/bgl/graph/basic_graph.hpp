@@ -463,10 +463,14 @@ public:
     ASSERT_MSG(num_nodes() == perm.size(), "invalid argument: size does not match");
     std::vector<node_t> cur_perm(num_nodes());
     std::vector<node_t> rev_perm(num_nodes());
+    std::vector<bool> dup_check(num_nodes());
     std::iota(cur_perm.begin(), cur_perm.end(), 0);
     std::iota(rev_perm.begin(), rev_perm.end(), 0);
 
     for (node_t v : nodes()) {
+      ASSERT_MSG(0 <= perm[v] && perm[v] < num_nodes(), "out of range: perm[{}] = {}", v, perm[v]);
+      ASSERT_MSG(!dup_check[perm[v]], "invalid argument: {} appear twice in perm", perm[v]);
+      dup_check[perm[v]] = true;
       node_t tmp = cur_perm[v];
       std::swap(adj_[v], adj_[rev_perm[perm[v]]]);
       std::swap(cur_perm[v], cur_perm[rev_perm[perm[v]]]);

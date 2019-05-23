@@ -4,3 +4,4 @@
 #include "connectivity.hpp"
 #include "elimination.hpp"
 #include "hyperball.hpp"
+#include "slashburn.hpp"
