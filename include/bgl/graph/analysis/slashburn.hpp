@@ -5,7 +5,7 @@
 /// [destructive] order by SlashBurn
 namespace bgl {
 template <typename GraphType>
-GraphType &order_by_slashburn(GraphType &g, double r = 0.01) {
+node_t order_by_slashburn(GraphType &g, double r = 0.01) {
   node_t k = std::ceil(r * g.num_nodes());
 
   // hub selection function
@@ -134,7 +134,6 @@ GraphType &order_by_slashburn(GraphType &g, double r = 0.01) {
       for (node_t v : gu.nodes()) {
         order_head.push_back(orig_id[v]);
       }
-      CONSOLE_LOG("# of hub nodes: {}", order_tail.size());
       break;
     }
   }
@@ -143,6 +142,8 @@ GraphType &order_by_slashburn(GraphType &g, double r = 0.01) {
   std::vector<node_t> order;
   order.insert(order.end(), order_head.begin(), order_head.end());
   order.insert(order.end(), order_tail.begin(), order_tail.end());
-  return g.permute_nodes(order);
+  g.permute_nodes(order);
+
+  return order_head.size();
 }
 }  // namespace bgl

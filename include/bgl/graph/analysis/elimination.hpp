@@ -39,7 +39,7 @@ public:
       preprocess();
       do_contraction_loop(threshold);
     } else {
-      width_ends_.push_back(g.num_nodes());
+      width_ends_.push_back(0);
     }
     complete_ordering();
     clear();
@@ -167,7 +167,7 @@ private:
     std::vector<triple_t> que_gen;
     for (node_t v : g_.nodes()) {
       std::size_t deg = g_.outdegree(v);
-      if (deg && deg < threshold) que_gen.emplace_back(deg, bgl_random(), v);
+      if (deg) que_gen.emplace_back(deg, bgl_random(), v);
     }
     queue_t que({}, std::move(que_gen));
 
