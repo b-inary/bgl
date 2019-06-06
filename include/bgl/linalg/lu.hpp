@@ -181,6 +181,9 @@ inline std::pair<sparse_matrix, sparse_matrix> ilu_decomposition(const sparse_ma
       U[i].assign(it, ai.end());
     }
 
+    remove_elements_if(L[i], fn(e) { return weight(e) == 0.0; });
+    remove_elements_if(U[i], fn(e) { return weight(e) == 0.0; });
+
     for (auto &e : U[i]) {
       e.second /= diag;
     }

@@ -24,11 +24,11 @@ class min_degree_eliminator {
 public:
   min_degree_eliminator() {}
 
-  /// constructor: input graph must be undirected
+  /// constructor
   min_degree_eliminator(const graph &g, int threshold)
       : min_degree_eliminator(g.clone(), threshold) {}
 
-  /// constructor: input graph must be undirected
+  /// constructor
   min_degree_eliminator(graph &&g, int threshold)
       : g_{std::move(g)},
         parent_(g.num_nodes()),
@@ -36,7 +36,6 @@ public:
         is_dead_(g.num_nodes(), false) {
     std::iota(parent_.begin(), parent_.end(), static_cast<node_t>(0));
     if (threshold > 0) {
-      preprocess();
       do_contraction_loop(threshold);
     } else {
       width_ends_.push_back(0);
@@ -86,21 +85,19 @@ private:
 
     std::vector<node_t> vs_normal, vs_hub;
     for (node_t w : g_.neighbors(v)) {
-      if (is_hub_[w]) {
-        vs_hub.push_back(w);
-        remove_elements(g_.mutable_edges(w), v);
-      } else {
-        vs_normal.push_back(w);
-      }
+      (is_hub_[w] ? vs_hub : vs_normal).push_back(w);
     }
 
     is_hub_[v] = true;
     g_.mutable_edges(v) = std::move(vs_normal);
-    for (node_t w : vs_hub) {
-      v = merge_hubs(v, w);
+
+    node_t w = v;
+    for (node_t u : vs_hub) {
+      w = merge_hubs(w, u);
     }
 
-    remove_duplicates(g_.mutable_edges(v));
+    remove_duplicates(g_.mutable_edges(w));
+    remove_elements(g_.mutable_edges(w), v);
   }
 
   std::size_t get_degree(node_t v) {
@@ -120,58 +117,17 @@ private:
     return remove_duplicates(neighbors).size();
   }
 
-  void preprocess() {
-    std::vector<bool> alive(g_.num_nodes(), true);
-
-    // remove zero-degree nodes
-    for (node_t v : g_.nodes()) {
-      if (g_.outdegree(v) == 0) {
-        alive[v] = false;
-        order_.push_back(v);
-      }
-    }
-    width_ends_.push_back(order_.size());
-
-    // remove one-degree nodes
-    size_t num_ordered;
-    std::vector<node_t> minus_degree(g_.num_nodes(), 0);
-    do {
-      num_ordered = order_.size();
-      for (node_t v : g_.nodes()) {
-        if (alive[v] && g_.outdegree(v) - minus_degree[v] <= 1) {
-          for (node_t w : g_.neighbors(v)) {
-            ++minus_degree[w];
-          }
-          alive[v] = false;
-          order_.push_back(v);
-        }
-      }
-    } while (num_ordered < order_.size());
-    width_ends_.push_back(order_.size());
-
-    // construct preprocessed graph
-    for (node_t v : g_.nodes()) {
-      auto &es = g_.mutable_edges(v);
-      if (alive[v]) {
-        filter(es, fn(w) { return alive[w]; });
-      } else {
-        es.clear();
-      }
-    }
-  }
-
   void do_contraction_loop(std::size_t threshold) {
     using triple_t = std::tuple<std::size_t, rng_t::result_type, node_t>;
     using queue_t = std::priority_queue<triple_t, std::vector<triple_t>, std::greater<triple_t>>;
 
     std::vector<triple_t> que_gen;
     for (node_t v : g_.nodes()) {
-      std::size_t deg = g_.outdegree(v);
-      if (deg) que_gen.emplace_back(deg, bgl_random(), v);
+      que_gen.emplace_back(g_.outdegree(v), bgl_random(), v);
     }
     queue_t que({}, std::move(que_gen));
 
-    std::size_t cur_width = 2;
+    std::size_t cur_width = 0;
     while (!que.empty()) {
       node_t v = std::get<2>(que.top());
       que.pop();
@@ -196,11 +152,8 @@ private:
 
   void complete_ordering() {
     std::vector<bool> ordered(g_.num_nodes());
-    for (node_t v : order_) {
-      ordered[v] = true;
-    }
     for (node_t v : g_.nodes()) {
-      if (!ordered[v]) {
+      if (!is_hub_[v] && !is_dead_[v]) {
         order_.push_back(v);
       }
     }

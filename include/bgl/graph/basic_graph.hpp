@@ -376,11 +376,13 @@ public:
   /* graph conversion */
 
   /// [destructive] simplify graph (i.e., remove self loops and multiple edges)
-  graph_type &simplify(bool preserve_all_weight = false) {
+  graph_type &simplify(bool preserve_all_weight = false, bool preserve_self_loops = false) {
     num_edges_ = 0;
     for (node_t v : nodes()) {
       auto &es = mutable_edges(v);
-      remove_elements_if(es, fn(e) { return to(e) == v; });
+      if (!preserve_self_loops) {
+        remove_elements_if(es, fn(e) { return to(e) == v; });
+      }
       if (preserve_all_weight) {
         remove_duplicates(es);
       } else {
