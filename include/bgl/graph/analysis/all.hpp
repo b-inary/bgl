@@ -2,6 +2,6 @@
 
 #include "clustering_coefficient.hpp"
 #include "connectivity.hpp"
-#include "elimination.hpp"
 #include "hyperball.hpp"
+#include "minimum_degree.hpp"
 #include "slashburn.hpp"

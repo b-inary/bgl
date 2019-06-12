@@ -69,7 +69,7 @@ std::pair<node_t, std::vector<node_t>> strongly_connected_components(const Graph
   node_t num_visited = 0;
   std::vector<bool> visited(n, false);
   std::vector<bool> on_stack(n, false);
-  std::vector<node_t> ids(n, 100);
+  std::vector<node_t> ids(n);
   std::vector<node_t> order(n);
   std::vector<node_t> lowlink(n);
   std::stack<node_t> node_stack;
