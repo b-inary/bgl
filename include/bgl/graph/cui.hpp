@@ -113,9 +113,9 @@ public:
 
 private:
   std::vector<std::string> paths_;
-  bool folder_mode_;
-  bool recursive_;
-  bool simplify_;
-  bool undirected_;
+  bool folder_mode_ = false;
+  bool recursive_ = false;
+  bool simplify_ = false;
+  bool undirected_ = false;
 };
 }  // namespace bgl
