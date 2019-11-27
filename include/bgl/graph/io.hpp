@@ -191,7 +191,9 @@ std::optional<GraphType> read_graph_binary_optional(std::istream &is,
   for (node_t v : irange(num_nodes)) {
     std::uint64_t degree = read_binary<std::uint64_t>(is);
     adj[v].resize(degree);
-    is.read(reinterpret_cast<char *>(adj[v].data()), degree * sizeof(edge_t));
+    if (degree > 0) {
+      is.read(reinterpret_cast<char *>(adj[v].data()), degree * sizeof(edge_t));
+    }
   }
 
   is.peek();
@@ -240,7 +242,9 @@ void write_graph_binary(std::ostream &os, const GraphType &g) {
   write_binary(os, static_cast<std::uint64_t>(g.num_edges()));
   for (node_t v : g.nodes()) {
     write_binary(os, static_cast<std::uint64_t>(g.outdegree(v)));
-    os.write(reinterpret_cast<const char *>(g.edges(v).data()), g.outdegree(v) * sizeof(edge_t));
+    if (g.outdegree(v) > 0) {
+      os.write(reinterpret_cast<const char *>(g.edges(v).data()), g.outdegree(v) * sizeof(edge_t));
+    }
   }
 
   os.flush();
