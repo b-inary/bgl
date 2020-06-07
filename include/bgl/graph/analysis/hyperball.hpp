@@ -1,6 +1,7 @@
 #pragma once
 #include "bgl/data_structure/hyperloglog_array.hpp"
 #include "bgl/graph/basic_graph.hpp"
+
 #include <cmath>
 #include <functional>
 
@@ -25,7 +26,7 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
   std::vector<double> cache(n);
 
   g.for_each_node(
-      fn(v) {
+      fn(v, i [[maybe_unused]]) {
         curr_hll[v].insert(v);
         cache[v] = curr_hll[v].count();
         callback(v, 0, 1.0);
@@ -42,7 +43,7 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
     next_updated.assign(n, false);
 
     g.for_each_node(
-        fn(u) {
+        fn(u, i [[maybe_unused]]) {
           bool merged = false;
           for (node_t v : g.neighbors(u)) {
             if (curr_updated[v]) {
@@ -63,7 +64,7 @@ void hyperball(const graph &g, int log2k, std::function<void(node_t, node_t, dou
 
     if (num_updated < n / 10) {
       g.for_each_node(
-          fn(v) {
+          fn(v, i [[maybe_unused]]) {
             if (next_updated[v]) {
               curr_hll[v] = next_hll[v];
             }

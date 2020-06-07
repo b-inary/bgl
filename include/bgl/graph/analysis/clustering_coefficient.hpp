@@ -8,7 +8,7 @@ std::vector<double> clustering_coefficient_per_degree(const graph &g, node_t deg
   std::vector<std::atomic<std::size_t>> count(degree_threshold + 1);
   std::vector<std::atomic<std::size_t>> num_triangles(degree_threshold + 1);
 
-  g.for_each_node(fn(u) {
+  g.for_each_node(fn(u, i [[maybe_unused]]) {
     std::size_t du = g.outdegree(u);
     if (du > degree_threshold) return;
     ++count[du];

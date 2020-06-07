@@ -2,6 +2,7 @@
 #include "bgl/data_structure/aligned_array.hpp"
 #include "bgl/graph/basic_graph.hpp"
 #include "bgl/util/all.hpp"
+
 #include <algorithm>
 #include <cstring>
 #include <random>
@@ -159,7 +160,7 @@ using sparse_matrix = wgraph<double>;
 
 inline real_vector operator*(const sparse_matrix &A, const real_vector &x) {
   real_vector y(x.size());
-  A.for_each_node(fn(i) {
+  A.for_each_node(fn(i, k [[maybe_unused]]) {
     for (auto [j, v] : A.edges(i)) {
       y[i] += v * x[j];
     }

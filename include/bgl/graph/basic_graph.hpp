@@ -346,7 +346,7 @@ public:
   /// parallel for-each loop
   /// @param callback callback function (must be thread safe): argument is node ID
   /// @param num_threads the number of threads: when specified 0, set automatically
-  void for_each_node(std::function<void(node_t)> callback, int num_threads = 0) const {
+  void for_each_node(std::function<void(node_t, int)> callback, int num_threads = 0) const {
     std::atomic<int> counter = 0;
     std::vector<std::thread> workers;
     if (num_threads == 0) {
@@ -354,14 +354,14 @@ public:
                              (num_nodes() + kParallelUnit - 1) / kParallelUnit);
     }
 
-    for (int i[[maybe_unused]] : irange(num_threads)) {
+    for (int i : irange(num_threads)) {
       workers.emplace_back(fn() {
         while (true) {
           int index = counter++;
           node_t start = index * kParallelUnit;
           node_t end = std::min((index + 1) * kParallelUnit, num_nodes());
           for (node_t v : irange(start, end)) {
-            callback(v);
+            callback(v, i);
           }
           if (end == num_nodes()) return;
         }
@@ -371,6 +371,12 @@ public:
     for (int i : irange(num_threads)) {
       workers[i].join();
     }
+  }
+
+  /// return number of threads
+  int num_threads() const {
+    return std::min(std::thread::hardware_concurrency(),
+                    (num_nodes() + kParallelUnit - 1) / kParallelUnit);
   }
 
   /* graph conversion */
@@ -563,9 +569,9 @@ using wgraph = basic_graph<weighted_edge_t<WeightType>>;
 
 /// convert from unweighted graph to weighted graph
 template <typename WeightType>
-wgraph<WeightType> convert_to_weighted(const graph &g,
-                                       std::function<WeightType(node_t, node_t)> weight_fn =
-                                           [](node_t, node_t) { return 1; }) {
+wgraph<WeightType> convert_to_weighted(
+    const graph &g,
+    std::function<WeightType(node_t, node_t)> weight_fn = [](node_t, node_t) { return 1; }) {
   weighted_adjacency_list<WeightType> adj(g.num_nodes());
   for (node_t u : g.nodes()) {
     for (node_t v : g.neighbors(u)) {
