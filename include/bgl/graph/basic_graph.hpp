@@ -476,7 +476,7 @@ public:
     std::iota(rev_perm.begin(), rev_perm.end(), 0);
 
     for (node_t v : nodes()) {
-      ASSERT_MSG(0 <= perm[v] && perm[v] < num_nodes(), "out of range: perm[{}] = {}", v, perm[v]);
+      ASSERT_MSG(perm[v] < num_nodes(), "out of range: perm[{}] = {}", v, perm[v]);
       ASSERT_MSG(!dup_check[perm[v]], "invalid argument: {} appear twice in perm", perm[v]);
       dup_check[perm[v]] = true;
       node_t tmp = cur_perm[v];
