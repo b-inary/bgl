@@ -7,8 +7,8 @@ TEST_CASE("linsolve", "[lu][gmres][linalg]") {
   sparse_matrix A(100);
   for (int i : irange(100)) {
     for (int j : irange(100)) {
-      if (i == j || bgl_random() < 0.1 * rng_t::max()) {
-        A.add_edge(i, {j, static_cast<double>(bgl_random()) / rng_t::max()});
+      if (i == j || bgl_random() < 0.1 * static_cast<double>(rng_t::max())) {
+        A.add_edge(i, {j, static_cast<double>(bgl_random()) / static_cast<double>(rng_t::max())});
       }
     }
   }
