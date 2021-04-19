@@ -4,7 +4,7 @@ A modern graph library for research (under development)
 
 ### Requirements
 
-- C++17 compiler (tested on g++9 and clang++8)
+- C++17 compiler (tested on g++10 and clang++11)
 - [CMake](https://cmake.org/) (>= version 3.8)
 - [Ninja](https://ninja-build.org/)
 
