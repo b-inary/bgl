@@ -8,7 +8,8 @@
 namespace bgl {
 inline real_vector gmres(const sparse_matrix &A, const real_vector &b,
                          const std::pair<sparse_matrix, sparse_matrix> &precond_lu = {},
-                         double tol = 1e-6, int restart = 20, int max_iter = 100) {
+                         const real_vector &initial_guess = {},
+                         double tol = 1e-8, int restart = 30, int max_iter = 100) {
   std::size_t n = b.size();
   bool use_precond = !precond_lu.first.empty();
 
@@ -21,6 +22,9 @@ inline real_vector gmres(const sparse_matrix &A, const real_vector &b,
   max_iter = std::min(static_cast<std::size_t>(max_iter), n / restart + 1);
 
   real_vector x(n);
+  if (initial_guess.size() == n) {
+    x = initial_guess;
+  }
 
   for (int outer_iter[[maybe_unused]] : irange(max_iter)) {
     int inner_iter = 0;

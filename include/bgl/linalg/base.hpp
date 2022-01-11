@@ -160,11 +160,21 @@ using sparse_matrix = wgraph<double>;
 
 inline real_vector operator*(const sparse_matrix &A, const real_vector &x) {
   real_vector y(x.size());
-  A.for_each_node(fn(i, k [[maybe_unused]]) {
+
+#ifdef SINGLE_THREADED_MATRIX_VECTOR_MULTIPLICATION
+  for (node_t i : A.nodes()) {
+    for (auto [j, v] : A.edges(i)) {
+      y[i] += v * x[j];
+    }
+  }
+#else
+  A.for_each_node(fn(i, thread_id [[maybe_unused]]) {
     for (auto [j, v] : A.edges(i)) {
       y[i] += v * x[j];
     }
   });
+#endif
+
   return y;
 }
 }  // namespace bgl
